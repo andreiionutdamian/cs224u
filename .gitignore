@@ -67,6 +67,8 @@ nlidata/*
 rel_ext_data*
 *_solved.ipynb
 
+*.part
+
 *.tgz
 
 .spyproject/
