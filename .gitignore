@@ -70,3 +70,5 @@ rel_ext_data*
 *.part
 
 *.tgz
+
+.spyproject/
