@@ -81,8 +81,23 @@ def observed_over_expected(df):
     oe = df / expected
     return oe
 
+def calc_delta(mco):
+  col_totals = np.array(mco).sum(axis=0)
+  row_totals = np.array(mco).sum(axis=1)
+  cm = [col_totals for _ in range(mco.shape[0])]
+  col_mat = np.vstack(cm)
+  row_mat = row_totals.reshape((-1,1))
+  rm = [row_mat for _ in range(mco.shape[1])]
+  row_mat = np.hstack(rm)
+  d1 = mco / (mco + 1)
+  mins = np.minimum(col_mat, row_mat)
+  d2 = mins / (mins + 1)
+  delta = d1 * d2
+  return delta
+  
 
-def pmi(df, positive=True):
+
+def pmi(df, positive=True, discounting=False):
     df = observed_over_expected(df)
     # Silence distracting warnings about log(0):
     with np.errstate(divide='ignore'):
@@ -90,6 +105,9 @@ def pmi(df, positive=True):
     df[np.isinf(df)] = 0.0  # log(0) = 0
     if positive:
         df[df < 0] = 0.0
+    if discounting:
+      d = calc_delta(df)
+      df = d * df
     return df
 
 
@@ -339,3 +357,29 @@ def glove(df, n=100, xmax=100, alpha=0.75, max_iter=100, eta=0.05,
     if isinstance(df, pd.DataFrame):
         G = pd.DataFrame(G, index=df.index)
     return G
+  
+if __name__ == '__main__':
+  import os
+  DATA_HOME = os.path.join('data', 'vsmdata')
+  print("Loading data...")
+  imdb20 = pd.read_csv(
+      os.path.join(DATA_HOME, 'imdb_window20-flat.csv.gz'), index_col=0)
+  print("Calculating PMI")
+  imdb20_pmi = pmi(imdb20, discounting=False)
+  print("Calculating delta")
+  delta = calc_delta(imdb20)
+  imdb20_pmid = delta * imdb20_pmi
+  
+  counts = np.diag(imdb20)
+  mins = np.argsort(counts)
+  for _min in mins[:5]:
+    word = imdb20.index[_min]
+    print("===========================\nword: {}".format(word))
+    print("*****\nmco neib:\n{}".format(neighbors(word, imdb20)[:5]))
+    print("*****\npmi neib:\n{}".format(neighbors(word, imdb20_pmi)[:5]))
+    print("*****\npmid neib:\n{}".format(neighbors(word, imdb20_pmid)[:5]))
+  word = 'intoxicate'
+  print("===========================\nword: {}".format(word))
+  print("*****\nmco neib:\n{}".format(neighbors(word, imdb20)[:5]))
+  print("*****\npmi neib:\n{}".format(neighbors(word, imdb20_pmi)[:5]))
+  print("*****\npmid neib:\n{}".format(neighbors(word, imdb20_pmid)[:5]))
