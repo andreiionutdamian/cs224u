@@ -149,3 +149,55 @@ def plot_retro_path(Q_hat, edges, retrofitter=None):
         ax = plot_retro_vsm(Q, edges, ax=ax, lims=lims)
     plt.tight_layout()
     return retrofitter
+  
+def get_wordnet_edges(wn):
+  edges = defaultdict(set)
+  for ss in wn.all_synsets():
+      lem_names = {lem.name() for lem in ss.lemmas()}
+      for lem in lem_names:
+          edges[lem] |= lem_names
+  return edges  
+
+def convert_edges_to_indices(edges, Q):
+  lookup = dict(zip(Q.index, range(Q.shape[0])))
+  index_edges = defaultdict(set)
+  for start, finish_nodes in edges.items():
+      s = lookup.get(start)
+      if s:
+          f = {lookup[n] for n in finish_nodes if n in lookup}
+          if f:
+              index_edges[s] = f
+  return index_edges  
+
+  
+if __name__ == '__main__':
+  from nltk.corpus import wordnet as wn
+  from collections import defaultdict
+  import os
+  
+  data_home = 'data'
+  
+  glove_dict = utils.glove2dict(
+    os.path.join(data_home, 'glove.6B', 'glove.6B.300d.txt'))
+  X_glove = pd.DataFrame(glove_dict).T  
+
+  lems = wn.lemmas('crane', pos=None)  
+
+  for lem in lems:
+    ss = lem.synset()
+    print("="*70)
+    print("Lemma name: {}".format(lem.name()))
+    print("Lemma Synset: {}".format(ss))
+    print("Synset definition: {}".format(ss.definition()))   
+    
+
+  wn_edges = get_wordnet_edges(wn)
+    
+  wn_index_edges = convert_edges_to_indices(wn_edges, X_glove)
+  
+  wn_retro = Retrofitter(verbose=True)  
+  X_retro = wn_retro.fit(X_glove, wn_index_edges)  
+  X_retro.to_csv(os.path.join(data_home, 'glove6B300d-retrofit-wn.csv.gz'), compression='gzip')  
+  
+  # lets test some neighnors on X_glove and on X_retro
+  
