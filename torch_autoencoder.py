@@ -91,13 +91,14 @@ class TorchAutoencoder(TorchModelBase):
                 optimizer.step()
             self.errors.append(epoch_error)
             progress_bar(
-                "Finished epoch {} of {}; error is {}".format(
+                "Finished epoch {} of {}; error is {:.7f}".format(
                     iteration, self.max_iter, err))
         # Hidden representations:
         with torch.no_grad():
             self.model.to('cpu')
             H = self.model[1](self.model[0](X_tensor))
             return self.convert_output(H, X)
+    
 
     def predict(self, X):
         """Returns the reconstructed matrix.

@@ -83,9 +83,10 @@ def safe_macro_f1(y, y_pred):
 
 def progress_bar(msg):
     """Simple over-writing progress bar."""
-    sys.stderr.write('\r')
-    sys.stderr.write(msg)
-    sys.stderr.flush()
+    print("\r" + msg, flush=True, end='')
+#    sys.stderr.write('\r')
+#    sys.stderr.write(msg)
+#    sys.stderr.flush()
 
 
 def log_of_array_ignoring_zeros(M):
