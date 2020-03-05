@@ -71,11 +71,15 @@ class TorchAutoencoder(TorchModelBase):
             pin_memory=True)
         # Graph
         if not self.warm_start or not hasattr(self, "model"):
-            self.model = self.define_graph()
+          self.model = self.define_graph()
+          print("Model defined & inited.", flush=True)
+        else:
+          print("Model warm-start", flush=True)
         self.model.to(self.device)
         self.model.train()
         # Optimization:
         loss = nn.MSELoss()
+        print("  Training AE model with lr:{:.1e}".format(self.eta), flush=True)
         optimizer = self.optimizer(self.model.parameters(), lr=self.eta)
         # Train:
         for iteration in range(1, self.max_iter+1):
