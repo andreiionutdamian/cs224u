@@ -427,6 +427,7 @@ class Dataset(object):
 
 
 def print_statistics_header():
+    print("",flush=True)
     print('{:20s} {:>10s} {:>10s} {:>10s} {:>10s} {:>10s}'.format(
         'relation', 'precision', 'recall', 'f-score', 'support', 'size'))
     print('{:20s} {:>10s} {:>10s} {:>10s} {:>10s} {:>10s}'.format(
@@ -532,7 +533,8 @@ def experiment(
         model_factory=(lambda: LogisticRegression(
             fit_intercept=True, solver='liblinear', random_state=42)),
         vectorize=True,
-        verbose=True):
+        verbose=True,
+        return_macro=False):
     train_result = train_models(
         splits,
         featurizers=featurizers,
@@ -545,11 +547,14 @@ def experiment(
         train_result,
         split_name=test_split,
         vectorize=vectorize)
-    evaluate_predictions(
-        predictions,
-        test_y,
-        verbose)
-    return train_result
+    eval_res = evaluate_predictions(
+                  predictions,
+                  test_y,
+                  verbose)
+    if return_macro:
+      return train_result, eval_res
+    else:
+      return train_result
 
 
 def examine_model_weights(train_result, k=3, verbose=True):
