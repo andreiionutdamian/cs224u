@@ -118,6 +118,7 @@ def get_reader_vocab(reader):
 READERS = (wordsim353_reader, mturk771_reader, simverb3500dev_reader, 
          simverb3500test_reader, men_reader)    
   
+
   
 def get_reader_vocab_overlap(readers=READERS):
     """Get data on the vocab-level relationships between pairs of 
@@ -268,12 +269,15 @@ def full_word_similarity_evaluation(df, readers=READERS, distfunc=vsm.cosine):
         Mapping dataset names to Spearman r values.
         
     """        
+    print("  * Computing evaluation with {} *".format(distfunc.__name__), flush=True)
     scores = {}     
     for reader in readers:
         score, data_df = word_similarity_evaluation(reader, df, distfunc=distfunc)
         scores[get_reader_name(reader)] = score
     series = pd.Series(scores, name='Spearman r')
     series['Macro-average'] = series.mean()
+    for key in dict(series):
+      print("    {:<16} {:.4f}".format(key+':', series[key]))
     return series  
   
 
@@ -418,18 +422,18 @@ def test_ttest_implementation(func):
     assert np.array_equal(predicted.round(5), actual)
     
 def subword_enrichment(df, n=4):
-    
     # 1. Use `vsm.ngram_vsm` to create a character-level 
     # VSM from `df`, using the above parameter `n` to 
     # set the size of the ngrams.
     
+    print("Generating ngram={} MCO".format(n), flush=True)
     df_ngram = vsm.ngram_vsm(df, n=n)
 
         
     # 2. Use `vsm.character_level_rep` to get the representation
     # for every word in `df` according to the character-level
     # VSM you created above.
-    
+    print("  Summarising ngrams reps to the each word", flush=True)    
     df_new_vsm = df.apply(func=lambda x: pd.Series(vsm.character_level_rep(x.name, cf=df_ngram, n=n),
                                                    index=df.columns), 
                           axis=1)
@@ -438,7 +442,7 @@ def subword_enrichment(df, n=4):
     # original representation from `df`. (This should use
     # element-wise addition; the dimensionality of the vectors
     # will be unchanged.)
-                            
+    print("  Combinind final MCO", flush=True)
     df_final_vsm = df + df_new_vsm
 
     
@@ -472,13 +476,133 @@ def test_subword_enrichment(func):
     assert np.array_equal(expected.values, new_df.values), \
         "Co-occurrence values aren't the same"        
 
-
 ##########################################################
+##########################################################
+##########################################################
+##########################################################
+##########################################################
+##########################################################
+        
+
+
+def normalise_word_vectors(word_vectors, norm=1.0):
+    """
+    This method normalises the collection of word vectors provided in the word_vectors dictionary.
     
+    
+    adapted from:
+      https://raw.githubusercontent.com/nmrksic/counter-fitting/master/counterfitting.py
+    """
+    for word in word_vectors:
+        word_vectors[word] /= np.sqrt((word_vectors[word]**2).sum() + 1e-6)
+        word_vectors[word] = word_vectors[word] * norm
+    return word_vectors
+
+def distance(v1, v2, normalised_vectors=True):
+    """
+    Returns the cosine distance between two vectors. 
+    If the vectors are normalised, there is no need for the denominator, which is always one. 
+
+    adapted from:
+      https://raw.githubusercontent.com/nmrksic/counter-fitting/master/counterfitting.py
+    """
+    if normalised_vectors:
+        return 1 - np.dot(v1, v2)
+    else:
+        return 1 - np.dot(v1, v2) / ( np.linalg.norm(v1) * np.linalg.norm(v2) )
+
+
+def vector_partial_gradient(u, v, normalised_vectors=True):
+    """
+    This function returns the gradient of cosine distance: \frac{ \partial dist(u,v)}{ \partial u}
+    If they are both of norm 1 (we do full batch and we renormalise at every step), we can save some time.
+    
+    adapted from:
+      https://raw.githubusercontent.com/nmrksic/counter-fitting/master/counterfitting.py
+    """
+
+    if normalised_vectors:
+        gradient = u * np.dot(u,v)  - v 
+    else:       
+        norm_u = np.linalg.norm(u)
+        norm_v = np.linalg.norm(v)
+        nominator = u * np.dot(u,v) - v * np.power(norm_u, 2)
+        denominator = norm_v * np.power(norm_u, 3)
+        gradient = nominator / denominator
+
+    return gradient
+
+
+def one_step_SGD(word_vectors, antonym_pairs,
+                 delta=1.0, lr=0.1, gamma=0):
+    """
+    This method performs a step of SGD to optimise the counterfitting cost function.
+
+    adapted from:
+      https://raw.githubusercontent.com/nmrksic/counter-fitting/master/counterfitting.py
+    """
+    from copy import deepcopy
+    new_word_vectors = deepcopy(word_vectors)
+
+    gradient_updates = {}
+    update_count = {}
+
+    # AR term:
+    for i, (word_i, word_j) in enumerate(antonym_pairs):
+        print("\r    Processing antonym pairs {:.1f}%...".format(i/len(antonym_pairs)*100), flush=True, end='')
+
+        current_distance = distance(new_word_vectors[word_i], new_word_vectors[word_j])
+
+        if current_distance < delta:
+    
+            gradient = vector_partial_gradient( new_word_vectors[word_i], new_word_vectors[word_j])
+            gradient = gradient * lr 
+
+            if word_i in gradient_updates:
+                gradient_updates[word_i] += gradient
+                update_count[word_i] += 1
+            else:
+                gradient_updates[word_i] = gradient
+                update_count[word_i] = 1
+
+   
+    print("\r    Applying gradients...", flush=True, end='')
+    for word in gradient_updates:
+        # we've found that scaling the update term for each word helps with convergence speed. 
+        update_term = gradient_updates[word] / (update_count[word]) 
+        new_word_vectors[word] += update_term 
+    print("\r    Done Applying gradients.", flush=True, end='')
+        
+    return normalise_word_vectors(new_word_vectors)
   
+  
+def counter_fit_antonyms(dct_word_vectors,  antonyms, epochs=20, lr=0.1):
+  """
+  This method repeatedly applies SGD steps to counter-fit word vectors to linguistic constraints. 
+  
+  https://raw.githubusercontent.com/nmrksic/counter-fitting/master/counterfitting.py
+  """
+  word_vectors = normalise_word_vectors(dct_word_vectors)
+  
+  current_iteration = 0
+  
+  
+  max_iter = epochs
+  print("Antonym pairs:", len(antonyms), flush=True)
+  print("Running the optimisation procedure for", max_iter, "SGD steps...", flush=True)
+  
+  while current_iteration < max_iter:
+    current_iteration += 1
+    print("\r  Counter-fitting SGD step {}...".format(current_iteration), flush=True, end='')
+    word_vectors = one_step_SGD(word_vectors, antonyms, lr=lr)
+  print("")
+  return word_vectors  
+
+##################################################        
+##################################################  
   
 
-def eval_model(dct, dataset_name, model_name, df):
+def eval_model(dct, dataset_name, model_name, df, distfunc=vsm.cosine):
   print("\nEvaluation of model '{}' {} based on '{}' MCO".format(
         model_name, df.shape, dataset_name),
         flush=True)
@@ -486,13 +610,17 @@ def eval_model(dct, dataset_name, model_name, df):
     dct['MODEL'] = []
   if 'DATA' not in dct:
     dct['DATA'] = []
+
+  if 'DST' not in dct:
+    dct['DST'] = []
   
   dct['DATA'].append(dataset_name)
   dct['MODEL'].append(model_name)
+  dct['DST'].append(distfunc.__name__)
   
-  res = full_word_similarity_evaluation(df)
-  print("Results for '{}' on data '{}':\n{}".format(
-      model_name, dataset_name, res), flush=True)
+  res = full_word_similarity_evaluation(df, distfunc=distfunc)
+  print("Results for '{}' on data '{}' with distfunc={}:".format(
+      model_name, dataset_name, distfunc.__name__), flush=True)
   
   for key in dict(res):
     if key not in dct:
@@ -510,37 +638,47 @@ def grid_search_vsm(files, dct_model_funcs):
   best_macro = 0
   best_model_name = ''
   dct_res = {}
-  for fn in files:
-    print("Loading '{}'".format(fn), flush=True)
-    data = pd.read_csv(os.path.join(VSM_HOME, fn), index_col=0)  
-    print("  Loaded {}".format(data.shape))
-    data_name = fn[:-7]
-    for model_name, model_func in dct_model_funcs.items():
-      print("=" * 70)
-      print("Running '{}' on '{}'".format(model_name, data_name), flush=True)
-      df = model_func(data)
-      dct_res, macro = eval_model(dct_res, 
-                                  dataset_name=data_name, 
-                                  model_name=model_name, 
-                                  df=df)
-      if best_macro < macro:
-        old_best_file = best_model_name
-        best_macro = macro
-        best_model = df
-        best_model_name = 'best_model_{:.4f}_'.format(macro).replace('.','') + model_name + '_' + fn
-        print("Found new best macro-average: {:.4f}".format(best_macro), flush=True)
-        if old_best_file != '':
-          try:
-            old_best_file = old_best_file + '.csv.gz'
-            os.remove(old_best_file)
-            print("Old best '{}' deleted.".format(old_best_file))
-          except:
-            print("ERROR: Cound not remove file '{}' !!!".format(old_best_file))            
-        best_model.to_csv(best_model_name, compression='gzip')
-        
-      df_res = pd.DataFrame(dct_res).sort_values('Macro-average')
-      df_res.to_csv("20200303_test.csv")
-      print("\nResults so far:\n{}".format(df_res), flush=True)
+  dist_funcs = [vsm.cosine] # [dice, vsm.cosine]
+  for distfunc in dist_funcs:
+    print("Using distfunc={}".format(distfunc.__name__))
+    for fn in files:
+      print("Loading '{}'".format(fn), flush=True)
+      data = pd.read_csv(os.path.join(VSM_HOME, fn), index_col=0)  
+      print("  Loaded {}".format(data.shape))
+      data_name = fn[:-7]
+      for model_name, model_func in dct_model_funcs.items():
+        print("=" * 70)
+        print("Running '{}' on '{}'".format(model_name, data_name), flush=True)
+        df = model_func(data)
+        if df is None:
+          print("{} returned None".format(model_func.__name__))
+          continue
+        print("Done running {}. Obtained df: {}".format(
+            model_func.__name__, df.shape), flush=True)
+        dct_res, macro = eval_model(dct_res, 
+                                    dataset_name=data_name, 
+                                    model_name=model_name, 
+                                    df=df,
+                                    distfunc=distfunc
+                                    )
+        if best_macro < macro:
+          old_best_file = best_model_name
+          best_macro = macro
+          best_model = df
+          best_model_name = 'best_model_{:.4f}_'.format(macro).replace('.','') + model_name + '_' + fn
+          print("Found new best macro-average: {:.4f}".format(best_macro), flush=True)
+          if old_best_file != '':
+            try:
+              old_best_file = old_best_file + '.csv.gz'
+              os.remove(old_best_file)
+              print("Old best '{}' deleted.".format(old_best_file))
+            except:
+              print("ERROR: Cound not remove file '{}' !!!".format(old_best_file))            
+          best_model.to_csv(best_model_name, compression='gzip')
+          
+        df_res = pd.DataFrame(dct_res).sort_values('Macro-average')
+        df_res.to_csv("20200303_test.csv")
+        print("\nResults so far:\n{}".format(df_res), flush=True)
   
   return best_model
 
@@ -591,16 +729,51 @@ def pmid(m, positive=True, delta_on_pmi=True, before=True):
   return pmi
 
 
+def counterfit_model(data):
+  print("Counter-fitting on {} embeds".format( data.shape), flush=True)
+
+
+  from nltk.corpus import wordnet as wn
+  print("  Preparing antonyms", flush=True)
+  ant_set = set()
+  for ss in wn.all_synsets():
+    lema = ss.lemmas()[0]      
+    w1 = lema.name()
+    ants = [lem.name() for lem in lema.antonyms()]
+    if len(ants)>0:
+      for w2 in ants:
+        if w1 in data.index and w2 in data.index:
+          ant_set.add((w1, w2))
+  
+    
+  dct_word_vectors = {k:v for k,v in zip(data.index, data.values)}
+  for word in ['expensive','east','smart','adult']:
+    if word in data:
+      break
+  neibs1 = vsm.neighbors(word, data)
+  dct_new_embeds = counter_fit_antonyms(dct_word_vectors, ant_set, lr=0.1, epochs=30)
+  df = pd.DataFrame.from_dict(dct_new_embeds, orient='index')
+  neibs = vsm.neighbors(word, df)
+
+  print("  Status before counter-fitting for word: {}".format(word), flush=True)
+  for w in dict(neibs1.iloc[:5]):
+    print("  {:<20} {:.3f}".format(w+':', neibs1[w]))
+  print("  Status AFTER counter-fitting for word: {}".format(word), flush=True)
+  for w in dict(neibs.iloc[:5]):
+    print("  {:<20} {:.3f}".format(w+':', neibs[w]))
+  return df
+  
+
 def retrofit_model(data, name=''):
   from retrofitting import Retrofitter
-  from nltk.corpus import wordnet as wn
   print("Retrofitting model '{}' with {} embeds".format(name, data.shape[1]), flush=True)
-  print("  Constructing edges", flush=True)
+  from nltk.corpus import wordnet as wn
+  print("  Constructing edges for words similarity", flush=True)
   edges = defaultdict(set)
   for ss in wn.all_synsets():
-      lem_names = {lem.name() for lem in ss.lemmas()}
-      for lem in lem_names:
-          edges[lem] |= lem_names  
+    lem_names = {lem.name() for lem in ss.lemmas()}
+    for lem in lem_names:
+      edges[lem] |= lem_names            
   print("  Preparing indices...",flush=True)
   lookup = dict(zip(data.index, range(data.shape[0])))
   index_edges = defaultdict(set)
@@ -611,7 +784,10 @@ def retrofit_model(data, name=''):
           if f:
               index_edges[s] = f  
   
-  wn_retro = Retrofitter(verbose=True)
+  wn_retro = Retrofitter(verbose=True,
+                         max_iter=1000,
+                         tol=1e-4,
+                         )
   print("  Running retrofitter ...", flush=True)
   retro_result = wn_retro.fit(data, index_edges)
   print("")
@@ -640,11 +816,15 @@ def lsa_model(data, k=100, use_ttest=False, disc_pmi=True, retrofit=False, delta
   return df_out
 
 def ae_model(data, n_embeds, 
+             distfunc=vsm.cosine,
              epochs=100000, 
-             retrofit=False, 
+             retrofit=True, 
              delta=True, 
              max_patience=5, 
-             lsa_factor=2):
+             lr=1e-2,
+             lsa_factor=2,
+             end_counterfit=False,
+             ):
   
   from torch_autoencoder import TorchAutoencoder
   
@@ -656,7 +836,7 @@ def ae_model(data, n_embeds,
     
   ae_model = TorchAutoencoder(max_iter=n_step_epochs, 
                               hidden_dim=n_embeds, 
-                              eta=0.0001,
+                              eta=lr,
                               warm_start=True)
   best_macro = 0
   best_model = None
@@ -667,17 +847,23 @@ def ae_model(data, n_embeds,
     print("Fitting step {}/{} for {} step-epochs".format(step, steps, n_step_epochs), flush=True)
     ae_output = ae_model.fit(lsa_output)
     print("\nCalculating step {} results...".format(step))
+    print("  Before retrofit ...")
+    res = full_word_similarity_evaluation(ae_output, distfunc=distfunc)
+    mb = res['Macro-average']
     if retrofit:
       df_out = retrofit_model(ae_output)
     else:
       df_out = ae_output
-    res = full_word_similarity_evaluation(df_out)
+    res = full_word_similarity_evaluation(df_out, distfunc=distfunc)
     macro = res['Macro-average']
+    print("  Before retro: {:.4f}".format(mb))
+    print("  After retro:  {:.4f}".format(macro))
+    print("  {}".format("Good!" if macro>mb else "WORSE!!!"), flush=True)
     if macro > best_macro:
       patience = 0
       best_macro = macro
       best_model = df_out
-      print("Found best model at epoch {}:\n{}".format(step * n_step_epochs, res), flush=True)
+      print("Found best model at epoch {}".format(step * n_step_epochs), flush=True)
     else:
       patience += 1
       print("Macro {:.4f} < {:.4f} best. Patience {}/{}".format(
@@ -686,11 +872,18 @@ def ae_model(data, n_embeds,
     if patience >= max_patience:
       print("Early stopping training loop at step {}".format(step))
       break      
+  if end_counterfit:
+    best_model = counterfit_model(best_model)
   return best_model
 
+##########################################################
+##########################################################
+##########################################################
+##########################################################
+##########################################################
+##########################################################
 
-
-def get_final_model_embeds():
+def get_final_model_embeds(distfunc=vsm.cosine):
   imdb5 = pd.read_csv(os.path.join(VSM_HOME, "imdb_window5-scaled.csv.gz"), index_col=0)
   ae_embeds = ae_model(data=imdb5, 
                        n_embeds=200, 
@@ -699,7 +892,7 @@ def get_final_model_embeds():
                        delta=False,
                        max_patience=5,
                        lsa_factor=2)
-  res = full_word_similarity_evaluation(ae_embeds)
+  res = full_word_similarity_evaluation(ae_embeds, distfunc=distfunc)
   macro = res['Macro-average']
   fn = 'best_model_{:.4f}.csv.gz'.format(macro).replace('.','')
   ae_embeds.to_csv(fn,  compression='gzip')
@@ -734,6 +927,17 @@ def comb_2(data, n_embed=100, reduce=True):
   else:
     return df_res
   
+def comb_3(data, ngram=3):
+  df = data
+  df = subword_enrichment(df, n=ngram)
+  df = ae_model(df, n_embeds=300, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.01)
+  return df
+
+def comb_4(data, ngram=3):
+  df = data
+  df = ae_model(df, n_embeds=300, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.01)
+  df = subword_enrichment(df, n=ngram)
+  return df
 
 
 MODEL_FUNCTIONS = {
@@ -745,7 +949,12 @@ MODEL_FUNCTIONS = {
 #    
 #    "C1_150" : lambda x: comb_1(x, n_embed=150, reduce=False),
 #    "C1_150r" : lambda x: comb_1(x, n_embed=150, reduce=True),
+
+#    "C3_3" : lambda x : comb_3(x, ngram=3),
+#    "C4_3" : lambda x : comb_4(x, ngram=3),
 #
+#    "C3_5" : lambda x : comb_3(x, ngram=5),
+#    "C4_5" : lambda x : comb_4(x, ngram=5),
 #
 #
 #
@@ -754,10 +963,27 @@ MODEL_FUNCTIONS = {
 #    "AE200_1Kd2" : lambda x: ae_model(x, n_embeds=200, epochs=2000, delta=False),
 #    "AE100_1Kd2"  : lambda x: ae_model(x, n_embeds=100, epochs=2000, delta=False),
 
-    "AE200_f2d1_RETR" : lambda x: ae_model(x, n_embeds=200, epochs=100000, retrofit=True, delta=True, lsa_factor=2),
-    "AE300_f2d1_RETR" : lambda x: ae_model(x, n_embeds=300, epochs=100000, retrofit=True, delta=True, lsa_factor=2),
-    "AE200_f2d2_RETR" : lambda x: ae_model(x, n_embeds=200, epochs=100000, retrofit=True, delta=False, lsa_factor=2),
-    "AE300_f2d2_RETR" : lambda x: ae_model(x, n_embeds=300, epochs=100000, retrofit=True, delta=False, lsa_factor=2),
+#    "AE200_f2d1_RETR1" : lambda x: ae_model(x, n_embeds=200, epochs=100000, retrofit=True, delta=True, lsa_factor=2, lr=0.01),
+#    "AE300_f2d1_RETR1" : lambda x: ae_model(x, n_embeds=300, epochs=100000, retrofit=True, delta=True, lsa_factor=2, lr=0.01),
+
+#    "C_AE200_f2d2_R1" : lambda x: ae_model(x, distfunc=vsm.cosine, n_embeds=200, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.01),
+    "C_AE300_f2d2_RC1" : lambda x: ae_model(x, end_counterfit=True, distfunc=vsm.cosine, n_embeds=300, retrofit=True, delta=False, lsa_factor=2, lr=0.01),
+    "C_AE300_f2d2_R1"  : lambda x: ae_model(x, end_counterfit=False, distfunc=vsm.cosine, n_embeds=300, retrofit=True, delta=False, lsa_factor=2, lr=0.01),
+
+#    "D_AE200_f2d2_R1" : lambda x: ae_model(x, distfunc=dice, n_embeds=200, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.01),
+#    "D_AE300_f2d2_R1" : lambda x: ae_model(x, distfunc=dice, n_embeds=300, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.01),
+
+#
+#    "AE200_f2d1_RETR2" : lambda x: ae_model(x, n_embeds=200, epochs=100000, retrofit=True, delta=True, lsa_factor=2, lr=0.001),
+#    "AE300_f2d1_RETR2" : lambda x: ae_model(x, n_embeds=300, epochs=100000, retrofit=True, delta=True, lsa_factor=2, lr=0.001),
+#    "AE200_f2d2_RETR2" : lambda x: ae_model(x, n_embeds=200, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.001),
+#    "AE300_f2d2_RETR2" : lambda x: ae_model(x, n_embeds=300, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.001),
+#
+#    "AE200_f2d1_RETR3" : lambda x: ae_model(x, n_embeds=200, epochs=100000, retrofit=True, delta=True, lsa_factor=2, lr=0.0001),
+#    "AE300_f2d1_RETR3" : lambda x: ae_model(x, n_embeds=300, epochs=100000, retrofit=True, delta=True, lsa_factor=2, lr=0.0001),
+#    "AE200_f2d2_RETR3" : lambda x: ae_model(x, n_embeds=200, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.0001),
+#    "AE300_f2d2_RETR3" : lambda x: ae_model(x, n_embeds=300, epochs=100000, retrofit=True, delta=False, lsa_factor=2, lr=0.0001),
+#
 #    "AE100_f2d2_RETR" : lambda x: ae_model(x, n_embeds=100, epochs=10000, retrofit=True, delta=False, lsa_factor=2),
 
 #    "AE200_f3d1_RETR" : lambda x: ae_model(x, n_embeds=200, epochs=10000, retrofit=True, delta=True, lsa_factor=3),
@@ -824,6 +1050,17 @@ if __name__ == '__main__':
     - lsa 300 on ttest
     - glove 300 with 10000 iters
   """  
+
+  def get_sim3500_data_frame():
+    datas = [simverb3500dev_reader, simverb3500test_reader]
+    df = pd.DataFrame()
+    for data_func in datas:
+      df = pd.concat([df, pd.DataFrame(data_func(), columns=['w1','w2','score'])])
+    return df.sort_values('score')
+
+  
+#  df_s = get_sim3500_data_frame()
+  
 #  vocab_overlap = get_reader_vocab_overlap()
 #  print(vocab_overlap_crosstab(vocab_overlap))
 #  print(get_reader_pair_overlap())
@@ -849,5 +1086,18 @@ if __name__ == '__main__':
 #  run_giga5_ppmi_baseline()
   
 #  grid_search_vsm(ALL_FILES, MODEL_FUNCTIONS)
-  
-  get_final_model_embeds()
+#
+#  mco_data = pd.read_csv(os.path.join(VSM_HOME, "giga_window20-flat.csv.gz"), index_col=0)    
+#  ae_embeds = ae_model(data=mco_data, 
+#                       n_embeds=300, 
+#                       epochs=100000, 
+#                       retrofit=True, 
+#                       delta=False,
+#                       max_patience=5,
+#                       end_counterfit=True,
+#                       lsa_factor=2)
+#  full_word_similarity_evaluation(ae_embeds)
+#  get_final_model_embeds()
+    
+  df = pd.read_csv("best_model_05842.csv.gz", index_col=0)
+  full_word_similarity_evaluation(df)
