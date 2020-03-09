@@ -291,10 +291,17 @@ class Dataset(object):
                     "If `vectorize=True`, the `featurizers` argument "
                     "must contain exactly one function.")
             featurizer = featurizers[0]
-            for rel, kbts in kbts_by_rel.items():
+            for rel, kbts in kbts_by_rel.items():                
+                print("  Generating features for rel: {}...".format(rel), flush=True)
                 for kbt in kbts:
                     rep = featurizer(kbt, self.corpus)
                     feat_matrices_by_rel[rel].append(rep)
+                emb_size = feat_matrices_by_rel[rel][0].shape[1]
+                seq_lens = [x.shape[0] for x in feat_matrices_by_rel[rel]]
+                mbs = sum([x * emb_size for x in seq_lens])
+                min_max = min(seq_lens), max(seq_lens)
+                print("    Resulted data: {} obs, seq min/max: {}, {:.1f} MB".format(
+                    len(seq_lens), min_max, mbs/1024**2), flush=True)
             return feat_matrices_by_rel, None
 
         # Create feature counters for all instances (kbts).
@@ -483,8 +490,14 @@ def train_models(
     train_X, vectorizer = train_dataset.featurize(
         train_o, featurizers, vectorize=vectorize)
     models = {}
-    for rel in splits['all'].kb.all_relations:
+    n_rels = len(splits['all'].kb.all_relations)
+    print("Training {} {} classifiers on {} relations".format(
+        n_rels, model_factory().__class__.__name__, n_rels))
+    for i_rel, rel in enumerate(splits['all'].kb.all_relations):
         models[rel] = model_factory()
+        print("  Training {}/{}: Running {}.fit() for rel={}...".format(
+                i_rel, n_rels, models[rel].__class__.__name__, rel),
+              flush=True)
         models[rel].fit(train_X[rel], train_y[rel])
     return {
         'featurizers': featurizers,

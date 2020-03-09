@@ -199,6 +199,7 @@ class TorchRNNClassifier(TorchModelBase):
         self
 
         """
+        print("    Fitting {} obs...".format(len(X)))
         # Incremental performance:
         X_dev = kwargs.get('X_dev')
         if X_dev is not None:
@@ -208,6 +209,8 @@ class TorchRNNClassifier(TorchModelBase):
         self.n_classes_ = len(self.classes_)
         class2index = dict(zip(self.classes_, range(self.n_classes_)))
         y = [class2index[label] for label in y]
+        n_obs = len(y)
+        n_batches = n_obs // self.batch_size
         dataset = self.build_dataset(X, y)
         dataloader = torch.utils.data.DataLoader(
             dataset,
@@ -236,7 +239,9 @@ class TorchRNNClassifier(TorchModelBase):
         # Train:
         for iteration in range(1, self.max_iter+1):
             epoch_error = 0.0
+            i_batch = 0
             for X_batch, batch_seq_lengths, y_batch in dataloader:
+                i_batch += 1
                 y_batch = y_batch.to(self.device, non_blocking=True)
                 batch_preds = self.model(X_batch, batch_seq_lengths)
                 err = loss(batch_preds, y_batch)
@@ -245,13 +250,15 @@ class TorchRNNClassifier(TorchModelBase):
                 optimizer.zero_grad()
                 err.backward()
                 optimizer.step()
+                print("\r      Epoch {} completed {:.1f}%".format(
+                    i_batch / n_batches * 100), end='', flush=True)
             # Incremental predictions where possible:
             if X_dev is not None and iteration > 0 and iteration % dev_iter == 0:
                 self.dev_predictions[iteration] = self.predict(X_dev)
                 self.model.train()
             self.errors.append(epoch_error)
-            progress_bar("Finished epoch {} of {}; error is {}".format(
-                iteration, self.max_iter, epoch_error))
+            print("\r      Finished epoch {} of {}; error is {:.3f}".format(
+                iteration, self.max_iter, epoch_error), flush=True)
         return self
 
     def predict_proba(self, X):
@@ -270,6 +277,8 @@ class TorchRNNClassifier(TorchModelBase):
         with torch.no_grad():
             self.model.to(self.device)
             X, seq_lengths = self._prepare_dataset(X)
+            #th_X = th.tensor(X)
+            
             preds = self.model(X, seq_lengths)
             preds = torch.softmax(preds, dim=1).cpu().numpy()
             return preds

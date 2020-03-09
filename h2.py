@@ -9,7 +9,9 @@ import os
 import rel_ext
 import utils
 if "wn" not in globals():
+  print("Loading WordNet...", flush=True)
   from nltk.corpus import wordnet as wn
+  print("Done loading WordNet.", flush=True)
 from functools import partial
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -234,6 +236,7 @@ if __name__ == '__main__':
     P("  Loading Glove...")    
     glove_lookup = utils.glove2dict(
       os.path.join(GLOVE_HOME, 'glove.6B.300d.txt'))  
+  glv_emb_size = list(glove_lookup.values())[0].shape[0]
   P("Done loading data.")
     
 ######################
@@ -254,6 +257,7 @@ if __name__ == '__main__':
   
 ######### glove feature generators
 
+
   def glove_middle_featurizer(kbt, corpus, np_func=np.sum):
       reps = []
       for ex in corpus.get_examples_for_entities(kbt.sbj, kbt.obj):
@@ -269,7 +273,8 @@ if __name__ == '__main__':
       else:
           return np_func(reps, axis=0)    
   
-  def get_pair_feats(kbt, corpus, how='full'):
+  
+  def get_pair_feats(kbt, corpus, how='middle', max_words=1000):
     reps = []
     for ex in corpus.get_examples_for_entities(kbt.sbj, kbt.obj):
       str_ex = ''
@@ -285,8 +290,14 @@ if __name__ == '__main__':
       for word in str_ex.split():
         rep = glove_lookup.get(word)
         if rep is not None:
-          reps.append(rep)
-    return np.array(rep)
+          reps.append(rep.astype(np.float32))
+    if len(reps) == 0:
+      reps = [np.zeros(glv_emb_size, dtype=np.float32)]
+    if len(reps) > max_words:
+      P("kbt: {} has {} obs, reducing to {}".format(
+          kbt, len(reps), max_words))
+      reps = reps[:max_words]
+    return np.array(reps)
 
 
 #######################################################       
@@ -437,18 +448,23 @@ if __name__ == '__main__':
     end_timer('syn_lin',syn_f1)
     
   if RUN_RNN1:
-    rnn1_model_factory = TorchRNNClassifier(vocab=None, use_embedding=False)
-    featurizer_func = partial(get_pair_feats, how='full')
-    start_timer('rnn1_fullsents')
+    rnn1_model_factory = lambda: TorchRNNClassifier(vocab={}, 
+                                                    use_embedding=False,
+                                                    batch_size=64,
+                                                    max_iter=25)
+    featurizer_func = partial(get_pair_feats, how='middle')
+    start_timer('rnn1_middle')
     res = rel_ext.experiment(
-    splits,
-    train_split='train',
-    test_split='dev',
-    model_factory=rnn1_model_factory,
-    featurizers=[featurizer_func],
-    verbose=True,
-    return_macro=True)    
+            splits,
+            train_split='train',
+            test_split='dev',
+            model_factory=rnn1_model_factory,
+            featurizers=[featurizer_func],
+            vectorize=False,
+            verbose=True,
+            return_macro=True)   
+    
     rnn1_results, rnn1_f1 = res
-    end_timer('rnn1_fullsents', rnn1_f1)
+    end_timer('rnn1_middle', rnn1_f1)
 
   print_results()
