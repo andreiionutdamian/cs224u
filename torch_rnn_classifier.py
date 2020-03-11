@@ -199,7 +199,6 @@ class TorchRNNClassifier(TorchModelBase):
         self
 
         """
-        print("    Fitting {} obs...".format(len(X)))
         # Incremental performance:
         X_dev = kwargs.get('X_dev')
         if X_dev is not None:
@@ -224,7 +223,10 @@ class TorchRNNClassifier(TorchModelBase):
             self.embed_dim = X[0][0].shape[0]
         # Graph:
         if not self.warm_start or not hasattr(self, "model"):
+            print("    Constructing model...")
             self.model = self.build_graph()
+        else:
+            print("    Model already constructed. Resuming training...")
         self.model.to(self.device)
         self.model.train()
         # Make sure this value is up-to-date; self.`model` might change
@@ -250,18 +252,20 @@ class TorchRNNClassifier(TorchModelBase):
                 optimizer.zero_grad()
                 err.backward()
                 optimizer.step()
-                print("\r      Epoch {} completed {:.1f}%".format(
-                    i_batch / n_batches * 100), end='', flush=True)
+                print("\r    Epoch {} done {:.1f}% - prev error hist: {}\t\t".format(
+                    iteration, i_batch / n_batches * 100, self.errors[-10:]), end='', flush=True)
             # Incremental predictions where possible:
             if X_dev is not None and iteration > 0 and iteration % dev_iter == 0:
                 self.dev_predictions[iteration] = self.predict(X_dev)
                 self.model.train()
-            self.errors.append(epoch_error)
-            print("\r      Finished epoch {} of {}; error is {:.3f}".format(
-                iteration, self.max_iter, epoch_error), flush=True)
+            self.errors.append(round(epoch_error,2))
+            print("\r    Finished epoch {} of {} ({}); error is {:.3f}\t\t\t\t".format(
+                iteration, self.max_iter, len(self.errors), epoch_error), flush=True, end='')
+        print("\r    Finished train {} eps with last 10 ep hist: {}\t\t".format(
+            len(self.errors), self.errors[-10:]), flush=True)
         return self
 
-    def predict_proba(self, X):
+    def predict_proba(self, X, verbose=True):
         """Predicted probabilities for the examples in `X`.
 
         Parameters
@@ -277,13 +281,25 @@ class TorchRNNClassifier(TorchModelBase):
         with torch.no_grad():
             self.model.to(self.device)
             X, seq_lengths = self._prepare_dataset(X)
-            #th_X = th.tensor(X)
-            
-            preds = self.model(X, seq_lengths)
-            preds = torch.softmax(preds, dim=1).cpu().numpy()
-            return preds
+            X = torch.nn.utils.rnn.pad_sequence(X, batch_first=True)
+            all_preds = []
+            b_size = 64
+            n_batches = X.shape[0] // b_size
+            dl = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X, seq_lengths),
+                                             batch_size=64)
+            for i_batch, (X_batch, seq_lengths_batch ) in enumerate(dl):
+              preds = self.model(X_batch, seq_lengths_batch)
+              preds = torch.softmax(preds, dim=1).cpu().numpy()
+              if verbose:
+                print("\r    Prediction {:.1f}%".format((i_batch+1) / n_batches * 100), 
+                      flush=True, end='')
+              all_preds.append(preds)
+            np_preds = np.concatenate(all_preds)
+            if verbose:
+              print("\rDone full prediction on {} observations".format(X.shape[0]))
+            return np_preds
 
-    def predict(self, X):
+    def predict(self, X, verbose=True):
         """Predicted labels for the examples in `X`. These are converted
         from the integers that PyTorch needs back to their original
         values in `self.classes_`.
@@ -297,7 +313,7 @@ class TorchRNNClassifier(TorchModelBase):
         list of length len(X)
 
         """
-        probs = self.predict_proba(X)
+        probs = self.predict_proba(X, verbose=verbose)
         return [self.classes_[i] for i in probs.argmax(axis=1)]
 
     def _prepare_dataset(self, X):

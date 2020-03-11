@@ -1,0 +1,69 @@
+
+Results so far:
+        MODEL       F05   HRS    eta  l2_strength                       how  batch_size  bidirectional  max_words  two_dir  hidden_dim
+1   rnn_v1_02  0.123757  0.39  0.010         0.01                left-right         256          False         50     True         128
+12  rnn_v1_13  0.171640  1.25  0.010         0.01                      full          64           True        100     True         256
+11  rnn_v1_12  0.177829  1.17  0.010         0.01                      full          64          False        100     True         512
+5   rnn_v1_06  0.203638  0.66  0.010         0.01                      full          64          False         50     True         128
+3   rnn_v1_04  0.236578  0.89  0.001         0.01                left-right          64          False        100     True         128
+13  rnn_v1_14  0.403284  0.27  0.010         0.01                    middle         256           True         50     True         256
+10  rnn_v1_11  0.404736  0.23  0.001         0.01                    middle         256          False        100     True         256
+7   rnn_v1_08  0.413200  0.69  0.010         0.01  mention1-middle-mention2          64           True         50     True         128
+0   rnn_v1_01  0.414059  0.23  0.001         0.01                    middle         256          False        100     True         512
+2   rnn_v1_03  0.422167  0.62  0.001         0.01                    middle          64           True         50     True         128
+6   rnn_v1_07  0.424688  0.84  0.010         0.00                left-right          64           True         50     True         256
+4   rnn_v1_05  0.518044  0.21  0.001         0.00                    middle         256          False         50    False         512
+14  rnn_v1_15  0.534089  0.23  0.001         0.01  mention1-middle-mention2         256          False         50    False         256
+8   rnn_v1_09  0.684349  0.23  0.001         0.00  mention1-middle-mention2         256          False         50    False         256
+9   rnn_v1_10  0.697654  0.64  0.010         0.00  mention1-middle-mention2          64           True         50    False         256
+
+relation              precision     recall    f-score    support       size
+------------------    ---------  ---------  ---------  ---------  ---------
+adjoins                   0.672      0.459      0.615        340       5716
+author                    0.899      0.507      0.779        509       5885
+capital                   0.792      0.400      0.662         95       5471
+contains                  0.915      0.338      0.682       3904       9280
+film_performance          0.883      0.484      0.758        766       6142
+founders                  0.815      0.361      0.651        380       5756
+genre                     0.814      0.282      0.591        170       5546
+has_sibling               0.757      0.437      0.660        499       5875
+has_spouse                0.755      0.446      0.663        594       5970
+is_a                      0.852      0.406      0.699        497       5873
+nationality               0.882      0.571      0.796        301       5677
+parents                   0.863      0.446      0.727        312       5688
+place_of_birth            0.742      0.506      0.679        233       5609
+place_of_death            0.648      0.428      0.587        159       5535
+profession                0.938      0.486      0.791        247       5623
+worked_at                 0.831      0.508      0.737        242       5618
+------------------    ---------  ---------  ---------  ---------  ---------
+macro-average             0.816      0.442      0.692       9248      95264
+  
+Results so far:
+        MODEL       F05   HRS     eta  l2_strength           how  batch_size  bidirectional  max_words  two_dir  hidden_dim
+2   rnn_v1_03  0.152079  0.90  0.0050        0.005    left-right         512           True        100    False         256
+10  rnn_v1_11  0.153213  0.55  0.0050        0.005    left-right         512          False         50    False         128
+20  rnn_v1_21  0.195650  0.82  0.0005        0.005    left-right         512           True        100    False         128
+5   rnn_v1_06  0.213335  0.74  0.0005        0.005    left-right         512          False        100    False         128
+14  rnn_v1_15  0.285871  0.81  0.0005        0.005          full         512          False        100    False         128
+15  rnn_v1_16  0.294115  0.55  0.0050        0.000    left-right         512          False         50    False         128
+21  rnn_v1_22  0.296603  0.85  0.0005        0.005          full         512          False        100    False         256
+16  rnn_v1_17  0.406255  0.68  0.0005        0.005          full         512           True         50    False         256
+17  rnn_v1_18  0.425472  0.17  0.0050        0.005        middle         512          False        100    False         128
+19  rnn_v1_20  0.436710  0.17  0.0050        0.005        middle         512          False         50    False         512
+9   rnn_v1_10  0.436834  0.81  0.0050        0.000          full         512          False        100    False         128
+13  rnn_v1_14  0.441768  0.20  0.0050        0.005        middle         512           True        100    False         512
+24  rnn_v1_25  0.442149  0.17  0.0050        0.005        middle         512          False         50    False         256
+12  rnn_v1_13  0.442889  0.17  0.0050        0.005        middle         512          False         50    False         128
+11  rnn_v1_12  0.514573  0.19  0.0005        0.000        middle         512           True        100    False         256
+22  rnn_v1_23  0.521309  0.16  0.0005        0.000        middle         512          False        100    False         256
+4   rnn_v1_05  0.523081  0.20  0.0005        0.000        middle         512           True        100    False         512
+18  rnn_v1_19  0.530735  0.19  0.0005        0.000        middle         512           True        100    False         128
+7   rnn_v1_08  0.532243  0.16  0.0050        0.000        middle         512          False         50    False         128
+8   rnn_v1_09  0.533425  0.19  0.0050        0.000        middle         512           True        100    False         256
+23  rnn_v1_24  0.539101  0.92  0.0005        0.000          full         512           True         50    False         512
+6   rnn_v1_07  0.542324  0.19  0.0050        0.000        middle         512           True        100    False         128
+1   rnn_v1_02  0.667892  0.22  0.0005        0.000  m1-middle-m2         512           True        100    False         256
+3   rnn_v1_04  0.669198  0.20  0.0005        0.000  m1-middle-m2         512          False        100    False         512
+0   rnn_v1_01  0.691331  0.18  0.0050        0.000  m1-middle-m2         512          False        100    False         128  
+0   rnn_v1_01  0.692352   0.2  0.0050            0  m1-middle-m2         512          False        100    False         128
+  

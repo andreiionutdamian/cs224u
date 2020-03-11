@@ -5,6 +5,7 @@ Created on Fri Mar  6 17:24:36 2020
 @author: damia
 """
 import numpy as np
+import pandas as pd
 import os
 import rel_ext
 import utils
@@ -27,7 +28,9 @@ RUN_DIRECTION   = False # 0.61
 RUN_POS         = False # 0.45
 RUN_SYN         = False # 0.53
 
-RUN_RNN1        = True  #
+RUN_RNN1        = False # 0.58
+RUN_GRID        = False  # 0.69
+RUN_FINAL       = True
 
 SVC_MAX_ITER    = 4
 
@@ -38,6 +41,9 @@ def P(s=''):
 
 def Pr(s=''):
   print('\r' + str(s), end='', flush=True)
+  
+
+  
   
 def get_POS(str_POS):
   base = [x for x in str_POS.strip().split(' ') if x]
@@ -211,8 +217,9 @@ if __name__ == '__main__':
       P("  {:<17} {:.4f} - time: {:>5.1f}s".format(n+':',v, dct_timers[n]))
     
   
-  
+    
   utils.fix_random_seeds()
+
   P("Loading data...")
   rel_ext_data_home = os.path.join('data', 'rel_ext_data')
   if 'corpus' not in globals():
@@ -273,31 +280,6 @@ if __name__ == '__main__':
       else:
           return np_func(reps, axis=0)    
   
-  
-  def get_pair_feats(kbt, corpus, how='middle', max_words=1000):
-    reps = []
-    for ex in corpus.get_examples_for_entities(kbt.sbj, kbt.obj):
-      str_ex = ''
-      if how == 'full':
-        str_ex = ' '.join((ex.left, ex.mention_1, ex.middle, ex.mention_2, ex.right))
-      else:
-        if 'left' in how:
-          str_ex += ex.left
-        if 'middle' in how:
-          str_ex += ex.middle
-        if 'right' in how:
-          str_ex += ex.right
-      for word in str_ex.split():
-        rep = glove_lookup.get(word)
-        if rep is not None:
-          reps.append(rep.astype(np.float32))
-    if len(reps) == 0:
-      reps = [np.zeros(glv_emb_size, dtype=np.float32)]
-    if len(reps) > max_words:
-      P("kbt: {} has {} obs, reducing to {}".format(
-          kbt, len(reps), max_words))
-      reps = reps[:max_words]
-    return np.array(reps)
 
 
 #######################################################       
@@ -447,12 +429,106 @@ if __name__ == '__main__':
     syn_results, syn_f1 = res
     end_timer('syn_lin',syn_f1)
     
+#######################################################       
+#######################################################       
+#######################################################       
+#######################################################     
+    
+  """
+
+  """
+
+  def prepare_grid_search(params_grid, nr_trials):
+    import itertools
+  
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)
+  
+    params = []
+    values = []
+    for k in params_grid:
+      params.append(k)
+      assert type(params_grid[k]) is list, 'All grid-search params must be lists. Error: {}'.format(k)
+      values.append(params_grid[k])
+    combs = list(itertools.product(*values))
+    n_options = len(combs)
+    grid_iterations = []
+    for i in range(n_options):
+      comb = combs[i]
+      func_kwargs = {}
+      for j,k in enumerate(params):
+        func_kwargs[k] = comb[j]
+      grid_iterations.append(func_kwargs)
+    idxs = np.arange(n_options)
+    if nr_trials < n_options:
+      idxs = np.random.choice(idxs, size=nr_trials, replace=False)
+    return [grid_iterations[i] for i in idxs]
+  
+  
+  def get_seq_feats(kbt, corpus, how='middle', two_dir=True, max_words=50):
+    reps = []
+    so_sents = []
+    
+    def extract_text(exmpl):
+      str_ex = ''
+      if how == 'full':
+        str_ex = ' '.join((exmpl.left, exmpl.mention_1, exmpl.middle, exmpl.mention_2, exmpl.right))
+      else:
+        if 'left' in how:
+          str_ex += ' ' + exmpl.left
+        if 'm1' in how:
+          str_ex += ' ' + exmpl.mention_1
+        if 'middle' in how:
+          str_ex += ' ' + exmpl.middle
+        if 'm2' in how:
+          str_ex += ' ' + exmpl.mention_2
+        if 'right' in how:
+          str_ex += ' ' + exmpl.right
+      return str_ex
+    
+    for ex in corpus.get_examples_for_entities(kbt.sbj, kbt.obj):
+      str_ex = extract_text(ex)
+      so_sents.append(str_ex)
+    so_sents = sorted(so_sents, key=lambda x: len(x))
+    so_best = so_sents[-1] if len(so_sents) > 0 else ''
+    
+    os_best = ''
+    if two_dir:
+      os_sents = []
+      for ex in corpus.get_examples_for_entities(kbt.obj, kbt.sbj):
+        str_ex = extract_text(ex)
+        os_sents.append(str_ex)
+      os_sents = sorted(os_sents, key=lambda x:len(x))
+      os_best = os_sents[-1] if len(os_sents) > 0 else ''
+  
+    str_text = so_best + ' ' + os_best
+      
+    str_rep = ''
+    for word in str_text.split():
+      w = word.lower()
+      rep = glove_lookup.get(w)
+      if rep is not None:
+        reps.append(rep.astype(np.float32))
+        str_rep += ' ' + w
+  
+  
+    if len(reps) == 0:
+      reps = [np.zeros(glv_emb_size, dtype=np.float32)]
+      
+    return np.array(reps[:max_words], dtype=np.float32)
+
+    
+          
+    
   if RUN_RNN1:
     rnn1_model_factory = lambda: TorchRNNClassifier(vocab={}, 
                                                     use_embedding=False,
-                                                    batch_size=64,
-                                                    max_iter=25)
-    featurizer_func = partial(get_pair_feats, how='middle')
+                                                    batch_size=128,
+                                                    bidirectional=True,
+                                                    eta=0.001,
+                                                    max_iter=50)
+    featurizer_func = partial(get_seq_feats, how='middle')
     start_timer('rnn1_middle')
     res = rel_ext.experiment(
             splits,
@@ -466,5 +542,219 @@ if __name__ == '__main__':
     
     rnn1_results, rnn1_f1 = res
     end_timer('rnn1_middle', rnn1_f1)
+
+  if RUN_GRID:
+  #### GRID
+    grid = {
+        'eta' : [
+            0.005,
+            0.0005,
+            ],
+            
+        'l2_strength' : [
+            0,
+            0.005
+            ],
+            
+        'how' : [
+            'full',
+            'middle',
+            'left-right',
+            'm1-middle-m2',
+            ],
+            
+        'batch_size' : [
+              512,
+#              64,
+#              256,
+            ],
+        'bidirectional' : [
+             True,
+             False,
+            ],
+            
+        'max_words' : [
+            50,
+            100,
+            ],
+            
+        'two_dir' : [
+#            True,
+            False
+            ],
+            
+        'hidden_dim' : [
+            128,
+            256,
+            512
+            ],
+            
+        }
+    
+    dct_results = OrderedDict({'MODEL':[], 'F05': [], 'HRS': []})
+    for k in grid: 
+      dct_results[k] = []
+    
+    options = prepare_grid_search(grid, nr_trials=40)
+    timings = []
+    t_left = np.inf
+    for grid_iter, option in enumerate(options):
+      model_name = 'rnn_v1_{:02}'.format(grid_iter+1)
+      P("\n\n" + "=" * 70)
+      P("Running grid search iteration {}/{} '{}': {}".format(
+          grid_iter+1, len(options), model_name, option))
+      P("  Time left for grid search completion: {:.1f} hrs".format(t_left / 3600))
+      dct_results['MODEL'].append(model_name)
+      for k in option:
+        dct_results[k].append(option[k])
+      max_words = option.pop('max_words')
+      how = option.pop('how')
+      two_dir = option.pop('two_dir')
+      epochs = 40 if how in ['full','left-right'] else 20
+      rnn1_model_factory = lambda: TorchRNNClassifier(vocab={}, 
+                                                      use_embedding=False,
+                                                      max_iter=epochs,
+                                                      **option)
+      featurizer_func = partial(get_seq_feats, how=how, max_words=max_words, two_dir=two_dir)
+      start_timer(model_name)
+      res = rel_ext.experiment(
+              splits,
+              train_split='train',
+              test_split='dev',
+              model_factory=rnn1_model_factory,
+              featurizers=[featurizer_func],
+              vectorize=False,
+              verbose=True,
+              return_macro=True)   
+      
+      rnn_results, rnn_f1 = res
+      t_res = end_timer(model_name, rnn_f1)  
+      timings.append(t_res)
+      t_left = (len(options) - grid_iter - 1) * np.mean(timings)
+      dct_results['F05'].append(rnn_f1)
+      dct_results['HRS'].append(round(t_res/3600,2))
+      df = pd.DataFrame(dct_results).sort_values('F05')
+      P("Results so far:\n{}".format(df))
+
+
+  if RUN_FINAL:
+    from sklearn.metrics import precision_recall_fscore_support
+    import torch as th
+    
+    utils.fix_random_seeds()
+      
+    max_epochs = 1000
+    early_stop_steps = 5
+    epochs_per_fit = 1
+    fit_iters = max_epochs // epochs_per_fit
+    final_model_factory  = lambda: TorchRNNClassifier(vocab={}, 
+                                                      use_embedding=False,
+                                                      warm_start=True,
+                                                      max_iter=epochs_per_fit,
+                                                      eta=0.001,
+                                                      bidirectional=False,
+                                                      batch_size=128,
+                                                      l2_strength=0,
+                                                      hidden_dim=512)    
+    final_featurizer = partial(get_seq_feats, how='m1-middle-m2', two_dir=False, max_words=100)
+    ### now we prepare the dataset
+    # first the train
+    train_dataset = splits['train']
+    train_o, train_y = train_dataset.build_dataset()
+    P("Featurizing train dataset...")
+    train_X, vectorizer = train_dataset.featurize(
+        train_o, [final_featurizer], vectorize=False)
+    # now train_X, train_y holds the train data
+    
+    # now the dev
+    assess_dataset = splits['dev']
+    assess_o, assess_y = assess_dataset.build_dataset()
+    P("Featurizing dev dataset...")
+    test_X, _ = assess_dataset.featurize(
+        assess_o,
+        featurizers=[final_featurizer],
+        vectorizer=None,
+        vectorize=False)
+    # now test_X and assess_y holds the dev data
+    
+    # lets train all the models
+    start_timer('final_model')
+    models = {}
+    early_stops = {}
+    n_rels = len(splits['all'].kb.all_relations)
+    P("Training {} {} classifiers on {} relations".format(
+        n_rels, final_model_factory().__class__.__name__, n_rels))
+    for i_rel, rel in enumerate(splits['all'].kb.all_relations):
+      models[rel] = final_model_factory()
+      P("Training {}/{}: Running {}.fit() for rel={} for max {} epochs with early stop...".format(
+              i_rel + 1, n_rels, models[rel].__class__.__name__, rel, max_epochs))
+      best_rel_f1 = 0
+      best_rel_model = ''
+      patience = 0
+      max_patience = 7
+      for ep in range(1, max_epochs + 1):
+        models[rel].fit(train_X[rel], train_y[rel])
+        # finished fit stage now lets evaluate
+        predictions =  models[rel].predict(test_X[rel], verbose=False)
+        stats = precision_recall_fscore_support(assess_y[rel], predictions, beta=0.5)
+        stats = [stat[1] for stat in stats]     
+        rel_f1 = stats[2]
+        if best_rel_f1 < rel_f1:
+          patience = 0
+          if best_rel_model != '':
+            try:
+              os.remove(best_rel_model)
+              P("  Old model file '{}' removed".format(best_rel_model))
+            except:
+              P("FAILED to remove old model file")
+          best_rel_f1 = rel_f1
+          best_rel_model = 'model_rel_{}_{}.th'.format(rel, ep)
+          th.save(models[rel].model.state_dict(), best_rel_model)
+          P("  Found new best for rel={} with f05={:.4f} @ ep {}".format(
+              rel, best_rel_f1, ep * epochs_per_fit))
+          early_stops[rel] = ep * epochs_per_fit
+        else:
+          patience += 1
+          P("  Model did not improve {:.4f} < {:.4f}. Patience {}/{}".format(
+              rel_f1, best_rel_f1, patience, max_patience))
+        if patience >= max_patience:
+          P("  Stopping trainn for rel '{}' after {} epochs".format(
+              rel, ep * epochs_per_fit))
+          break
+      if best_rel_model != '':
+        P("  Loading best model '{}' for rel='{}'".format(best_rel_model, rel))
+        models[rel].model.load_state_dict(th.load(best_rel_model))
+        predictions =  models[rel].predict(test_X[rel], verbose=False)
+        stats = precision_recall_fscore_support(assess_y[rel], predictions, beta=0.5)
+        stats = [stat[1] for stat in stats]     
+        rel_f1 = stats[2]   
+        P("  Final model for rel '{}' has a F0.5 of {:.4f}".format(rel,
+          rel_f1))
+        assert rel_f1 == best_rel_f1, "Results can not be replicated {} vs {} ".format(best_rel_f1, rel_f1)
+        try:
+          new_fn = "best_rel_ext_{}_F05_{:.4f}.th".format(rel,rel_f1)
+          os.rename(best_rel_model, new_fn)
+          P("Model '{}' renamed to '{}'".format(best_rel_model, new_fn))
+        except:
+          P("  Model could not be renamed")
+    # now we have trained one model for each realtion with independent early stopping                        
+    train_result = {
+        'featurizers': featurizers,
+        'vectorizer': vectorizer,
+        'models': models,
+        'all_relations': splits['all'].kb.all_relations,
+        'vectorize': False}
+    predictions, test_y = rel_ext.predict(
+        splits,
+        train_result,
+        split_name='dev',
+        vectorize=False)
+    eval_res = rel_ext.evaluate_predictions(
+                  predictions,
+                  test_y,
+                  verbose=True)
+    end_timer('final_model', eval_res)
+    
+    
 
   print_results()

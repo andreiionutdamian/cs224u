@@ -496,7 +496,7 @@ def train_models(
     for i_rel, rel in enumerate(splits['all'].kb.all_relations):
         models[rel] = model_factory()
         print("  Training {}/{}: Running {}.fit() for rel={}...".format(
-                i_rel, n_rels, models[rel].__class__.__name__, rel),
+                i_rel + 1, n_rels, models[rel].__class__.__name__, rel),
               flush=True)
         models[rel].fit(train_X[rel], train_y[rel])
     return {
@@ -508,15 +508,20 @@ def train_models(
 
 
 def predict(splits, train_result, split_name='dev', vectorize=True):
+    print("Running predict...", flush=True)
     assess_dataset = splits[split_name]
+    print("  Building dataset...", flush=True)
     assess_o, assess_y = assess_dataset.build_dataset()
+    print("  Featurizing...", flush=True)
     test_X, _ = assess_dataset.featurize(
         assess_o,
         featurizers=train_result['featurizers'],
         vectorizer=train_result['vectorizer'],
         vectorize=vectorize)
     predictions = {}
+    print("  Running inference on each model...", flush=True)
     for rel in train_result['all_relations']:
+        print("    Running predict on {}...".format(rel), flush=True)
         predictions[rel] = train_result['models'][rel].predict(test_X[rel])
     return predictions, assess_y
 
