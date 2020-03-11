@@ -72,3 +72,6 @@ rel_ext_data*
 *.tgz
 
 .spyproject/
+*.zip
+
+*.gz
