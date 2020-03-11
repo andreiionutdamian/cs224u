@@ -732,7 +732,8 @@ if __name__ == '__main__':
           rel_f1))
         assert rel_f1 == best_rel_f1, "Results can not be replicated {} vs {} ".format(best_rel_f1, rel_f1)
         try:
-          new_fn = "best_rel_ext_{}_F05_{:.4f}.th".format(rel,rel_f1)
+          new_fn = "best_rel_ext_{}_F05_{:.4f}_ep_{:03}.th".format(
+              rel, rel_f1,  early_stops[rel])
           os.rename(best_rel_model, new_fn)
           P("Model '{}' renamed to '{}'".format(best_rel_model, new_fn))
         except:
