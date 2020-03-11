@@ -689,7 +689,7 @@ if __name__ == '__main__':
             P("  Found new best for rel={} with f05={:.4f} @ ep {}".format(
                 rel, best_rel_f1, ep * epochs_per_fit))
             early_stops[rel] = ep * epochs_per_fit
-            bests[rel] = raound(best_rel_f1,3)
+            bests[rel] = round(best_rel_f1,3)
           else:
             patience += 1
             P("  Model did not improve {:.4f} < {:.4f}. Patience {}/{}".format(
