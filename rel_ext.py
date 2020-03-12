@@ -296,12 +296,13 @@ class Dataset(object):
                 for kbt in kbts:
                     rep = featurizer(kbt, self.corpus)
                     feat_matrices_by_rel[rel].append(rep)
-                emb_size = feat_matrices_by_rel[rel][0].shape[1]
-                seq_lens = [x.shape[0] for x in feat_matrices_by_rel[rel]]
-                mbs = sum([x * emb_size for x in seq_lens])
-                min_max = min(seq_lens), max(seq_lens)
-                print("    Resulted data: {} obs, seq min/max: {}, {:.1f} MB".format(
-                    len(seq_lens), min_max, mbs/1024**2), flush=True)
+                if len(feat_matrices_by_rel[rel][0].shape) > 1:
+                    emb_size = feat_matrices_by_rel[rel][0].shape[1]
+                    seq_lens = [x.shape[0] for x in feat_matrices_by_rel[rel]]
+                    mbs = sum([x * emb_size for x in seq_lens])
+                    min_max = min(seq_lens), max(seq_lens)
+                    print("    Resulted data: {} obs, seq min/max: {}, {:.1f} MB".format(
+                        len(seq_lens), min_max, mbs/1024**2), flush=True)
             return feat_matrices_by_rel, None
 
         # Create feature counters for all instances (kbts).

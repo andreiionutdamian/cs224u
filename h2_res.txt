@@ -19,7 +19,7 @@ Results so far:
 
 relation              precision     recall    f-score    support       size
 ------------------    ---------  ---------  ---------  ---------  ---------
-adjoins                   0.672      0.459      0.615        340       5716 > 66
+adjoins                   0.672      0.459      0.615        340       5716 > 61
 author                    0.899      0.507      0.779        509       5885 > 78
 capital                   0.792      0.400      0.662         95       5471 > 67
 contains                  0.915      0.338      0.682       3904       9280 > 69
@@ -67,3 +67,24 @@ Results so far:
 0   rnn_v1_01  0.691331  0.18  0.0050        0.000  m1-middle-m2         512          False        100    False         128  
 0   rnn_v1_01  0.692352   0.2  0.0050            0  m1-middle-m2         512          False        100    False         128
   
+  
+  
+Results so far:
+        MODEL       F05   HRS   eta  l2_strength                 how  batch_size  bidirectional  max_words  two_dir  hidden_dim  n_ex
+15  rnn_v2_16  0.560651  0.32  0.01            0  left15-midl-rght15         256          False        100    False         256     2
+3   rnn_v2_04  0.566543  0.42  0.01            0  left15-midl-rght15         256           True        100    False         256     2
+13  rnn_v2_14  0.574833  0.30  0.01            0                midl         256           True        100    False         256     1
+10  rnn_v2_11  0.601397  0.40  0.01            0                midl         256           True        100    False         256     2
+7   rnn_v2_08  0.682864  0.26  0.01            0                midl         256           True        100     True         256     1
+8   rnn_v2_09  0.683619  0.30  0.01            0  left15-midl-rght15         256          False        100     True         256     1
+9   rnn_v2_10  0.687509  0.41  0.01            0                midl         256          False        100     True         256     1
+16  rnn_v2_17  0.688191  0.35  0.01            0  left15-midl-rght15         256           True        100     True         256     1
+1   rnn_v2_02  0.698830  0.45  0.01            0  left15-midl-rght15         256           True        100     True         256     2
+14  rnn_v2_15  0.716448  0.25  0.01            0                midl         256          False        100     True         256     2
+12  rnn_v2_13  0.718265  0.32  0.01            0      men1-midl-men2         256          False        100    False         256     1
+4   rnn_v2_05  0.720537  0.31  0.01            0      men1-midl-men2         256           True        100    False         256     1
+2   rnn_v2_03  0.726432  0.29  0.01            0                midl         256           True        100     True         256     2
+5   rnn_v2_06  0.787217  0.37  0.01            0      men1-midl-men2         256           True        100     True         256     1
+6   rnn_v2_07  0.790733  0.33  0.01            0      men1-midl-men2         256          False        100     True         256     1
+0   rnn_v2_01  0.801926  0.43  0.01            0      men1-midl-men2         256           True        100     True         256     2
+11  rnn_v2_12  0.802472  0.40  0.01            0      men1-midl-men2         256          False        100     True         256     2  
