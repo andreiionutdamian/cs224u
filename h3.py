@@ -207,6 +207,10 @@ class TorchRNNSentenceEncoderDataset(torch.utils.data.Dataset):
       self.prem_lengths, self.hyp_lengths = seq_lengths
     else:
       prems, hyps = zip(*sequences)
+      self.prem_seqs = [x for x in prems]
+      self.hyp_seqs = [x for x in hyps]
+      self.prem_lengths = [len(x) for x in prems]
+      self.hyp_lengths = [len(x) for x in hyps]
       
     self.y = y
     assert len(self.prem_seqs) == len(self.y)
