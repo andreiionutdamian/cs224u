@@ -164,7 +164,11 @@ def fit_classifier_with_crossvalidation(
 
     """
     # Find the best model within param_grid:
-    crossvalidator = GridSearchCV(basemod, param_grid, cv=cv, scoring=scoring)
+    crossvalidator = GridSearchCV(basemod, param_grid, 
+                                  cv=cv, 
+                                  scoring=scoring,
+#                                  n_jobs=8,
+                                  verbose=100 if verbose else 0)
     crossvalidator.fit(X, y)
     # Report some information:
     if verbose:

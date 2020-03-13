@@ -22,13 +22,13 @@ from collections import OrderedDict
 from torch_rnn_classifier import TorchRNNClassifier
 
 RUN_BASELINE    = False # 0.56
-RUN_GLOVE_LIN   = True # 0.53
+RUN_GLOVE_LIN   = False # 0.53
 RUN_SVC         = False # 0.10
 RUN_DIRECTION   = False # 0.61
 RUN_POS         = False # 0.45
 RUN_SYN         = False # 0.53
 
-RUN_RNN1        = False # 0.58
+RUN_RNN1        = True # 0.58
 RUN_GRID        = False  # 0.8
 RUN_FINAL       = False
 
@@ -47,7 +47,7 @@ SVC_MAX_ITER    = 4
 
 from datetime import datetime as dt
 lst_log = []
-log_fn = dt.now().strftime("%Y%m%d_%H%M_log.txt")
+log_fn = dt.now().strftime("logs/%Y%m%d_%H%M_log.txt")
 
 def P(s=''):
   lst_log.append(s)
@@ -717,7 +717,7 @@ if __name__ == '__main__':
                                                     bidirectional=True,
                                                     eta=0.001,
                                                     max_iter=50)
-    featurizer_func = partial(get_seq_feats, how='middle')
+    featurizer_func = partial(get_seq_feats, how='midl')
     start_timer('rnn1_middle')
     res = rel_ext.experiment(
             splits,

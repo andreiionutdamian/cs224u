@@ -202,11 +202,13 @@ class NLIReader(object):
             src_filename,
             filter_unlabeled=True,
             samp_percentage=None,
-            random_state=None):
+            random_state=None,
+            data_size=None):
         self.src_filename = src_filename
         self.filter_unlabeled = filter_unlabeled
         self.samp_percentage = samp_percentage
         self.random_state = random_state
+        self.data_size = data_size
 
     def read(self):
         """Primary interface.
@@ -234,28 +236,28 @@ class SNLITrainReader(NLIReader):
     def __init__(self, snli_home, **kwargs):
         src_filename = os.path.join(
             snli_home, "snli_1.0_train.jsonl")
-        super(SNLITrainReader, self).__init__(src_filename, **kwargs)
+        super(SNLITrainReader, self).__init__(src_filename, data_size=550000, **kwargs)
 
 
 class SNLIDevReader(NLIReader):
     def __init__(self, snli_home, **kwargs):
         src_filename = os.path.join(
             snli_home, "snli_1.0_dev.jsonl")
-        super(SNLIDevReader, self).__init__(src_filename, **kwargs)
+        super(SNLIDevReader, self).__init__(src_filename, data_size=10000, **kwargs)
 
 
 class MultiNLITrainReader(NLIReader):
     def __init__(self, snli_home, **kwargs):
         src_filename = os.path.join(
             snli_home, "multinli_1.0_train.jsonl")
-        super(MultiNLITrainReader, self).__init__(src_filename, **kwargs)
+        super(MultiNLITrainReader, self).__init__(src_filename, data_size=392000, **kwargs)
 
 
 class MultiNLIMatchedDevReader(NLIReader):
     def __init__(self, multinli_home, **kwargs):
         src_filename = os.path.join(
             multinli_home, "multinli_1.0_dev_matched.jsonl")
-        super(MultiNLIMatchedDevReader, self).__init__(src_filename, **kwargs)
+        super(MultiNLIMatchedDevReader, self).__init__(src_filename, data_size=20000, **kwargs)
 
 
 class MultiNLIMismatchedDevReader(NLIReader):
@@ -335,6 +337,9 @@ def build_dataset(reader, phi, vectorizer=None, vectorize=True):
     feats = []
     labels = []
     raw_examples = []
+    cnt = 0
+    smp = reader.samp_percentage or 1
+    n_obs = (reader.data_size or 0) * smp
     for ex in reader.read():
         t1 = ex.sentence1_parse
         t2 = ex.sentence2_parse
@@ -343,6 +348,12 @@ def build_dataset(reader, phi, vectorizer=None, vectorize=True):
         feats.append(d)
         labels.append(label)
         raw_examples.append((t1, t2))
+        cnt += 1
+        prc = cnt / n_obs * 100 if n_obs > 0 else cnt
+        print("\rReading & featurizing {} - {:.1f}% ...".format(
+            reader.__class__.__name__,
+            prc), end='', flush=True)
+    print()
     if vectorize:
         if vectorizer == None:
             vectorizer = DictVectorizer(sparse=True)
@@ -454,6 +465,7 @@ def experiment(
             vectorize=vectorize)
         X_assess, y_assess = assess['X'], assess['y']
     # Train:
+    print("Training with {}...".format(train_func.__name__), flush=True)
     mod = train_func(X_train, y_train)
     # Predictions:
     predictions = mod.predict(X_assess)
