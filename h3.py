@@ -211,7 +211,12 @@ class TorchRNNSentenceEncoderDataset(torch.utils.data.Dataset):
       self.hyp_seqs = [x for x in hyps]
       self.prem_lengths = [len(x) for x in prems]
       self.hyp_lengths = [len(x) for x in hyps]
-      
+      if type(y[0]) == str:
+        classes_ = sorted(set(y))
+        n_classes_ = len(classes_)
+        class2index = dict(zip(self.classes_, range(n_classes_)))
+        y = [class2index[label] for label in y]
+            
     self.y = y
     assert len(self.prem_seqs) == len(self.y)
 
