@@ -38,6 +38,7 @@ import utils
 ###############################################################################
 
 from datetime import datetime as dt
+from functools import partial
 lst_log = []
 log_fn = dt.now().strftime("logs/%Y%m%d_%H%M_log.txt")
 
@@ -54,7 +55,41 @@ def P(s=''):
 
 def Pr(s=''):
   print('\r' + str(s), end='', flush=True)
+
+
+def get_object_params(obj, n=None):
+  """
+  Parameters
+  ----------
+  obj : any type
+    the inspected object.
+  n : int, optional
+    the number of params that are returned. The default is None
+    (all params returned).
+  Returns
+  -------
+  out_str : str
+    the description of the object 'obj' in terms of parameters values.
+  """
   
+  out_str = obj.__class__.__name__+"("
+  n_added_to_log = 0
+  for _iter, (prop, value) in enumerate(vars(obj).items()):
+    if type(value) in [int, float, bool]:
+      out_str += prop+'='+str(value) + ','
+      n_added_to_log += 1
+    elif type(value) in [str]:
+      out_str += prop+"='" + value + "',"
+      n_added_to_log += 1
+    
+    if n is not None and n_added_to_log >= n:
+      break
+  #endfor
+  
+  out_str = out_str[:-1] if out_str[-1]==',' else out_str
+  out_str += ')'
+  return out_str  
+
   
 def prepare_grid_search(params_grid, nr_trials):
   import itertools
@@ -198,6 +233,19 @@ def fit_shallow_neural_classifier_with_crossvalidation(X, y):
   return best_mod
 
 
+def sentence_encoding_rnn_phi(t1, t2):
+  """Map `t1` and `t2` to a pair of lits of leaf nodes."""
+  return (t1.leaves(), t2.leaves())
+
+def get_sentence_encoding_vocab(X, n_words=None):    
+  wc = Counter([w for pair in X for ex in pair for w in ex])
+  wc = wc.most_common(n_words) if n_words else wc.items()
+  vocab = {w for w, c in wc}
+  vocab.add("$UNK")
+  return sorted(vocab)
+
+
+
 
 
 class TorchRNNSentenceEncoderDataset(torch.utils.data.Dataset):
@@ -255,6 +303,7 @@ class TorchRNNSentenceEncoderClassifierModel(TorchRNNClassifierModel):
         classifier_dim = hidden_dim * 2
     self.classifier_layer = nn.Linear(
         classifier_dim, output_dim)
+    
 
   def forward(self, X, seq_lengths):
     X_prem, X_hyp = X
@@ -286,19 +335,82 @@ class TorchRNNSentenceEncoderClassifier(TorchRNNClassifier):
         bidirectional=self.bidirectional,
         device=self.device)
 
-  def predict_proba(self, X):
+  def predict_proba(self, X, verbose=False):
+    self.model.eval()
     with torch.no_grad():
       X_prem, X_hyp = zip(*X)
       X_prem, prem_lengths = self._prepare_dataset(X_prem)
       X_hyp, hyp_lengths = self._prepare_dataset(X_hyp)
       preds = self.model((X_prem, X_hyp), (prem_lengths, hyp_lengths))
       preds = torch.softmax(preds, dim=1).cpu().numpy()
-      return preds
+
+      X_prem = torch.nn.utils.rnn.pad_sequence(X_prem, batch_first=True)
+      X_hyp = torch.nn.utils.rnn.pad_sequence(X_hyp, batch_first=True)
+      all_preds = []
+      b_size = 64
+      n_batches = X_prem.shape[0] // b_size
+      dl = torch.utils.data.DataLoader(
+          torch.utils.data.TensorDataset(
+              X_prem, X_hyp,
+              prem_lengths, hyp_lengths),
+          batch_size=b_size)
+      for i_batch, (X_b_p, X_b_h, p_l_b, h_l_b) in enumerate(dl):
+        X_batch = X_b_p, X_b_h
+        seq_lengths_batch = p_l_b, h_l_b
+        preds = self.model(X_batch, seq_lengths_batch)
+        preds = torch.softmax(preds, dim=1).cpu().numpy()
+        if verbose:
+          print("\r    Prediction {:.1f}%".format((i_batch) / n_batches * 100), 
+                flush=True, end='')
+        all_preds.append(preds)
+      np_preds = np.concatenate(all_preds)
+      if verbose:
+        print("\rDone full prediction on {} observations".format(np_preds.shape[0]))
+      return np_preds
+    
+    
+def fit_sentence_encoding_rnn(X, y):   
+  vocab = get_sentence_encoding_vocab(X, n_words=10000)
+  mod = TorchRNNSentenceEncoderClassifier(
+      vocab, 
+      batch_size=64,
+      hidden_dim=50, 
+      max_iter=10)
+  mod.fit(X, y)
+  return mod    
+
+
+def get_glove_sents(t1, t2, dct_glove):
+  glv_emb = len(next(iter(dct_glove.values())))
+  s1 = t1.leaves()
+  s2 = t2.leaves()
+  sr1 = [dct_glove[w] for w in s1 if w in dct_glove]
+  sr2 = [dct_glove[w] for w in s2 if w in dct_glove]
+  
+  if len(sr1) == 0:
+    sr1 = [np.zeros(glv_emb)]
+  if len(sr2) == 0:
+    sr2 = [np.zeros(glv_emb)]
+  return np.array(sr1), np.array(sr2)
+
+def fit_rnn_glove_sents(X, y):
+  model = TorchRNNSentenceEncoderClassifier(
+      vocab={}, 
+      max_iter=10,
+      batch_size=64,
+      use_embedding=False)
+  model.fit(X, y)
+  return model
         
 if __name__ == '__main__':
+  GLOVE_DIM = 50
   utils.fix_random_seeds()
+  if "glove_lookup" not in globals():
+    P("Loading GloVe-{}...".format(GLOVE_DIM))
+    glove_lookup = utils.glove2dict(os.path.join(GLOVE_HOME, 'glove.6B.{}d.txt'.format(GLOVE_DIM)))  
+  GLOVE_DIM = len(next(iter(glove_lookup.values())))
+  P("GloVe-{} loaded.".format(GLOVE_DIM))
   
-  glove_lookup = utils.glove2dict(os.path.join(GLOVE_HOME, 'glove.6B.50d.txt'))  
   
 #  reader10 = nli.SNLITrainReader(SNLI_HOME, samp_percentage=0.10, random_state=42)
 #  snli_iterator = iter(reader10.read())
@@ -321,15 +433,35 @@ if __name__ == '__main__':
 #  
 #  h1 = hypernym_features(t1, t2)
   
-  
-  nli.experiment(
-      train_reader=nli.SNLITrainReader(
-          SNLI_HOME, samp_percentage=0.10, random_state=42), 
-      phi=glove_leaves_phi,
-      train_func=fit_shallow_neural_classifier_with_crossvalidation,
-      assess_reader=nli.SNLIDevReader(SNLI_HOME),
-      random_state=42,
-      vectorize=False)  # Ask `experiment` not to featurize; we did it already.  
-  
-  
-  
+#  
+#  nli.experiment(
+#      train_reader=nli.SNLITrainReader(
+#          SNLI_HOME, samp_percentage=0.10, random_state=42), 
+#      phi=glove_leaves_phi,
+#      train_func=fit_shallow_neural_classifier_with_crossvalidation,
+#      assess_reader=nli.SNLIDevReader(SNLI_HOME),
+#      random_state=42,
+#      vectorize=False)  # Ask `experiment` not to featurize; we did it already.  
+#  
+#  
+  P("=" * 70)
+  P("Running sent encoders with learned embeddings...")
+  _ = nli.experiment(
+    train_reader=nli.SNLITrainReader(
+        SNLI_HOME, samp_percentage=0.10, random_state=42), 
+    phi=sentence_encoding_rnn_phi,
+    train_func=fit_sentence_encoding_rnn,
+    assess_reader=nli.SNLIDevReader(SNLI_HOME),
+    random_state=42,
+    vectorize=False)
+    
+  P("=" * 70)
+  P("Running sent encoders with pre-trained embeddings...")
+  _ = nli.experiment(
+    train_reader=nli.SNLITrainReader(
+        SNLI_HOME, samp_percentage=0.10, random_state=42), 
+    phi=partial(get_glove_sents, dct_glove=glove_lookup),
+    train_func=fit_rnn_glove_sents,
+    assess_reader=nli.SNLIDevReader(SNLI_HOME),
+    random_state=42,
+    vectorize=False)

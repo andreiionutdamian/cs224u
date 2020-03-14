@@ -340,6 +340,7 @@ def build_dataset(reader, phi, vectorizer=None, vectorize=True):
     cnt = 0
     smp = reader.samp_percentage or 1
     n_obs = (reader.data_size or 0) * smp
+    print("Building dataset of aprox {} obs...".format(n_obs), flush=True)
     for ex in reader.read():
         t1 = ex.sentence1_parse
         t2 = ex.sentence2_parse
@@ -350,7 +351,7 @@ def build_dataset(reader, phi, vectorizer=None, vectorize=True):
         raw_examples.append((t1, t2))
         cnt += 1
         prc = cnt / n_obs * 100 if n_obs > 0 else cnt
-        print("\rReading & featurizing {} - {:.1f}% ...".format(
+        print("\r  Reading & featurizing {} - {:.1f}% ...".format(
             reader.__class__.__name__,
             prc), end='', flush=True)
     print()

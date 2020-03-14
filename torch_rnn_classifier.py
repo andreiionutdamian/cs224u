@@ -5,9 +5,43 @@ import torch.nn as nn
 import torch.utils.data
 from torch_model_base import TorchModelBase
 from utils import progress_bar
+import textwrap
 
 __author__ = "Christopher Potts"
 __version__ = "CS224u, Stanford, Spring 2020"
+
+def get_object_params(obj, n=None):
+  """
+  Parameters
+  ----------
+  obj : any type
+    the inspected object.
+  n : int, optional
+    the number of params that are returned. The default is None
+    (all params returned).
+  Returns
+  -------
+  out_str : str
+    the description of the object 'obj' in terms of parameters values.
+  """
+  
+  out_str = obj.__class__.__name__+"("
+  n_added_to_log = 0
+  for _iter, (prop, value) in enumerate(vars(obj).items()):
+    if type(value) in [int, float, bool]:
+      out_str += prop+'='+str(value) + ','
+      n_added_to_log += 1
+    elif type(value) in [str]:
+      out_str += prop+"='" + value + "',"
+      n_added_to_log += 1
+    
+    if n is not None and n_added_to_log >= n:
+      break
+  #endfor
+  
+  out_str = out_str[:-1] if out_str[-1]==',' else out_str
+  out_str += ')'
+  return out_str  
 
 
 class TorchRNNDataset(torch.utils.data.Dataset):
@@ -220,11 +254,15 @@ class TorchRNNClassifier(TorchModelBase):
             collate_fn=dataset.collate_fn)
         if not self.use_embedding:
             # Infer `embed_dim` from `X` in this case:
-            self.embed_dim = X[0][0].shape[0]
+            self.embed_dim = X[0][0].shape[-1]
         # Graph:
         if not self.warm_start or not hasattr(self, "model"):
             print("    Constructing model...")
             self.model = self.build_graph()
+            print("      Initialized model {}:\n {}".format(
+                self.model.__class__.__name__,
+                textwrap.indent(str(self.model), " " * 6)))
+
         else:
             print("    Model already constructed. Resuming training...")
         self.model.to(self.device)
