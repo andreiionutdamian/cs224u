@@ -1,0 +1,172 @@
+======================================================================
+Running baseline model 'BaseLR_C6L2' with 'vect_concatenate'
+Training model LogisticRegression
+              precision    recall  f1-score   support
+
+           0      0.916     0.948     0.932      1910
+           1      0.422     0.305     0.354       239
+
+    accuracy                          0.876      2149
+   macro avg      0.669     0.627     0.643      2149
+weighted avg      0.861     0.876     0.867      2149
+
+
+Results so far:
+         MODEL     SCORE VECT              vect
+0  BaseLR_C6L2  0.642959       vect_concatenate
+
+======================================================================
+Running baseline model 'BaseLR_C4L1' with 'vect_concatenate'
+Training model LogisticRegression
+              precision    recall  f1-score   support
+
+           0      0.914     0.968     0.940      1910
+           1      0.512     0.272     0.355       239
+
+    accuracy                          0.890      2149
+   macro avg      0.713     0.620     0.648      2149
+weighted avg      0.869     0.890     0.875      2149
+
+
+Results so far:
+         MODEL     SCORE VECT              vect
+0  BaseLR_C6L2  0.642959       vect_concatenate
+1  BaseLR_C4L1  0.647585       vect_concatenate
+
+======================================================================
+Running baseline model 'BaseNN_50' with 'vect_concatenate'
+Training model TorchShallowNeuralClassifier
+Found new best macro-f1 0.6161 > 0.0000 at epoch 1			
+Found new best macro-f1 0.6385 > 0.6161 at epoch 2			
+Found new best macro-f1 0.6489 > 0.6385 at epoch 5			
+Found new best macro-f1 0.6553 > 0.6489 at epoch 10			
+Found new best macro-f1 0.6625 > 0.6553 at epoch 18			
+Found new best macro-f1 0.6664 > 0.6625 at epoch 23			
+Found new best macro-f1 0.6674 > 0.6664 at epoch 31			
+Found new best macro-f1 0.6703 > 0.6674 at epoch 34			
+
+Max patience 11/10 reached!
+Loading model from epoch 34 with macro-f1 0.6703
+              precision    recall  f1-score   support
+
+           0      0.926     0.930     0.928      1910
+           1      0.420     0.406     0.413       239
+
+    accuracy                          0.872      2149
+   macro avg      0.673     0.668     0.670      2149
+weighted avg      0.870     0.872     0.871      2149
+
+
+Results so far:
+         MODEL     SCORE VECT              vect
+0  BaseLR_C6L2  0.642959       vect_concatenate
+1  BaseLR_C4L1  0.647585       vect_concatenate
+2    BaseNN_50  0.670333       vect_concatenate
+
+======================================================================
+Running baseline model 'BaseNN_150' with 'vect_concatenate'
+Training model TorchShallowNeuralClassifier
+Found new best macro-f1 0.6089 > 0.0000 at epoch 1			
+Found new best macro-f1 0.6643 > 0.6089 at epoch 2			
+Found new best macro-f1 0.6653 > 0.6643 at epoch 11			
+Found new best macro-f1 0.6658 > 0.6653 at epoch 17			
+
+Max patience 11/10 reached!
+Loading model from epoch 17 with macro-f1 0.6658
+              precision    recall  f1-score   support
+
+           0      0.926     0.926     0.926      1910
+           1      0.406     0.406     0.406       239
+
+    accuracy                          0.868      2149
+   macro avg      0.666     0.666     0.666      2149
+weighted avg      0.868     0.868     0.868      2149
+
+
+Results so far:
+         MODEL     SCORE VECT              vect
+0  BaseLR_C6L2  0.642959       vect_concatenate
+1  BaseLR_C4L1  0.647585       vect_concatenate
+3   BaseNN_150  0.665756       vect_concatenate
+2    BaseNN_50  0.670333       vect_concatenate
+
+======================================================================
+Running baseline model 'BaseNN_300' with 'vect_concatenate'
+Training model TorchShallowNeuralClassifier
+Found new best macro-f1 0.6293 > 0.0000 at epoch 1			
+Found new best macro-f1 0.6386 > 0.6293 at epoch 3			
+Found new best macro-f1 0.6566 > 0.6386 at epoch 4			
+Found new best macro-f1 0.6791 > 0.6566 at epoch 8			
+
+Max patience 11/10 reached!
+Loading model from epoch 8 with macro-f1 0.6791
+              precision    recall  f1-score   support
+
+           0      0.939     0.889     0.913      1910
+           1      0.378     0.540     0.445       239
+
+    accuracy                          0.850      2149
+   macro avg      0.659     0.714     0.679      2149
+weighted avg      0.877     0.850     0.861      2149
+
+
+Results so far:
+         MODEL     SCORE VECT              vect
+0  BaseLR_C6L2  0.642959       vect_concatenate
+1  BaseLR_C4L1  0.647585       vect_concatenate
+3   BaseNN_150  0.665756       vect_concatenate
+2    BaseNN_50  0.670333       vect_concatenate
+4   BaseNN_300  0.679111       vect_concatenate
+
+Generated 50 random grid-search iters out of a total of iters
+
+
+======================================================================
+Running grid search iteration 1/50 'H3_v1_01': {'dual_path': [128], 'layers': [128, 64], 'input_drop': 0, 'other_drop': 0, 'bn': False, 'bn_inputs': False, 'activ': 'selu', 'eta': 0.0005}
+  Time left for grid search completion: inf hrs
+Training model TorchDeepNeuralClassifier
+Found new best macro-f1 0.4747 > 0.0000 at epoch 1			
+Found new best macro-f1 0.5692 > 0.4747 at epoch 2			
+Found new best macro-f1 0.6179 > 0.5692 at epoch 3			
+Found new best macro-f1 0.6285 > 0.6179 at epoch 4			
+Found new best macro-f1 0.6316 > 0.6285 at epoch 5			
+Found new best macro-f1 0.6360 > 0.6316 at epoch 6			
+Found new best macro-f1 0.6361 > 0.6360 at epoch 7			
+Found new best macro-f1 0.6487 > 0.6361 at epoch 8			
+Found new best macro-f1 0.6509 > 0.6487 at epoch 12			
+Found new best macro-f1 0.6554 > 0.6509 at epoch 13			
+
+Max patience 21/20 reached!
+Loading model from epoch 13 with macro-f1 0.6554
+              precision    recall  f1-score   support
+
+           0      0.918     0.955     0.936      1910
+           1      0.466     0.314     0.375       239
+
+    accuracy                          0.884      2149
+   macro avg      0.692     0.634     0.655      2149
+weighted avg      0.867     0.884     0.873      2149
+
+Results so far:
+         MODEL     SCORE VECT                                        vect dual_path     layers input_drop other_drop     bn bn_inputs activ     eta
+0  BaseLR_C6L2  0.642959                                 vect_concatenate                                                                          
+1  BaseLR_C4L1  0.647585                                 vect_concatenate                                                                          
+5     H3_v1_01  0.655432       <function glove_vec at 0x000001A6A75DF168>     [128]  [128, 64]          0          0  False     False  selu  0.0005
+3   BaseNN_150  0.665756                                 vect_concatenate                                                                          
+2    BaseNN_50  0.670333                                 vect_concatenate                                                                          
+4   BaseNN_300  0.679111                                 vect_concatenate                                                                          
+
+
+======================================================================
+Running grid search iteration 2/50 'H3_v1_02': {'dual_path': [128, 64], 'layers': [128, 64], 'input_drop': 0, 'other_drop': 0.5, 'bn': True, 'bn_inputs': True, 'activ': 'tanh', 'eta': 0.0005}
+  Time left for grid search completion: 0.2 hrs
+Training model TorchDeepNeuralClassifier
+Found new best macro-f1 0.6190 > 0.0000 at epoch 1			
+Found new best macro-f1 0.6191 > 0.6190 at epoch 7			
+Found new best macro-f1 0.6218 > 0.6191 at epoch 8			
+Found new best macro-f1 0.6257 > 0.6218 at epoch 9			
+Found new best macro-f1 0.6284 > 0.6257 at epoch 13			
+Found new best macro-f1 0.6355 > 0.6284 at epoch 14			
+Found new best macro-f1 0.6373 > 0.6355 at epoch 16			
+Found new best macro-f1 0.6442 > 0.6373 at epoch 17			
+Found new best macro-f1 0.6513 > 0.6442 at epoch 19			

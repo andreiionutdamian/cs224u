@@ -1,0 +1,1 @@
+Found new best macro-f1 0.5692 > 0.0000 at epoch 0			

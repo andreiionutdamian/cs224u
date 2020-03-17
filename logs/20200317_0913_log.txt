@@ -1,0 +1,12 @@
+Loading GloVe-300...
+GloVe-300 loaded.
+Found new best macro-f1 0.5231 > 0.0000 at epoch 0			
+Found new best macro-f1 0.5837 > 0.5231 at epoch 0			
+Found new best macro-f1 0.6378 > 0.5837 at epoch 0			
+Found new best macro-f1 0.6536 > 0.6378 at epoch 0			
+Found new best macro-f1 0.6728 > 0.6536 at epoch 0			
+Found new best macro-f1 0.6731 > 0.6728 at epoch 0			
+Found new best macro-f1 0.6886 > 0.6731 at epoch 0			
+
+Max patience 21/20 reached!
+Loading model from epoch 0 with macro-f1 0.6886

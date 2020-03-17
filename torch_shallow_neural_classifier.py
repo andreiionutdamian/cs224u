@@ -5,6 +5,8 @@ import torch.utils.data
 from torch_model_base import TorchModelBase
 from utils import progress_bar
 
+import textwrap
+
 __author__ = "Christopher Potts"
 __version__ = "CS224u, Stanford, Spring 2020"
 
@@ -86,7 +88,13 @@ class TorchShallowNeuralClassifier(TorchModelBase):
             pin_memory=True)
         # Graph:
         if not self.warm_start or not hasattr(self, "model"):
-            self.model = self.define_graph()
+          self.model = self.define_graph()
+          print("Initialized model {}:\n {}".format(
+              self.model.__class__.__name__,
+              textwrap.indent(str(self.model), " " * 6)))
+
+        else:
+          print("\rFitting already loaded model...\t\t\t", end='', flush=True)
         self.model.to(self.device)
         self.model.train()
         # Optimization:
@@ -112,9 +120,8 @@ class TorchShallowNeuralClassifier(TorchModelBase):
                 self.dev_predictions[iteration] = self.predict(X_dev)
                 self.model.train()
             self.errors.append(epoch_error)
-            progress_bar(
-                "Finished epoch {} of {}; error is {}".format(
-                    iteration, self.max_iter, epoch_error))
+            print("\rFinished epoch {} of {}; error is {:.4f}".format(
+                    iteration, self.max_iter, epoch_error), end='', flush=True)
         return self
 
     def predict_proba(self, X):

@@ -257,14 +257,14 @@ class TorchRNNClassifier(TorchModelBase):
             self.embed_dim = X[0][0].shape[-1]
         # Graph:
         if not self.warm_start or not hasattr(self, "model"):
-            print("    Constructing model...")
+            print("  Constructing model...")
             self.model = self.build_graph()
-            print("      Initialized model {}:\n {}".format(
+            print("  Initialized model {}:\n {}".format(
                 self.model.__class__.__name__,
                 textwrap.indent(str(self.model), " " * 6)))
 
         else:
-            print("    Model already constructed. Resuming training...")
+            print("  Model already constructed. Resuming training...")
         self.model.to(self.device)
         self.model.train()
         # Make sure this value is up-to-date; self.`model` might change
@@ -299,7 +299,7 @@ class TorchRNNClassifier(TorchModelBase):
             self.errors.append(round(epoch_error,2))
             print("\r    Finished epoch {} of {} ({}); error is {:.3f}\t\t\t\t".format(
                 iteration, self.max_iter, len(self.errors), epoch_error), flush=True, end='')
-        print("\r    Finished train {} eps with last 10 ep hist: {}\t\t".format(
+        print("\r  Finished train {} eps with last 10 ep hist: {}\t\t".format(
             len(self.errors), self.errors[-10:]), flush=True)
         return self
 

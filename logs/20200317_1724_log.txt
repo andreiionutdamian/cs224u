@@ -1,0 +1,24 @@
+
+Train has 71 words that are not in GLOVE: ['gearstick', 'sinceskillpromotion', 'list-style-image', 'prodrome', 'brightstorm']...
+  [['salmon', 'gearstick'], 0]
+  [['blouse', 'sinceskillpromotion'], 0]
+  [['cedar', 'list-style-image'], 0]
+  [['chill', 'prodrome'], 0]
+  [['androsterone', 'androgen'], 1]
+  [['androsterone', 'hormone'], 1]
+  [['iridocyclitis', 'inflammation'], 1]
+  [['chancre', 'inflammation'], 1]
+
+Pos vs neg: 16 vs 299
+
+
+Dev has 24 words that are not in GLOVE: ['catheterisation', 'tenosynovitis', 'amblicipitids', 'fermoota', 'airbrush-tanning']...
+  [['saw', 'catheterisation'], 0]
+  [['antigen', 'tenosynovitis'], 0]
+  [['colitis', 'tenosynovitis'], 0]
+  [['corticosteroid', 'tenosynovitis'], 0]
+  [['tenosynovitis', 'antigen'], 1]
+  [['tenosynovitis', 'corticosteroid'], 1]
+  [['tenosynovitis', 'infection'], 1]
+
+Pos vs neg: 3 vs 92

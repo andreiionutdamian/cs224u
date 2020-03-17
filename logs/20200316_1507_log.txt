@@ -1,0 +1,7 @@
+GloVe-300 loaded.
+train_cross found in globals
+dev_cross found in globals
+train_glove300_sents NOT already loaded in globals
+Loading raw data 'data/SNLITrainReader_550000.npy'...
+Loaded data (549367, 3)
+Running featurizer '<function get_glove_sents at 0x000001E271252AF8>' on 549367 obs...

@@ -1,0 +1,6 @@
+Loading GloVe-300...
+GloVe-300 loaded.
+Loading data 'train_cross'...
+Loaded X: (549367, 4500116) and y: 549367
+train_cross already loaded in globals
+dev_cross NOT already loaded in globals

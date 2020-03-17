@@ -1,0 +1,3 @@
+GloVe-300 loaded.
+======================================================================
+Running baseline log-reg with word cross...

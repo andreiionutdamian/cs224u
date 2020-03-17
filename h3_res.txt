@@ -1,0 +1,42 @@
+           MODEL     SCORE    VECT  dual_path          layers input_drop other_drop     bn bn_inputs activ     eta
+819    H3_v1_815  0.724020  concat       None            [64]        0.3          0   True     False  relu   0.005
+126    H3_v1_122  0.724329  concat  [128, 64]       [128, 64]        0.3          0   True      True  selu  0.0005
+189    H3_v1_185  0.724417  concat  [128, 64]       [128, 32]        0.3          0   True     False  relu  0.0005
+334    H3_v1_330  0.724666  concat      [128]       [128, 64]        0.3          0   True     False  tanh   0.005
+230    H3_v1_226  0.724731  concat       None  [256, 128, 64]        0.3        0.3   True      True  tanh   0.005
+629    H3_v1_625  0.724864  concat       None       [128, 64]        0.3        0.5  False     False  relu   0.005
+900    H3_v1_896  0.725420  concat      [128]  [256, 128, 64]        0.3          0  False     False  relu   0.005
+501    H3_v1_497  0.725893  concat       None       [128, 64]        0.3        0.3  False      True  relu  0.0005
+384    H3_v1_380  0.725953  concat       None  [256, 128, 64]        0.3          0   True     False  selu   0.005
+1180  H3_v1_1176  0.726502  concat       None  [256, 128, 64]        0.3        0.5  False      True  relu   0.005
+568    H3_v1_564  0.726795  concat       None       [128, 32]        0.3        0.5   True     False  relu   0.005
+596    H3_v1_592  0.726923  concat       None  [256, 128, 64]        0.3        0.3   True      True  relu  0.0005
+749    H3_v1_745  0.726992  concat       None       [128, 32]        0.3        0.3  False     False  relu  0.0005
+1290  H3_v1_1286  0.726992  concat      [128]  [256, 128, 64]        0.3        0.3   True     False  tanh   0.005
+606    H3_v1_602  0.727052  concat       None       [128, 32]        0.3        0.5  False      True  relu   0.005
+194    H3_v1_190  0.727373  concat       None  [256, 128, 64]        0.3        0.3  False     False  relu  0.0005
+1278  H3_v1_1274  0.727457  concat       None       [128, 64]        0.3        0.3  False     False  relu   0.005
+429    H3_v1_425  0.727541  concat  [128, 64]  [256, 128, 64]        0.3          0   True     False  tanh  0.0005
+249    H3_v1_245  0.727555  concat       None       [128, 64]        0.3        0.5   True      True  relu  0.0005
+453    H3_v1_449  0.727666  concat       None  [256, 128, 64]        0.3          0  False     False  relu   0.005
+984    H3_v1_980  0.727684  concat      [128]       [128, 32]        0.3          0   True     False  selu   0.005
+25      H3_v1_21  0.728202  concat       None       [128, 32]        0.3        0.3  False     False  relu   0.005
+772    H3_v1_768  0.728997  concat       None       [128, 32]        0.3        0.5  False     False  relu  0.0005
+43      H3_v1_39  0.730170  concat      [128]  [256, 128, 64]        0.3        0.3  False     False  tanh   0.005
+1091  H3_v1_1087  0.731590  concat      [128]            [64]        0.3        0.3   True     False  selu   0.005
+1063  H3_v1_1059  0.732000  concat       None  [256, 128, 64]        0.3        0.3  False      True  relu  0.0005
+471    H3_v1_467  0.733074  concat       None       [128, 32]        0.3        0.5  False      True  relu  0.0005
+837    H3_v1_833  0.734017  concat       None       [128, 32]        0.3        0.3   True     False  relu   0.005
+304    H3_v1_300  0.734735  concat       None       [128, 32]        0.3          0   True     False  relu  0.0005
+789    H3_v1_785  0.735137  concat      [128]            [64]        0.3        0.3   True      True  relu   0.005
+266    H3_v1_262  0.735788  concat       None       [128, 64]        0.3        0.5  False     False  relu  0.0005
+536    H3_v1_532  0.736147  concat      [128]       [128, 64]        0.3        0.3   True      True  relu   0.005
+646    H3_v1_642  0.736594  concat       None       [128, 64]        0.3        0.5   True     False  relu  0.0005
+56      H3_v1_52  0.736901  concat      [128]  [256, 128, 64]        0.3        0.3   True      True  relu   0.005
+1012  H3_v1_1008  0.737691  concat       None       [128, 64]        0.3        0.3  False     False  relu  0.0005
+1213  H3_v1_1209  0.738285  concat       None  [256, 128, 64]        0.3        0.5  False     False  relu   0.005
+742    H3_v1_738  0.738781  concat       None  [256, 128, 64]        0.3        0.3  False     False  relu   0.005
+1000   H3_v1_996  0.744044  concat      [128]  [256, 128, 64]        0.3        0.3   True     False  relu   0.005
+887    H3_v1_883  0.747550  concat       None       [128, 32]        0.3        0.5  False     False  relu   0.005
+380    H3_v1_376  0.754119  concat      [128]  [256, 128, 64]        0.3        0.3   True      True  relu  0.0005
+

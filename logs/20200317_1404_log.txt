@@ -1,0 +1,28 @@
+
+Train has 71 words that are not in GLOVE: ['pyrexia', 'mavoc', 'olisten', 'massimamente', 'brow-clutching']...
+  [['pneumococcus', 'pyrexia'], 0]
+  [['pyrexia', 'pneumococcus'], 0]
+  [['beet', 'mavoc'], 0]
+  [['hat', 'olisten'], 0]
+  [['chancre', 'inflammation'], 1]
+  [['chancre', 'lesion'], 1]
+  [['chancre', 'ulcer'], 1]
+  [['lesion', 'chancre'], 1]
+
+Pos vs neg: 16 vs 299
+
+
+Dev has 24 words that are not in GLOVE: ['tenosynovitis', 'amikacin', 'sub-paragraph', 'chlortetracycline', 'airbrush-tanning']...
+  [['antigen', 'tenosynovitis'], 0]
+  [['colitis', 'tenosynovitis'], 0]
+  [['corticosteroid', 'tenosynovitis'], 0]
+  [['depression', 'tenosynovitis'], 0]
+  [['tenosynovitis', 'antigen'], 1]
+  [['tenosynovitis', 'corticosteroid'], 1]
+  [['tenosynovitis', 'infection'], 1]
+
+Pos vs neg: 3 vs 92
+Found new best macro-f1 0.1040 > 0.0000 at epoch 1. 			
+Found new best macro-f1 0.1055 > 0.1040 at epoch 2. 			
+Found new best macro-f1 0.1057 > 0.1055 at epoch 10. 			
+Found new best macro-f1 0.1073 > 0.1057 at epoch 11. 			

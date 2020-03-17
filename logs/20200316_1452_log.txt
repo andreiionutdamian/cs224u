@@ -1,0 +1,13 @@
+Loading GloVe-300...
+GloVe-300 loaded.
+Loading data 'train_cross'...
+Loaded X: (549367, 4500116), y: 549367, vectorizer: DictVectorizer(dtype=<class 'numpy.float64'>, separator='=', sort=True,
+               sparse=True) (4500116 feats)
+train_cross already loaded in globals
+Loading data 'dev_cross'...
+Loaded X: (9842, 4500116), y: 9842, vectorizer: DictVectorizer(dtype=<class 'numpy.float64'>, separator='=', sort=True,
+               sparse=True) (4500116 feats)
+dev_cross already loaded in globals
+train_glove300_sents NOT already loaded in globals
+Loading raw data 'data/SNLITrainReader_550000.npy'...
+Loaded data (549367, 3)

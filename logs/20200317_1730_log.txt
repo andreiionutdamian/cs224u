@@ -1,0 +1,44 @@
+
+Train has 71 words that are not in GLOVE: ['gearstick', 'sinceskillpromotion', 'list-style-image', 'prodrome', 'brightstorm']...
+  [['salmon', 'gearstick'], 0]
+  [['blouse', 'sinceskillpromotion'], 0]
+  [['cedar', 'list-style-image'], 0]
+  [['chill', 'prodrome'], 0]
+  [['androsterone', 'androgen'], 1]
+  [['androsterone', 'hormone'], 1]
+  [['iridocyclitis', 'inflammation'], 1]
+  [['chancre', 'inflammation'], 1]
+
+Pos vs neg: 16 vs 299
+
+
+Dev has 24 words that are not in GLOVE: ['catheterisation', 'tenosynovitis', 'amblicipitids', 'fermoota', 'airbrush-tanning']...
+  [['saw', 'catheterisation'], 0]
+  [['antigen', 'tenosynovitis'], 0]
+  [['colitis', 'tenosynovitis'], 0]
+  [['corticosteroid', 'tenosynovitis'], 0]
+  [['tenosynovitis', 'antigen'], 1]
+  [['tenosynovitis', 'corticosteroid'], 1]
+  [['tenosynovitis', 'infection'], 1]
+
+Pos vs neg: 3 vs 92
+Found new best macro-f1 0.4700 > 0.0000 at epoch 1. 			
+Found new best macro-f1 0.4740 > 0.4700 at epoch 12. 			
+Found new best macro-f1 0.4857 > 0.4740 at epoch 13. 			
+Found new best macro-f1 0.4937 > 0.4857 at epoch 14. 			
+Found new best macro-f1 0.4981 > 0.4937 at epoch 16. 			
+Found new best macro-f1 0.5108 > 0.4981 at epoch 17. 			
+Found new best macro-f1 0.5259 > 0.5108 at epoch 18. 			
+Found new best macro-f1 0.5509 > 0.5259 at epoch 19. 			
+Found new best macro-f1 0.5739 > 0.5509 at epoch 20. 			
+Found new best macro-f1 0.5922 > 0.5739 at epoch 21. 			
+Found new best macro-f1 0.5938 > 0.5922 at epoch 22. 			
+
+Patience reached 11/10 - reloaded from ep 22 reduced lr from 1.0e-04 to 5.0e-05
+
+Patience reached 11/10 - reloaded from ep 22 reduced lr from 5.0e-05 to 2.5e-05
+
+Patience reached 11/10 - reloaded from ep 22 reduced lr from 2.5e-05 to 1.3e-05
+
+Max fails 41/40 reached!
+Loading model from epoch 22 with macro-f1 0.5938

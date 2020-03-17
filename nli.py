@@ -339,7 +339,7 @@ def build_dataset(reader, phi, vectorizer=None, vectorize=True):
     raw_examples = []
     cnt = 0
     smp = reader.samp_percentage or 1
-    n_obs = (reader.data_size or 0) * smp
+    n_obs = int((reader.data_size or 0) * smp)
     print("Building dataset of aprox {} obs...".format(n_obs), flush=True)
     for ex in reader.read():
         t1 = ex.sentence1_parse

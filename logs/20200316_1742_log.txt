@@ -1,0 +1,4 @@
+======================================================================
+Running baseline model 'BaseLR_C06L2' with 'vect_concatenate'
+Training model LogisticRegression
+Found new best macro-f1 0.5577 at epoch 1

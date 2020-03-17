@@ -1,0 +1,469 @@
+======================================================================
+Running baseline model 'BaseLR_C06L2' with 'vect_concatenate'
+Training model LogisticRegression
+              precision    recall  f1-score   support
+
+           0      0.916     0.948     0.932      1910
+           1      0.422     0.305     0.354       239
+
+    accuracy                          0.876      2149
+   macro avg      0.669     0.627     0.643      2149
+weighted avg      0.861     0.876     0.867      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+0  BaseLR_C06L2  0.642959  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseLR_C04L1' with 'vect_concatenate'
+Training model LogisticRegression
+              precision    recall  f1-score   support
+
+           0      0.914     0.968     0.940      1910
+           1      0.512     0.272     0.355       239
+
+    accuracy                          0.890      2149
+   macro avg      0.713     0.620     0.648      2149
+weighted avg      0.869     0.890     0.875      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseMLP_50' with 'vect_concatenate'
+Training model TorchShallowNeuralClassifier
+Found new best macro-f1 0.5930 at epoch 1
+Found new best macro-f1 0.6138 at epoch 2
+Found new best macro-f1 0.6411 at epoch 3
+Current score 0.6170899371968456 < 0.6411208526731992. Patience 1/10
+Current score 0.6393690216479275 < 0.6411208526731992. Patience 2/10
+Current score 0.6246357226251873 < 0.6411208526731992. Patience 3/10
+Found new best macro-f1 0.6547 at epoch 7
+Current score 0.6412793091552509 < 0.6547097810805382. Patience 1/10
+Current score 0.6359349294994808 < 0.6547097810805382. Patience 2/10
+Current score 0.6406069101961196 < 0.6547097810805382. Patience 3/10
+Current score 0.6448897548463474 < 0.6547097810805382. Patience 4/10
+Current score 0.6278877371876579 < 0.6547097810805382. Patience 5/10
+Current score 0.6437504174180191 < 0.6547097810805382. Patience 6/10
+Found new best macro-f1 0.6625 at epoch 14
+Current score 0.6272118310829078 < 0.6624994621573942. Patience 1/10
+Found new best macro-f1 0.6628 at epoch 16
+Current score 0.6401995939568118 < 0.6628422550471464. Patience 1/10
+Current score 0.641938915448009 < 0.6628422550471464. Patience 2/10
+Current score 0.6377608875540164 < 0.6628422550471464. Patience 3/10
+Current score 0.6526462811267145 < 0.6628422550471464. Patience 4/10
+Current score 0.6329676476801723 < 0.6628422550471464. Patience 5/10
+Current score 0.6388807863031072 < 0.6628422550471464. Patience 6/10
+Current score 0.6328251734021375 < 0.6628422550471464. Patience 7/10
+Current score 0.6438813302767067 < 0.6628422550471464. Patience 8/10
+Current score 0.6237585484704624 < 0.6628422550471464. Patience 9/10
+Current score 0.6268714020903947 < 0.6628422550471464. Patience 10/10
+Current score 0.6443183623748742 < 0.6628422550471464. Patience 11/10
+Max patience {} reached!
+Loading model from epoch 16 with macro-f1 0.6628
+              precision    recall  f1-score   support
+
+           0      0.925     0.925     0.925      1910
+           1      0.400     0.402     0.401       239
+
+    accuracy                          0.866      2149
+   macro avg      0.663     0.663     0.663      2149
+weighted avg      0.867     0.866     0.867      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+2    BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseMLP_100' with 'vect_concatenate'
+Training model TorchShallowNeuralClassifier
+Found new best macro-f1 0.6067 at epoch 1
+Found new best macro-f1 0.6517 at epoch 2
+Found new best macro-f1 0.6587 at epoch 3
+Current score 0.657480257914946 < 0.658655618282699. Patience 1/10
+Current score 0.6480618785051134 < 0.658655618282699. Patience 2/10
+Current score 0.6263546138103626 < 0.658655618282699. Patience 3/10
+Current score 0.6232497354053862 < 0.658655618282699. Patience 4/10
+Current score 0.6140904272183252 < 0.658655618282699. Patience 5/10
+Current score 0.65513326404293 < 0.658655618282699. Patience 6/10
+Current score 0.6185961622005361 < 0.658655618282699. Patience 7/10
+Current score 0.6304718501238546 < 0.658655618282699. Patience 8/10
+Current score 0.6284624303786985 < 0.658655618282699. Patience 9/10
+Current score 0.6221382906105495 < 0.658655618282699. Patience 10/10
+Current score 0.6337962524093912 < 0.658655618282699. Patience 11/10
+Max patience {} reached!
+Loading model from epoch 3 with macro-f1 0.6587
+              precision    recall  f1-score   support
+
+           0      0.920     0.945     0.932      1910
+           1      0.439     0.343     0.385       239
+
+    accuracy                          0.878      2149
+   macro avg      0.679     0.644     0.659      2149
+weighted avg      0.866     0.878     0.871      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+3   BaseMLP_100  0.658656  vect_concatenate
+2    BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseMLP_D50' with 'vect_concatenate'
+Training model TorchDeepNeuralClassifier
+Found new best macro-f1 0.6071 at epoch 1
+Found new best macro-f1 0.6429 at epoch 2
+Current score 0.6326526357920718 < 0.6428720437931944. Patience 1/10
+Found new best macro-f1 0.6471 at epoch 4
+Found new best macro-f1 0.6517 at epoch 5
+Current score 0.6397356495417427 < 0.6516659872630794. Patience 1/10
+Found new best macro-f1 0.6597 at epoch 7
+Current score 0.6462430627892284 < 0.6597147731568032. Patience 1/10
+Current score 0.6499054324676563 < 0.6597147731568032. Patience 2/10
+Current score 0.6521145472242619 < 0.6597147731568032. Patience 3/10
+Current score 0.6550901117789892 < 0.6597147731568032. Patience 4/10
+Current score 0.6475015090675276 < 0.6597147731568032. Patience 5/10
+Current score 0.6351082149217334 < 0.6597147731568032. Patience 6/10
+Current score 0.6204775068829916 < 0.6597147731568032. Patience 7/10
+Current score 0.6451257775086696 < 0.6597147731568032. Patience 8/10
+Current score 0.6455714469784821 < 0.6597147731568032. Patience 9/10
+Current score 0.6519341336502331 < 0.6597147731568032. Patience 10/10
+Current score 0.6454021887242378 < 0.6597147731568032. Patience 11/10
+Max patience {} reached!
+Loading model from epoch 7 with macro-f1 0.6597
+              precision    recall  f1-score   support
+
+           0      0.918     0.955     0.936      1910
+           1      0.472     0.322     0.383       239
+
+    accuracy                          0.885      2149
+   macro avg      0.695     0.639     0.660      2149
+weighted avg      0.869     0.885     0.875      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+3   BaseMLP_100  0.658656  vect_concatenate
+4   BaseMLP_D50  0.659715  vect_concatenate
+2    BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseMLP_D100' with 'vect_concatenate'
+Training model TorchDeepNeuralClassifier
+Found new best macro-f1 0.6189 at epoch 1
+Found new best macro-f1 0.6583 at epoch 2
+Current score 0.6295157982344024 < 0.6583111184710655. Patience 1/10
+Current score 0.6462430627892284 < 0.6583111184710655. Patience 2/10
+Current score 0.6287123506646475 < 0.6583111184710655. Patience 3/10
+Current score 0.6563648120482772 < 0.6583111184710655. Patience 4/10
+Current score 0.6373947196778493 < 0.6583111184710655. Patience 5/10
+Current score 0.6373665198934796 < 0.6583111184710655. Patience 6/10
+Current score 0.6291965885001561 < 0.6583111184710655. Patience 7/10
+Current score 0.6508385713731425 < 0.6583111184710655. Patience 8/10
+Current score 0.6406992904688757 < 0.6583111184710655. Patience 9/10
+Current score 0.6497080863721842 < 0.6583111184710655. Patience 10/10
+Current score 0.6407819461044414 < 0.6583111184710655. Patience 11/10
+Max patience {} reached!
+Loading model from epoch 2 with macro-f1 0.6583
+              precision    recall  f1-score   support
+
+           0      0.920     0.943     0.931      1910
+           1      0.432     0.347     0.385       239
+
+    accuracy                          0.877      2149
+   macro avg      0.676     0.645     0.658      2149
+weighted avg      0.866     0.877     0.871      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+5  BaseMLP_D100  0.658311  vect_concatenate
+3   BaseMLP_100  0.658656  vect_concatenate
+4   BaseMLP_D50  0.659715  vect_concatenate
+2    BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseLR_C06L2' with 'vect_summarize'
+Training model LogisticRegression
+              precision    recall  f1-score   support
+
+           0      0.905     0.957     0.930      1910
+           1      0.366     0.201     0.259       239
+
+    accuracy                          0.872      2149
+   macro avg      0.636     0.579     0.595      2149
+weighted avg      0.845     0.872     0.856      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+6  BaseLR_C06L2  0.594852    vect_summarize
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+5  BaseMLP_D100  0.658311  vect_concatenate
+3   BaseMLP_100  0.658656  vect_concatenate
+4   BaseMLP_D50  0.659715  vect_concatenate
+2    BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseLR_C04L1' with 'vect_summarize'
+Training model LogisticRegression
+              precision    recall  f1-score   support
+
+           0      0.906     0.964     0.934      1910
+           1      0.414     0.201     0.270       239
+
+    accuracy                          0.879      2149
+   macro avg      0.660     0.583     0.602      2149
+weighted avg      0.851     0.879     0.860      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+6  BaseLR_C06L2  0.594852    vect_summarize
+7  BaseLR_C04L1  0.602368    vect_summarize
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+5  BaseMLP_D100  0.658311  vect_concatenate
+3   BaseMLP_100  0.658656  vect_concatenate
+4   BaseMLP_D50  0.659715  vect_concatenate
+2    BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseMLP_50' with 'vect_summarize'
+Training model TorchShallowNeuralClassifier
+Found new best macro-f1 0.5287 at epoch 1
+Found new best macro-f1 0.5696 at epoch 2
+Found new best macro-f1 0.5794 at epoch 3
+Found new best macro-f1 0.6107 at epoch 4
+Current score 0.6087601242988732 < 0.6106538414620503. Patience 1/10
+Found new best macro-f1 0.6109 at epoch 6
+Current score 0.6105856100730525 < 0.6108720185958766. Patience 1/10
+Found new best macro-f1 0.6128 at epoch 8
+Current score 0.5934530585693375 < 0.6128133432403895. Patience 1/10
+Current score 0.6032162436157996 < 0.6128133432403895. Patience 2/10
+Current score 0.596787972662238 < 0.6128133432403895. Patience 3/10
+Current score 0.6031722185812463 < 0.6128133432403895. Patience 4/10
+Current score 0.6011242467553439 < 0.6128133432403895. Patience 5/10
+Current score 0.5968248620993761 < 0.6128133432403895. Patience 6/10
+Current score 0.5965005796663138 < 0.6128133432403895. Patience 7/10
+Current score 0.6051386080007892 < 0.6128133432403895. Patience 8/10
+Current score 0.599647632430591 < 0.6128133432403895. Patience 9/10
+Current score 0.6070784902703409 < 0.6128133432403895. Patience 10/10
+Current score 0.6058625764213734 < 0.6128133432403895. Patience 11/10
+Max patience {} reached!
+Loading model from epoch 8 with macro-f1 0.6128
+              precision    recall  f1-score   support
+
+           0      0.908     0.962     0.934      1910
+           1      0.424     0.222     0.291       239
+
+    accuracy                          0.880      2149
+   macro avg      0.666     0.592     0.613      2149
+weighted avg      0.854     0.880     0.863      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+6  BaseLR_C06L2  0.594852    vect_summarize
+7  BaseLR_C04L1  0.602368    vect_summarize
+8    BaseMLP_50  0.612813    vect_summarize
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+5  BaseMLP_D100  0.658311  vect_concatenate
+3   BaseMLP_100  0.658656  vect_concatenate
+4   BaseMLP_D50  0.659715  vect_concatenate
+2    BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseMLP_100' with 'vect_summarize'
+Training model TorchShallowNeuralClassifier
+Found new best macro-f1 0.5407 at epoch 1
+Found new best macro-f1 0.5951 at epoch 2
+Current score 0.5831454667644184 < 0.5951011450608649. Patience 1/10
+Found new best macro-f1 0.6131 at epoch 4
+Current score 0.5854476909149458 < 0.6130627662508812. Patience 1/10
+Current score 0.6066810700721088 < 0.6130627662508812. Patience 2/10
+Found new best macro-f1 0.6332 at epoch 7
+Current score 0.619934310257706 < 0.6332044008939316. Patience 1/10
+Current score 0.6122789602555128 < 0.6332044008939316. Patience 2/10
+Current score 0.6237131184612783 < 0.6332044008939316. Patience 3/10
+Current score 0.6094550455561286 < 0.6332044008939316. Patience 4/10
+Current score 0.6208730278743888 < 0.6332044008939316. Patience 5/10
+Current score 0.5923750914780719 < 0.6332044008939316. Patience 6/10
+Current score 0.6104910410091198 < 0.6332044008939316. Patience 7/10
+Current score 0.5978092145098255 < 0.6332044008939316. Patience 8/10
+Current score 0.6158147901920145 < 0.6332044008939316. Patience 9/10
+Current score 0.6072109730124925 < 0.6332044008939316. Patience 10/10
+Current score 0.6133671414296735 < 0.6332044008939316. Patience 11/10
+Max patience {} reached!
+Loading model from epoch 7 with macro-f1 0.6332
+              precision    recall  f1-score   support
+
+           0      0.915     0.942     0.928      1910
+           1      0.392     0.297     0.338       239
+
+    accuracy                          0.871      2149
+   macro avg      0.653     0.620     0.633      2149
+weighted avg      0.857     0.871     0.863      2149
+
+
+Results so far:
+          MODEL     SCORE              VECT
+6  BaseLR_C06L2  0.594852    vect_summarize
+7  BaseLR_C04L1  0.602368    vect_summarize
+8    BaseMLP_50  0.612813    vect_summarize
+9   BaseMLP_100  0.633204    vect_summarize
+0  BaseLR_C06L2  0.642959  vect_concatenate
+1  BaseLR_C04L1  0.647585  vect_concatenate
+5  BaseMLP_D100  0.658311  vect_concatenate
+3   BaseMLP_100  0.658656  vect_concatenate
+4   BaseMLP_D50  0.659715  vect_concatenate
+2    BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseMLP_D50' with 'vect_summarize'
+Training model TorchDeepNeuralClassifier
+Found new best macro-f1 0.5540 at epoch 1
+Found new best macro-f1 0.5698 at epoch 2
+Found new best macro-f1 0.5917 at epoch 3
+Found new best macro-f1 0.6034 at epoch 4
+Current score 0.5747650225520151 < 0.6034174321428437. Patience 1/10
+Current score 0.6023838322566883 < 0.6034174321428437. Patience 2/10
+Found new best macro-f1 0.6059 at epoch 7
+Found new best macro-f1 0.6113 at epoch 8
+Current score 0.6081742362753055 < 0.6113341214666338. Patience 1/10
+Current score 0.5632270482885597 < 0.6113341214666338. Patience 2/10
+Current score 0.5847049396681749 < 0.6113341214666338. Patience 3/10
+Current score 0.6049746707193516 < 0.6113341214666338. Patience 4/10
+Current score 0.5997285934756 < 0.6113341214666338. Patience 5/10
+Current score 0.6085092854872067 < 0.6113341214666338. Patience 6/10
+Found new best macro-f1 0.6174 at epoch 15
+Current score 0.5903986614287793 < 0.6174250516271452. Patience 1/10
+Current score 0.5920396824881243 < 0.6174250516271452. Patience 2/10
+Current score 0.5746740319918799 < 0.6174250516271452. Patience 3/10
+Current score 0.6031184866633248 < 0.6174250516271452. Patience 4/10
+Current score 0.5957279428112119 < 0.6174250516271452. Patience 5/10
+Current score 0.5837197095617181 < 0.6174250516271452. Patience 6/10
+Current score 0.5680541725676291 < 0.6174250516271452. Patience 7/10
+Current score 0.5746740319918799 < 0.6174250516271452. Patience 8/10
+Current score 0.5848863803645739 < 0.6174250516271452. Patience 9/10
+Found new best macro-f1 0.6188 at epoch 25
+Current score 0.5896026086113818 < 0.618771344239502. Patience 1/10
+Current score 0.5977370640003686 < 0.618771344239502. Patience 2/10
+Found new best macro-f1 0.6207 at epoch 28
+Current score 0.6080784139615103 < 0.6207063800454725. Patience 1/10
+Found new best macro-f1 0.6244 at epoch 30
+Current score 0.6202028083724311 < 0.6244341687580935. Patience 1/10
+Found new best macro-f1 0.6420 at epoch 32
+Current score 0.6027106305358816 < 0.6419686646745475. Patience 1/10
+Current score 0.6118688533234898 < 0.6419686646745475. Patience 2/10
+Current score 0.5973161134093431 < 0.6419686646745475. Patience 3/10
+Current score 0.6144293396620033 < 0.6419686646745475. Patience 4/10
+Current score 0.5964264681137472 < 0.6419686646745475. Patience 5/10
+Current score 0.5884862614661639 < 0.6419686646745475. Patience 6/10
+Current score 0.6244247811966752 < 0.6419686646745475. Patience 7/10
+Current score 0.5932607543885448 < 0.6419686646745475. Patience 8/10
+Current score 0.6107987539226056 < 0.6419686646745475. Patience 9/10
+Current score 0.5976691395005966 < 0.6419686646745475. Patience 10/10
+Current score 0.6028454940466114 < 0.6419686646745475. Patience 11/10
+Max patience {} reached!
+Loading model from epoch 32 with macro-f1 0.6420
+              precision    recall  f1-score   support
+
+           0      0.916     0.949     0.932      1910
+           1      0.424     0.301     0.352       239
+
+    accuracy                          0.877      2149
+   macro avg      0.670     0.625     0.642      2149
+weighted avg      0.861     0.877     0.867      2149
+
+
+Results so far:
+           MODEL     SCORE              VECT
+6   BaseLR_C06L2  0.594852    vect_summarize
+7   BaseLR_C04L1  0.602368    vect_summarize
+8     BaseMLP_50  0.612813    vect_summarize
+9    BaseMLP_100  0.633204    vect_summarize
+10   BaseMLP_D50  0.641969    vect_summarize
+0   BaseLR_C06L2  0.642959  vect_concatenate
+1   BaseLR_C04L1  0.647585  vect_concatenate
+5   BaseMLP_D100  0.658311  vect_concatenate
+3    BaseMLP_100  0.658656  vect_concatenate
+4    BaseMLP_D50  0.659715  vect_concatenate
+2     BaseMLP_50  0.662842  vect_concatenate
+
+======================================================================
+Running baseline model 'BaseMLP_D100' with 'vect_summarize'
+Training model TorchDeepNeuralClassifier
+Found new best macro-f1 0.5477 at epoch 1
+Found new best macro-f1 0.5951 at epoch 2
+Current score 0.5619536027437151 < 0.5951011450608649. Patience 1/10
+Current score 0.5936500842300684 < 0.5951011450608649. Patience 2/10
+Current score 0.5939283128938853 < 0.5951011450608649. Patience 3/10
+Current score 0.5798704931686259 < 0.5951011450608649. Patience 4/10
+Found new best macro-f1 0.6024 at epoch 7
+Current score 0.5807555711224348 < 0.6023838322566883. Patience 1/10
+Current score 0.566297330621129 < 0.6023838322566883. Patience 2/10
+Current score 0.5825563325563325 < 0.6023838322566883. Patience 3/10
+Current score 0.5971481060274691 < 0.6023838322566883. Patience 4/10
+Current score 0.5808445289385932 < 0.6023838322566883. Patience 5/10
+Found new best macro-f1 0.6052 at epoch 13
+Current score 0.5798242902610009 < 0.6052016901556307. Patience 1/10
+Current score 0.6043230036299229 < 0.6052016901556307. Patience 2/10
+Current score 0.5897056167599783 < 0.6052016901556307. Patience 3/10
+Current score 0.5755112038178313 < 0.6052016901556307. Patience 4/10
+Current score 0.5938783269116611 < 0.6052016901556307. Patience 5/10
+Current score 0.5835121150933872 < 0.6052016901556307. Patience 6/10
+Found new best macro-f1 0.6449 at epoch 20
+Current score 0.5947263783329357 < 0.6448897548463474. Patience 1/10
+Current score 0.6159692544914395 < 0.6448897548463474. Patience 2/10
+Current score 0.5931978798586572 < 0.6448897548463474. Patience 3/10
+Current score 0.6101143851080496 < 0.6448897548463474. Patience 4/10
+Current score 0.6094040200391007 < 0.6448897548463474. Patience 5/10
+Current score 0.590716962585243 < 0.6448897548463474. Patience 6/10
+Current score 0.6034341309843279 < 0.6448897548463474. Patience 7/10
+Current score 0.5849607488951751 < 0.6448897548463474. Patience 8/10
+Current score 0.5779832867061034 < 0.6448897548463474. Patience 9/10
+Current score 0.5931978798586572 < 0.6448897548463474. Patience 10/10
+Current score 0.595142042317112 < 0.6448897548463474. Patience 11/10
+Max patience {} reached!
+Loading model from epoch 20 with macro-f1 0.6449
+              precision    recall  f1-score   support
+
+           0      0.917     0.946     0.931      1910
+           1      0.419     0.314     0.359       239
+
+    accuracy                          0.875      2149
+   macro avg      0.668     0.630     0.645      2149
+weighted avg      0.861     0.875     0.867      2149
+
+
+Results so far:
+           MODEL     SCORE              VECT
+6   BaseLR_C06L2  0.594852    vect_summarize
+7   BaseLR_C04L1  0.602368    vect_summarize
+8     BaseMLP_50  0.612813    vect_summarize
+9    BaseMLP_100  0.633204    vect_summarize
+10   BaseMLP_D50  0.641969    vect_summarize
+0   BaseLR_C06L2  0.642959  vect_concatenate
+11  BaseMLP_D100  0.644890    vect_summarize
+1   BaseLR_C04L1  0.647585  vect_concatenate
+5   BaseMLP_D100  0.658311  vect_concatenate
+3    BaseMLP_100  0.658656  vect_concatenate
+4    BaseMLP_D50  0.659715  vect_concatenate
+2     BaseMLP_50  0.662842  vect_concatenate
+

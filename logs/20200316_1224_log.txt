@@ -1,0 +1,2 @@
+GloVe-300 loaded.
+train_cross NOT already loaded in globals
