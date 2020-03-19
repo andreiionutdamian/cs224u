@@ -1,50 +1,0 @@
-
-Train has 71 words that are not in GLOVE: ['pyrexia', 'mavoc', 'olisten', 'massimamente', 'brow-clutching']...
-  [['pneumococcus', 'pyrexia'], 0]
-  [['pyrexia', 'pneumococcus'], 0]
-  [['beet', 'mavoc'], 0]
-  [['hat', 'olisten'], 0]
-  [['chancre', 'inflammation'], 1]
-  [['chancre', 'lesion'], 1]
-  [['chancre', 'ulcer'], 1]
-  [['lesion', 'chancre'], 1]
-
-Pos vs neg: 16 vs 299
-
-
-Dev has 24 words that are not in GLOVE: ['tenosynovitis', 'amikacin', 'sub-paragraph', 'chlortetracycline', 'airbrush-tanning']...
-  [['antigen', 'tenosynovitis'], 0]
-  [['colitis', 'tenosynovitis'], 0]
-  [['corticosteroid', 'tenosynovitis'], 0]
-  [['depression', 'tenosynovitis'], 0]
-  [['tenosynovitis', 'antigen'], 1]
-  [['tenosynovitis', 'corticosteroid'], 1]
-  [['tenosynovitis', 'infection'], 1]
-
-Pos vs neg: 3 vs 92
-Found new best macro-f1 0.4740 > 0.0000 at epoch 1. 			
-Found new best macro-f1 0.5145 > 0.4740 at epoch 2. 			
-Found new best macro-f1 0.5341 > 0.5145 at epoch 3. 			
-Found new best macro-f1 0.5378 > 0.5341 at epoch 4. 			
-Found new best macro-f1 0.5457 > 0.5378 at epoch 6. 			
-Found new best macro-f1 0.5527 > 0.5457 at epoch 7. 			
-Found new best macro-f1 0.5619 > 0.5527 at epoch 8. 			
-Found new best macro-f1 0.5640 > 0.5619 at epoch 10. 			
-Found new best macro-f1 0.5694 > 0.5640 at epoch 11. 			
-Found new best macro-f1 0.5698 > 0.5694 at epoch 12. 			
-Found new best macro-f1 0.5766 > 0.5698 at epoch 13. 			
-Found new best macro-f1 0.5798 > 0.5766 at epoch 14. 			
-Found new best macro-f1 0.5808 > 0.5798 at epoch 16. 			
-Found new best macro-f1 0.5872 > 0.5808 at epoch 17. 			
-Found new best macro-f1 0.5882 > 0.5872 at epoch 18. 			
-Found new best macro-f1 0.5992 > 0.5882 at epoch 19. 			
-Found new best macro-f1 0.6002 > 0.5992 at epoch 22. 			
-Found new best macro-f1 0.6024 > 0.6002 at epoch 23. 			
-Found new best macro-f1 0.6040 > 0.6024 at epoch 25. 			
-Found new best macro-f1 0.6082 > 0.6040 at epoch 28. 			
-Found new best macro-f1 0.6154 > 0.6082 at epoch 30. 			
-Found new best macro-f1 0.6169 > 0.6154 at epoch 32. 			
-Found new best macro-f1 0.6177 > 0.6169 at epoch 36. 			
-
-Patience reached 11/10 - reloaded from ep 36 reduced lr from 1.0e-04 to 5.0e-05
-Found new best macro-f1 0.6202 > 0.6177 at epoch 53. 			

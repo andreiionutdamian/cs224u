@@ -72,7 +72,7 @@ class TorchAutoencoder(TorchModelBase):
         # Graph
         if not self.warm_start or not hasattr(self, "model"):
           self.model = self.define_graph()
-          print("Model defined & inited.", flush=True)
+          print("Model defined & inited:\n{}".format(self.model), flush=True)
         else:
           print("Model warm-start", flush=True)
         self.model.to(self.device)
@@ -98,10 +98,15 @@ class TorchAutoencoder(TorchModelBase):
                 "Finished epoch {} of {}; error is {:.7f}".format(
                     iteration, self.max_iter, err))
         # Hidden representations:
+        return self.get_repr(X_tensor, X)
+
+          
+    def get_repr(self, X_tensor, X_df):
         with torch.no_grad():
             self.model.to('cpu')
             H = self.model[1](self.model[0](X_tensor))
-            return self.convert_output(H, X)
+            return self.convert_output(H, X_df)
+        
     
 
     def predict(self, X):

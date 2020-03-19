@@ -16,6 +16,44 @@ from scipy.stats import spearmanr
 import vsm
 from IPython.display import display
 
+from retrofitting import Retrofitter, retrofit
+
+from torch_autoencoder import TorchAutoencoder
+
+import torch as th
+
+class L2_Normalizer(th.nn.Module):
+  def __init__(self,):
+    super().__init__()
+    
+  def forward(self, inputs):
+    return th.nn.functional.normalize(inputs, p=2, dim=1)
+
+
+class TorchDeepAutoencoder(TorchAutoencoder):
+    def define_graph(self):
+      self.out_layer = 5
+      return th.nn.Sequential(
+          th.nn.Dropout(0.1),
+          th.nn.Linear(self.input_dim_, self.hidden_dim),
+          th.nn.Tanh(),
+          th.nn.Linear(self.hidden_dim, self.hidden_dim // 2),
+          L2_Normalizer(),
+          th.nn.Linear(self.hidden_dim // 2, self.hidden_dim),
+          th.nn.Tanh(),
+          th.nn.Linear(self.hidden_dim, self.output_dim_)
+          )
+        
+    def get_repr(self, X_tensor, X_df):
+      with th.no_grad():
+        H = X_tensor
+        self.model.to('cpu')
+        for i in range(self.out_layer):
+          H = self.model[i](H)
+        print("Out layer: {}".format(self.model[i]))
+        return self.convert_output(H, X_df)
+  
+
 
 VSM_HOME = os.path.join('data', 'vsmdata')
 
@@ -118,6 +156,23 @@ def get_reader_vocab(reader):
 READERS = (wordsim353_reader, mturk771_reader, simverb3500dev_reader, 
          simverb3500test_reader, men_reader)    
   
+
+def mturk287_reader():
+    """MTurk-287: http://tx.technion.ac.il/~kirar/Datasets.html"""
+    src_filename = os.path.join(
+        WORDSIM_HOME, 'bakeoff-wordsim-test-data', 'MTurk-287.csv')
+    return wordsim_dataset_reader(
+        src_filename, header=False)
+
+def simlex999_reader(wordsim_test_home=WORDSIM_HOME):
+    """SimLex999: https://www.cl.cam.ac.uk/~fh295/SimLex-999.zip"""
+    src_filename = os.path.join(
+        WORDSIM_HOME, 'bakeoff-wordsim-test-data', 'SimLex-999', 'SimLex-999.txt')
+    return wordsim_dataset_reader(
+        src_filename, delimiter="\t", header=True, score_col_index=3)
+
+BAKEOFF = (simlex999_reader, mturk287_reader)
+
 
   
 def get_reader_vocab_overlap(readers=READERS):
@@ -250,7 +305,7 @@ def _normalized_ranking(series):
     ranks = series.rank(method='dense')
     return ranks / ranks.sum()      
   
-def full_word_similarity_evaluation(df, readers=READERS, distfunc=vsm.cosine):
+def full_word_similarity_evaluation(df, readers=READERS, distfunc=vsm.cosine, verbose=True):
     """Evaluate a VSM against all datasets in `readers`.
     
     Parameters
@@ -269,15 +324,16 @@ def full_word_similarity_evaluation(df, readers=READERS, distfunc=vsm.cosine):
         Mapping dataset names to Spearman r values.
         
     """        
-    print("  * Computing evaluation with {} *".format(distfunc.__name__), flush=True)
+    print("* Computing evaluation with {} *".format(distfunc.__name__), flush=True)
     scores = {}     
     for reader in readers:
         score, data_df = word_similarity_evaluation(reader, df, distfunc=distfunc)
         scores[get_reader_name(reader)] = score
     series = pd.Series(scores, name='Spearman r')
     series['Macro-average'] = series.mean()
-    for key in dict(series):
-      print("    {:<16} {:.4f}".format(key+':', series[key]))
+    if verbose:
+      for key in dict(series):
+        print("  {:<16} {:.4f}".format(key+':', series[key]))
     return series  
   
 
@@ -764,33 +820,36 @@ def counterfit_model(data):
   return df
   
 
-def retrofit_model(data, name=''):
-  from retrofitting import Retrofitter
-  print("Retrofitting model '{}' with {} embeds".format(name, data.shape[1]), flush=True)
-  from nltk.corpus import wordnet as wn
-  print("  Constructing edges for words similarity", flush=True)
-  edges = defaultdict(set)
-  for ss in wn.all_synsets():
-    lem_names = {lem.name() for lem in ss.lemmas()}
-    for lem in lem_names:
-      edges[lem] |= lem_names            
-  print("  Preparing indices...",flush=True)
-  lookup = dict(zip(data.index, range(data.shape[0])))
-  index_edges = defaultdict(set)
-  for start, finish_nodes in edges.items():
-      s = lookup.get(start)
-      if s:
-          f = {lookup[n] for n in finish_nodes if n in lookup}
-          if f:
-              index_edges[s] = f  
-  
-  wn_retro = Retrofitter(verbose=True,
-                         max_iter=1000,
-                         tol=1e-4,
-                         )
-  print("  Running retrofitter ...", flush=True)
-  retro_result = wn_retro.fit(data, index_edges)
-  print("")
+def retrofit_model(data, name='', direct=True):
+  if direct:
+    print("Direct retrofit...", flush=True)
+    retro_result = retrofit(data)
+  else:
+    print("Retrofitting model '{}' with {} embeds".format(name, data.shape[1]), flush=True)
+    from nltk.corpus import wordnet as wn
+    print("  Constructing edges for words similarity", flush=True)
+    edges = defaultdict(set)
+    for ss in wn.all_synsets():
+      lem_names = {lem.name() for lem in ss.lemmas()}
+      for lem in lem_names:
+        edges[lem] |= lem_names            
+    print("  Preparing indices...",flush=True)
+    lookup = dict(zip(data.index, range(data.shape[0])))
+    index_edges = defaultdict(set)
+    for start, finish_nodes in edges.items():
+        s = lookup.get(start)
+        if s:
+            f = {lookup[n] for n in finish_nodes if n in lookup}
+            if f:
+                index_edges[s] = f  
+    
+    wn_retro = Retrofitter(verbose=True,
+                           max_iter=1000,
+                           tol=1e-4,
+                           )
+    print("  Running retrofitter ...", flush=True)
+    retro_result = wn_retro.fit(data, index_edges)
+    print("")
   return retro_result
 
 
@@ -806,7 +865,10 @@ def lsa_model(data, k=100, use_ttest=False, disc_pmi=True, retrofit=False, delta
       lsa_input = pmid(data, delta_on_pmi=delta)
     else:
       print("Computing positive PMI reweighting for LSA {}".format(k), flush=True)
-      lsa_input = vsm.pmi(data)    
+      lsa_input = vsm.pmi(data, positive=True)    
+  
+  print("Pre-LSA bakeoff")
+  bakeoff_eval(lsa_input)
   print("Computing LSA k={}...".format(k))
   lsa_output = vsm.lsa(lsa_input, k=k)
   if retrofit:
@@ -821,17 +883,19 @@ def ae_model(data, n_embeds,
              retrofit=True, 
              delta=True, 
              max_patience=5, 
-             lr=1e-2,
+             lr=1e-4,
              lsa_factor=2,
              end_counterfit=False,
+             disc_pmi=True,
              ):
   
-  from torch_autoencoder import TorchAutoencoder
   
+  bakes = []
   print("Generating autoencoder based model with {} embeds...".format(n_embeds), flush=True)
-  lsa_output = lsa_model(data, k=int(n_embeds * lsa_factor), disc_pmi=True, use_ttest=False, delta=delta)
-
-  n_step_epochs = 100
+  lsa_output = lsa_model(data, k=int(n_embeds * lsa_factor), disc_pmi=disc_pmi, use_ttest=False, delta=delta)
+  print("Post-LSA bake-off eval...")
+  bakeoff_eval(lsa_output)
+  n_step_epochs = 10
   steps = epochs // n_step_epochs
     
   ae_model = TorchAutoencoder(max_iter=n_step_epochs, 
@@ -849,6 +913,7 @@ def ae_model(data, n_embeds,
     print("\nCalculating step {} results...".format(step))
     print("  Before retrofit ...")
     res = full_word_similarity_evaluation(ae_output, distfunc=distfunc)
+    bakeoff_eval(ae_output)
     mb = res['Macro-average']
     if retrofit:
       df_out = retrofit_model(ae_output)
@@ -859,6 +924,10 @@ def ae_model(data, n_embeds,
     print("  Before retro: {:.4f}".format(mb))
     print("  After retro:  {:.4f}".format(macro))
     print("  {}".format("Good!" if macro>mb else "WORSE!!!"), flush=True)
+    res = round(bakeoff_eval(df_out),4)
+    bakes.append(res)
+    print(bakes)
+    
     if macro > best_macro:
       patience = 0
       best_macro = macro
@@ -874,6 +943,9 @@ def ae_model(data, n_embeds,
       break      
   if end_counterfit:
     best_model = counterfit_model(best_model)
+  print('\n\n' + '=' * 40)
+  print("Max bake-off score {} at iter {}".format(max(bakes), np.argmax(bakes)))
+  print('=' * 40 + '\n')
   return best_model
 
 ##########################################################
@@ -1039,6 +1111,25 @@ ALL_FILES = [
     "imdb_window5-scaled.csv.gz",
     "imdb_window20-flat.csv.gz",
     ]
+
+
+def bakeoff_eval(title, embds, dct_res):
+    distfunc = vsm.jaccard
+    print("\n\n{} {} evaluation on the TRAINING DATA".format(
+        title, embds.shape))
+    trn_res = full_word_similarity_evaluation(embds)
+    print("\n{} {} results on the TEST sets using distfunc '{}'".format(
+        title, embds.shape, distfunc.__name__), flush=True)
+    res = full_word_similarity_evaluation(embds, readers=BAKEOFF, distfunc=distfunc, verbose=True)
+    
+    print("----------------------------", flush=True)
+    print("Bake-off score: {:.4}".format(res['Macro-average']), flush=True)
+    print("----------------------------\n", flush=True)
+    dct_res['MODEL'].append(title)
+    dct_res['BAKE'].append(res['Macro-average'])
+    dct_res['TRAIN'].append(trn_res['Macro-average'])
+    return dct_res
+  
   
   
 if __name__ == '__main__':
@@ -1099,5 +1190,109 @@ if __name__ == '__main__':
 #  full_word_similarity_evaluation(ae_embeds)
 #  get_final_model_embeds()
     
-  df = pd.read_csv("best_model_05842.csv.gz", index_col=0)
-  full_word_similarity_evaluation(df)
+#  df = pd.read_csv("models/h1/_h1_best_model_05842.csv.gz", index_col=0)
+#  full_word_similarity_evaluation(df)
+#  bakeoff_eval(df)
+  """
+        MODEL      BAKE     TRAIN
+6    LSA PPMI -0.041168  0.480857
+7  LSA DPPMI1 -0.033820  0.483567
+5  LSA Direct -0.006980  0.113213
+0         MCO  0.066034  0.159749
+1        PPMI  0.451753  0.476300
+3      DPPMI2  0.458192  0.480277
+4  RET_DPPMI1  0.465135  0.519761
+2      DPPMI1  0.488581  0.479645
+
+  """
+  results = {'MODEL':[], 'BAKE':[], 'TRAIN':[]}
+  if 'mco_data' not in globals():
+    mco_data = pd.read_csv(os.path.join(VSM_HOME, "imdb_window5-scaled.csv.gz"), index_col=0)    
+  results = bakeoff_eval('MCO', mco_data, results)
+  
+  pp = vsm.pmi(mco_data, positive=True)
+  results = bakeoff_eval('PP', pp, results)
+
+#  pp_tt = ttest(pp)
+#  results = bakeoff_eval('PP_TT', pp_tt, results)
+#
+#  pp_tt_r = retrofit(pp_tt)
+#  results = bakeoff_eval('PP_TT_R', pp_tt_r, results)
+
+#  pp_tt_r_l = vsm.lsa(pp_tt_r, k=512)
+#  results = bakeoff_eval('PP_TT_R_L', pp_tt_r_l, results)
+#
+#  pp_tt_r_l_n = pp_tt_r_l.apply(vsm.length_norm, axis=1)
+#  results = bakeoff_eval('PP_TT_R_L_N', pp_tt_r_l_n, results)
+#
+#  ae = TorchAutoencoder(hidden_dim=256, max_iter=100)
+#  pp_tt_r_l_n_ae = pd.DataFrame(ae.fit(pp_tt_r_l_n), index=pp_tt_r_l_n.index)
+#  results = bakeoff_eval('PP_TT_R_L_N_AE', pp_tt_r_l_n_ae, results)
+
+  ########################################
+  
+  pp_n = pp.apply(vsm.length_norm, axis=1)
+  results = bakeoff_eval('PP_N', pp_n, results)
+
+  pp_n_l = vsm.lsa(pp_n, k=1024)
+  results = bakeoff_eval('PP_N_L', pp_n_l, results)
+
+  pp_n_l_r = retrofit(pp_n_l)
+  results = bakeoff_eval('PP_N_L_R', pp_n_l_r, results)
+
+  ae = TorchAutoencoder(hidden_dim=512, max_iter=100)
+  pp_n_l_r_ae = ae.fit(pp_n_l_r)
+  results = bakeoff_eval('PP_N_L_R_AE', pp_n_l_r_ae, results)
+
+  pp_n_l_r_ae_r = retrofit(pp_n_l_r_ae)
+  results = bakeoff_eval('PP_N_L_R_AE_R', pp_n_l_r_ae_r, results)
+
+  ########################################
+
+  
+#  dp1 = pmid(mco_data, positive=True, delta_on_pmi=False)
+#  results = bakeoff_eval('DPP1', dp1, results)
+#
+#  dp1_n = dp1.apply(vsm.length_norm, axis=1)
+#  results = bakeoff_eval('DPP1_N', dp1_n, results)
+#
+#  dp1_n_l = vsm.lsa(dp1_n, k=1024)
+#  results = bakeoff_eval('DPP1_N_L', dp1_n_l, results)
+#
+#  dp1_n_l_n = dp1_n_l.apply(vsm.length_norm, axis=1)
+#  results = bakeoff_eval('DPP1_N_L_N', dp1_n_l_n, results)
+#
+#  dae = TorchDeepAutoencoder(hidden_dim=512,max_iter=500, eta=0.001)
+#  dp1_n_l_n_dae = dae.fit(dp1_n_l_n)
+#  results = bakeoff_eval('DPP1_N_L_N_DAE', dp1_n_l_n_dae, results)
+#
+#  dp1_n_l_n_dae_r = retrofit(dp1_n_l_n_dae)
+#  results = bakeoff_eval('DPP1_N_L_N_DAE_R', dp1_n_l_n_dae_r, results)
+
+  ########################################
+  
+#  dp1_n_l_r = retrofit(dp1_n_l)
+#  results = bakeoff_eval('DPP1_N_L_R', dp1_n_l_r, results)
+#
+#  ae = TorchAutoencoder(hidden_dim=512,max_iter=100)
+#  dp1_n_l_r_ae = pd.DataFrame(ae.fit(dp1_n_l_r), index=dp1_n_l_r.index)
+#  results = bakeoff_eval('DPP1_N_L_R_AE', dp1_n_l_r_ae, results)
+#  
+#  dp1_n_l_r_ae_r = retrofit(dp1_n_l_r_ae)
+#  results = bakeoff_eval('DPP1_N_L_R_AE_R', dp1_n_l_r_ae_r, results)
+#  
+#  ########################################
+#  
+#  ae = TorchAutoencoder(hidden_dim=1500,max_iter=200, eta=0.00005, l2_strength=0.0001)
+#  pp_ae = pd.DataFrame(ae.fit(pp), index=pp.index)
+#  results = bakeoff_eval('PP_AE', pp_ae, results)
+#  
+#  pp_ae_r = retrofit(pp_ae)
+#  results = bakeoff_eval('PP_AE_R', pp_ae_r, results)
+
+  
+
+  
+  df_res = pd.DataFrame(results).sort_values('BAKE')
+  print(df_res)
+  

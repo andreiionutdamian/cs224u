@@ -1,26 +1,0 @@
-Generated 50 random grid-search iters out of a total of iters
-
-
-======================================================================
-Running grid search iteration 1/50 'H3_v1_01': {'dual_path': None, 'layers': [64], 'input_drop': 0.3, 'other_drop': 0.3, 'bn': False, 'bn_inputs': True, 'activ': 'tanh'}
-  Time left for grid search completion: inf hrs
-Training model TorchDeepNeuralClassifier
-Found new best macro-f1 0.5261 > 0.0000 at epoch 1			
-Found new best macro-f1 0.5447 > 0.5261 at epoch 2			
-Found new best macro-f1 0.6020 > 0.5447 at epoch 3			
-Found new best macro-f1 0.6118 > 0.6020 at epoch 5			
-Found new best macro-f1 0.6354 > 0.6118 at epoch 7			
-Found new best macro-f1 0.6523 > 0.6354 at epoch 10			
-Found new best macro-f1 0.6559 > 0.6523 at epoch 14			
-
-Max patience 11/10 reached!
-Loading model from epoch 14 with macro-f1 0.6559
-              precision    recall  f1-score   support
-
-           0      0.914     0.974     0.943      1910
-           1      0.570     0.272     0.368       239
-
-    accuracy                          0.896      2149
-   macro avg      0.742     0.623     0.656      2149
-weighted avg      0.876     0.896     0.880      2149
-

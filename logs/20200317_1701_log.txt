@@ -1,50 +1,0 @@
-
-Train has 71 words that are not in GLOVE: ['gearstick', 'sinceskillpromotion', 'list-style-image', 'prodrome', 'brightstorm']...
-  [['salmon', 'gearstick'], 0]
-  [['blouse', 'sinceskillpromotion'], 0]
-  [['cedar', 'list-style-image'], 0]
-  [['chill', 'prodrome'], 0]
-  [['androsterone', 'androgen'], 1]
-  [['androsterone', 'hormone'], 1]
-  [['iridocyclitis', 'inflammation'], 1]
-  [['chancre', 'inflammation'], 1]
-
-Pos vs neg: 16 vs 299
-
-
-Dev has 24 words that are not in GLOVE: ['catheterisation', 'tenosynovitis', 'amblicipitids', 'fermoota', 'airbrush-tanning']...
-  [['saw', 'catheterisation'], 0]
-  [['antigen', 'tenosynovitis'], 0]
-  [['colitis', 'tenosynovitis'], 0]
-  [['corticosteroid', 'tenosynovitis'], 0]
-  [['tenosynovitis', 'antigen'], 1]
-  [['tenosynovitis', 'corticosteroid'], 1]
-  [['tenosynovitis', 'infection'], 1]
-
-Pos vs neg: 3 vs 92
-Found new best macro-f1 0.4781 > 0.0000 at epoch 1. 			
-Found new best macro-f1 0.5311 > 0.4781 at epoch 2. 			
-Found new best macro-f1 0.5503 > 0.5311 at epoch 3. 			
-Found new best macro-f1 0.5536 > 0.5503 at epoch 4. 			
-Found new best macro-f1 0.5813 > 0.5536 at epoch 5. 			
-Found new best macro-f1 0.5842 > 0.5813 at epoch 7. 			
-Found new best macro-f1 0.5987 > 0.5842 at epoch 8. 			
-Found new best macro-f1 0.6022 > 0.5987 at epoch 10. 			
-Found new best macro-f1 0.6034 > 0.6022 at epoch 13. 			
-Found new best macro-f1 0.6045 > 0.6034 at epoch 14. 			
-Found new best macro-f1 0.6104 > 0.6045 at epoch 15. 			
-Found new best macro-f1 0.6110 > 0.6104 at epoch 16. 			
-Found new best macro-f1 0.6167 > 0.6110 at epoch 18. 			
-Found new best macro-f1 0.6248 > 0.6167 at epoch 21. 			
-Found new best macro-f1 0.6324 > 0.6248 at epoch 26. 			
-Found new best macro-f1 0.6336 > 0.6324 at epoch 28. 			
-Found new best macro-f1 0.6355 > 0.6336 at epoch 32. 			
-
-Patience reached 11/10 - reloaded from ep 32 reduced lr from 1.0e-04 to 5.0e-05
-
-Patience reached 11/10 - reloaded from ep 32 reduced lr from 5.0e-05 to 2.5e-05
-
-Patience reached 11/10 - reloaded from ep 32 reduced lr from 2.5e-05 to 1.3e-05
-
-Max fails 41/40 reached!
-Loading model from epoch 32 with macro-f1 0.6355

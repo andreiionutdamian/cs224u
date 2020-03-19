@@ -1,3 +1,0 @@
-Found new best macro-f1 0.5853 > 0.0000 at epoch 1. Saving model and optimizer.	
-Found new best macro-f1 0.6658 > 0.5853 at epoch 2. Saving model and optimizer.	
-Found new best macro-f1 0.6941 > 0.6658 at epoch 3. Saving model and optimizer.	

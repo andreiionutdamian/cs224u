@@ -1,150 +1,0 @@
-======================================================================
-Running baseline model 'BaseLR_C06L2' with 'vect_concatenate'
-Training model LogisticRegression
-              precision    recall  f1-score   support
-
-           0      0.916     0.948     0.932      1910
-           1      0.422     0.305     0.354       239
-
-    accuracy                          0.876      2149
-   macro avg      0.669     0.627     0.643      2149
-weighted avg      0.861     0.876     0.867      2149
-
-
-Results so far:
-          MODEL     SCORE              VECT
-0  BaseLR_C06L2  0.642959  vect_concatenate
-
-======================================================================
-Running baseline model 'BaseLR_C04L1' with 'vect_concatenate'
-Training model LogisticRegression
-              precision    recall  f1-score   support
-
-           0      0.914     0.968     0.940      1910
-           1      0.512     0.272     0.355       239
-
-    accuracy                          0.890      2149
-   macro avg      0.713     0.620     0.648      2149
-weighted avg      0.869     0.890     0.875      2149
-
-
-Results so far:
-          MODEL     SCORE              VECT
-0  BaseLR_C06L2  0.642959  vect_concatenate
-1  BaseLR_C04L1  0.647585  vect_concatenate
-
-======================================================================
-Running baseline model 'BaseMLP_50' with 'vect_concatenate'
-Training model TorchShallowNeuralClassifier
-Found new best macro-f1 0.6161 > 0.0000 at epoch 1			
-Found new best macro-f1 0.6385 > 0.6161 at epoch 2			
-Found new best macro-f1 0.6489 > 0.6385 at epoch 5			
-Found new best macro-f1 0.6553 > 0.6489 at epoch 10			
-Found new best macro-f1 0.6625 > 0.6553 at epoch 18			
-Found new best macro-f1 0.6664 > 0.6625 at epoch 23			
-Found new best macro-f1 0.6674 > 0.6664 at epoch 31			
-Found new best macro-f1 0.6703 > 0.6674 at epoch 34			
-Max patience 11/10 reached!
-Loading model from epoch 34 with macro-f1 0.6703
-              precision    recall  f1-score   support
-
-           0      0.926     0.930     0.928      1910
-           1      0.420     0.406     0.413       239
-
-    accuracy                          0.872      2149
-   macro avg      0.673     0.668     0.670      2149
-weighted avg      0.870     0.872     0.871      2149
-
-
-Results so far:
-          MODEL     SCORE              VECT
-0  BaseLR_C06L2  0.642959  vect_concatenate
-1  BaseLR_C04L1  0.647585  vect_concatenate
-2    BaseMLP_50  0.670333  vect_concatenate
-
-======================================================================
-Running baseline model 'BaseMLP_100' with 'vect_concatenate'
-Training model TorchShallowNeuralClassifier
-Found new best macro-f1 0.6033 > 0.0000 at epoch 1			
-Found new best macro-f1 0.6508 > 0.6033 at epoch 2			
-Found new best macro-f1 0.6577 > 0.6508 at epoch 6			
-Found new best macro-f1 0.6607 > 0.6577 at epoch 7			
-Found new best macro-f1 0.6665 > 0.6607 at epoch 9			
-Found new best macro-f1 0.6821 > 0.6665 at epoch 11			
-Max patience 11/10 reached!
-Loading model from epoch 11 with macro-f1 0.6821
-              precision    recall  f1-score   support
-
-           0      0.930     0.925     0.928      1910
-           1      0.426     0.448     0.437       239
-
-    accuracy                          0.872      2149
-   macro avg      0.678     0.686     0.682      2149
-weighted avg      0.874     0.872     0.873      2149
-
-
-Results so far:
-          MODEL     SCORE              VECT
-0  BaseLR_C06L2  0.642959  vect_concatenate
-1  BaseLR_C04L1  0.647585  vect_concatenate
-2    BaseMLP_50  0.670333  vect_concatenate
-3   BaseMLP_100  0.682128  vect_concatenate
-
-======================================================================
-Running baseline model 'BaseMLP_D50' with 'vect_concatenate'
-Training model TorchDeepNeuralClassifier
-Found new best macro-f1 0.5721 > 0.0000 at epoch 1			
-Found new best macro-f1 0.5752 > 0.5721 at epoch 2			
-Found new best macro-f1 0.5989 > 0.5752 at epoch 3			
-Found new best macro-f1 0.6130 > 0.5989 at epoch 7			
-Found new best macro-f1 0.6189 > 0.6130 at epoch 9			
-Found new best macro-f1 0.6364 > 0.6189 at epoch 13			
-Max patience 11/10 reached!
-Loading model from epoch 13 with macro-f1 0.6364
-              precision    recall  f1-score   support
-
-           0      0.910     0.979     0.943      1910
-           1      0.579     0.230     0.329       239
-
-    accuracy                          0.896      2149
-   macro avg      0.745     0.605     0.636      2149
-weighted avg      0.874     0.896     0.875      2149
-
-
-Results so far:
-          MODEL     SCORE              VECT
-4   BaseMLP_D50  0.636416  vect_concatenate
-0  BaseLR_C06L2  0.642959  vect_concatenate
-1  BaseLR_C04L1  0.647585  vect_concatenate
-2    BaseMLP_50  0.670333  vect_concatenate
-3   BaseMLP_100  0.682128  vect_concatenate
-
-======================================================================
-Running baseline model 'BaseMLP_D100' with 'vect_concatenate'
-Training model TorchDeepNeuralClassifier
-Found new best macro-f1 0.5632 > 0.0000 at epoch 1			
-Found new best macro-f1 0.6251 > 0.5632 at epoch 2			
-Found new best macro-f1 0.6258 > 0.6251 at epoch 12			
-Found new best macro-f1 0.6559 > 0.6258 at epoch 13			
-Found new best macro-f1 0.6648 > 0.6559 at epoch 21			
-Max patience 11/10 reached!
-Loading model from epoch 21 with macro-f1 0.6648
-              precision    recall  f1-score   support
-
-           0      0.918     0.963     0.940      1910
-           1      0.514     0.314     0.390       239
-
-    accuracy                          0.891      2149
-   macro avg      0.716     0.638     0.665      2149
-weighted avg      0.873     0.891     0.879      2149
-
-
-Results so far:
-          MODEL     SCORE              VECT
-4   BaseMLP_D50  0.636416  vect_concatenate
-0  BaseLR_C06L2  0.642959  vect_concatenate
-1  BaseLR_C04L1  0.647585  vect_concatenate
-5  BaseMLP_D100  0.664777  vect_concatenate
-2    BaseMLP_50  0.670333  vect_concatenate
-3   BaseMLP_100  0.682128  vect_concatenate
-

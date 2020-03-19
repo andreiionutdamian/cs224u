@@ -69,12 +69,12 @@ def find_logreg_params(train_data, dev_data):
   for vcf in baseline_vector_combo_funcs:
     X_train, y_train = nli.word_entail_featurize(
         data=train_data,  
-        vector_func=glove_vec, 
+        vector_func=l_glv, 
         vector_combo_func=vcf
         )
     X_dev, y_dev = nli.word_entail_featurize(
         data=dev_data,  
-        vector_func=glove_vec, 
+        vector_func=l_glv, 
         vector_combo_func=vcf
         )
     model = fit_softmax_with_crossvalidation(X_train, y_train)
@@ -98,9 +98,12 @@ from sklearn.linear_model import LogisticRegression
 from collections import OrderedDict
 from time import time
 import textwrap
+from sklearn.metrics import classification_report
+import vsm
 
 lst_log = []
-log_fn = dt.now().strftime("logs/%Y%m%d_%H%M_log.txt")
+_date = dt.now().strftime("%Y%m%d_%H%M")
+log_fn = dt.now().strftime("logs/"+_date+"_log.txt")
 
 def P(s=''):
   lst_log.append(s)
@@ -154,9 +157,6 @@ def get_object_params(obj, n=None):
 def prepare_grid_search(params_grid, valid_fn, nr_trials):
   import itertools
 
-  pd.set_option('display.max_rows', 500)
-  pd.set_option('display.max_columns', 500)
-  pd.set_option('display.width', 1000)
 
   params = []
   values = []
@@ -173,6 +173,7 @@ def prepare_grid_search(params_grid, valid_fn, nr_trials):
     for j,k in enumerate(params):
       func_kwargs[k] = comb[j]
     grid_iterations.append(func_kwargs)
+  P("Filtering {} grid-search options...".format(len(grid_iterations)))
   cleaned_iters = [x for x in grid_iterations if valid_fn(x)]
   n_options = len(cleaned_iters)
   idxs = np.arange(n_options)
@@ -182,8 +183,38 @@ def prepare_grid_search(params_grid, valid_fn, nr_trials):
       len(idxs), n_options))
   return [cleaned_iters[i] for i in idxs]
 
-        
-  
+
+def add_res(dct, model_name, score, **kwargs):
+  n_existing = len(dct['MODEL'])
+  dct['MODEL'].append(model_name)
+  dct['SCORE'].append(score)
+  for key in kwargs:
+    if key not in dct:
+      dct[key] = ['-' ] * n_existing
+    dct[key].append(kwargs[key])
+  for k in dct:
+    if len(dct[k]) < (n_existing + 1):
+      dct[k] = dct[k] + [' '] * ((n_existing + 1) - len(dct[k]))
+  return dct
+
+
+def maybe_add_top_model(top_models, model, score, k=5):
+  if len(top_models) < k:
+    top_models.append([model, score])
+  else:
+    for i in range(k):
+      if top_models[i][1] < score:
+        for jj in range(k-1, i, -1):
+          top_models[jj] = top_models[jj-1]
+        top_models[i][0] = model
+        top_models[i][1] = score
+        break          
+  return sorted(top_models, key=lambda x: x[1], reverse=True)
+       
+
+tm = [['a', 100], ['e', 99], ['dddd', 98], ['dd', 52], ['gg', 51]] 
+
+tm = maybe_add_top_model(tm, 'kk', 52)  
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -194,8 +225,45 @@ def prepare_grid_search(params_grid, valid_fn, nr_trials):
 ###############################################################################
 ###############################################################################
 
-def lower_glove_vec(w):    
-  """Return `w`'s GloVe representation if available, else return 
+def maybe_find_glove_replacement(w):
+  w = w.lower()
+  lw = len(w)
+  if lw < 4:
+    return None
+  else:   
+    nw1 = ''
+    found = False
+    for i in range(lw//2 + 2):
+      nw = w[:-(i+1)]
+      if nw in GLOVE:
+        nw1 = nw
+        found = True
+        break
+    nw2 = ''
+    for i in range(lw//2 + 2):
+      nw = w[(i+1):]
+      if nw in GLOVE:
+        nw2 = nw
+        found = True
+        break
+    if found:
+      return nw1 if len(nw1) > len(nw2) else nw2
+    return None
+
+def l_glv_rep(w):    
+  """Return lower `w`'s GloVe representation if available, else return 
+  a replacement (zeros vector is nothing is found)."""
+  if w in GLOVE:
+    return GLOVE[w]
+  else:
+    nw = maybe_find_glove_replacement(w)
+    v = np.random.uniform(low=-1e-4, high=1e-4, size=GLOVE_DIM)
+    if nw is not None:
+      v = v + GLOVE[nw]
+    return v
+    
+def l_glv(w):    
+  """Return lower `w`'s GloVe representation if available, else return 
   a zeros vector."""
   return GLOVE.get(w.lower(), np.zeros(GLOVE_DIM))
 
@@ -220,7 +288,15 @@ def test_glove_vs_data(trn, dev):
   for x in dev:
     dev_words.add(x[0][0])
     dev_words.add(x[0][1])
-    
+  
+  glove_train = [x for x in trn if (x[0][0] in GLOVE) and (x[0][1] in GLOVE)]
+  glove_dev = [x for x in dev if (x[0][0] in GLOVE) and (x[0][1] in GLOVE)]
+  out_train = [x for x in trn if (x[0][0] not in GLOVE) or (x[0][1] not in GLOVE)]
+  out_dev = [x for x in dev if (x[0][0] not in GLOVE) or (x[0][1] not in GLOVE)]
+  
+  P("\nGlove train: {} ({:.1f}%)".format(len(glove_train), len(glove_train)/len(trn)*100))
+  P("\nGlove dev: {} ({:.1f}%)".format(len(glove_dev), len(glove_dev)/len(dev)*100))
+  
   miss_train = [x.lower() for x in train_words if x.lower() not in GLOVE] 
   miss_dev = [x.lower() for x in dev_words if x.lower() not in GLOVE]
   P("\nTrain has {} words that are not in GLOVE: {}...".format(len(miss_train), miss_train[:5]))
@@ -253,16 +329,87 @@ def test_glove_vs_data(trn, dev):
         if x[1] == 0 and negatives < 5:
           P("  {}".format(x))
   P("\nPos vs neg: {} vs {}".format(positives, negatives))
-  return miss_train, miss_dev
+  res = {
+      'glove_train' : glove_train,
+      'glove_dev' : glove_dev,
+      'out_train' : out_train,
+      'out_dev' : out_dev
+      }
+  return res, (miss_train, miss_dev)
 
 
-class ThSiameseCombine(th.nn.Module):
-  def __init__(self, input_dim, method, norm_each):
+class ConstrativeLoss(th.nn.Module):
+  def __init__(self, margin=0.2):
+    super(ConstrativeLoss, self).__init__()
+    self.margin = margin
+    
+    
+  def forward(self, dist, gold):
+    th_d_sq = th.pow(dist, 2)
+    th_d_sqm = th.pow(th.clamp(self.margin - dist, 0), 2)
+    loss = (1 - gold) * th_d_sq + gold * th_d_sqm
+    return loss.mean()
+  
+  def __repr__(self):
+    s = self.__class__.__name__ + "(margin={})".format(
+        self.margin,
+        )
+    return s  
+
+
+class FocalLoss(th.nn.Module):
+  def __init__(self, alpha=4, gamma=2):
+    super(FocalLoss, self).__init__()
+    self.alpha = alpha
+    self.gamma = gamma
+
+  def forward(self, inputs, targets):
+    BCE_loss = th.nn.functional.binary_cross_entropy_with_logits(
+        inputs, 
+        targets, 
+        reduction='none',
+        )
+
+    pt = th.exp(-BCE_loss)
+    F_loss = self.alpha * th.pow(1 - pt, self.gamma) * BCE_loss
+    return th.mean(F_loss)
+      
+  def __repr__(self):
+    s = self.__class__.__name__ + "(alpha={}, gamma={})".format(
+        self.alpha,
+        self.gamma,
+        )
+    return s
+
+
+class InputPlaceholder(th.nn.Module):
+  def __init__(self, input_dim):
+    super().__init__()
+    self.input_dim = input_dim
+    
+  def forward(self, inputs):
+    return inputs
+  
+  def __repr__(self):
+    s = self.__class__.__name__ + "(input_dim={})".format(
+        self.input_dim,
+        )
+    return s
+  
+class L2_Normalizer(th.nn.Module):
+  def __init__(self,):
+    super().__init__()
+    
+  def forward(self, inputs):
+    return th.nn.functional.normalize(inputs, p=2, dim=1)
+
+class PathsCombiner(th.nn.Module):
+  def __init__(self, input_dim, method, activ=None):
     super().__init__()
     self.method = method
     self.input_dim = input_dim
-    self.norm_each = norm_each
-    if method in ['sub','abs','sqr']:
+    self.activ = self.get_activation(activ)
+    if method in ['sub','abs','sqr', 'add']:
       self.output_dim = input_dim
     elif method == 'cat':
       self.output_dim = input_dim * 2
@@ -275,12 +422,14 @@ class ThSiameseCombine(th.nn.Module):
   def forward(self, paths):
     path1 = paths[0]
     path2 = paths[1]
-    if self.norm_each:
-      path1 = th.nn.functional.normalize(path1, p=2, dim=1)
-      path2 = th.nn.functional.normalize(path2, p=2, dim=1)
+#    if self.norm_each:
+#      path1 = th.nn.functional.normalize(path1, p=2, dim=1)
+#      path2 = th.nn.functional.normalize(path2, p=2, dim=1)
       
     if self.method == 'sub':
       th_x = path1 - path2
+    elif self.method == 'add':
+      th_x = path1 + path2
     elif self.method == 'cat':
       th_x = th.cat((path1, path2), dim=1)
     elif self.method == 'abs':
@@ -288,16 +437,32 @@ class ThSiameseCombine(th.nn.Module):
     elif self.method == 'sqr':
       th_x = th.pow(path1 - path2, 2)
     elif self.method == 'eucl':
-      th_x = th.pairwise_distance(path1, path2, keepdim=True)
+      th_x = th.pairwise_distance(path1, path2, keepdim=True)    
     
+    if self.activ is not None:
+      th_x = self.activ(th_x)
+      
     return th_x
   
+  def get_activation(self, act):
+    if act == 'relu':
+      return th.nn.ReLU()
+    elif act == 'tanh':
+      return th.nn.Tanh()
+    elif act == 'selu':
+      return th.nn.SELU()
+    elif act == 'sigmoid':
+      return th.nn.Sigmoid()
+    else:
+      return None
+  
+  
   def __repr__(self):
-    s = self.__class__.__name__ + "(input_dim={}, output_dim={}, method='{}', norm_each={})".format(
+    s = self.__class__.__name__ + "(input_dim={}x2, output_dim={}, method='{}', act={})".format(
         self.input_dim,
         self.output_dim,
         self.method,
-        self.norm_each,
+        self.activ,
         )
     return s
 
@@ -306,6 +471,8 @@ class ThWordEntailModel(th.nn.Module):
                input_dim,
                siam_lyrs,
                siam_norm,
+               siam_bn,
+               comb_activ,
                separate_paths,
                layers,
                input_drop,
@@ -325,6 +492,8 @@ class ThWordEntailModel(th.nn.Module):
     self.separate = separate_paths
     self.loss_type = loss_type
     self.siam_norm = siam_norm
+    self.siam_bn = siam_bn
+    self.comb_activ = comb_activ
     
     if self.loss_type == 'cl' and (layers != [] or siam_lyrs == [] or separate_paths):
       raise ValueError("Cannot have siamese nets with CL with this config: layers={}  siam_lyrs={} sep={}".format(
@@ -341,19 +510,23 @@ class ThWordEntailModel(th.nn.Module):
     
     for path_no in range(len(paths)):
       last_output = self.path_input
+      paths[path_no].append(InputPlaceholder(self.path_input))
       if input_drop > 0:
         paths[path_no].append(th.nn.Dropout(input_drop))
       if bn_inputs:
         paths[path_no].append(th.nn.BatchNorm1d(last_output))
       if len(siam_lyrs) > 0:
         for i, layer in enumerate(siam_lyrs):
-          paths[path_no].append(th.nn.Linear(last_output, layer, bias=not bn))
-          if bn:
+          paths[path_no].append(th.nn.Linear(last_output, layer, bias=not self.siam_bn))
+          if self.siam_bn:
             paths[path_no].append(th.nn.BatchNorm1d(layer))
-          paths[path_no].append(self.get_activation(activ))
-          if other_drop > 0:
-            paths[path_no].append(th.nn.Dropout(other_drop))
+          if i < (len(siam_lyrs) - 1):
+            paths[path_no].append(self.get_activation(activ))
+            if other_drop > 0:
+              paths[path_no].append(th.nn.Dropout(other_drop))
           last_output = layer
+      if self.siam_norm:
+        paths[path_no].append(L2_Normalizer())
     if self.separate :
       self.path1_layers = th.nn.ModuleList(paths[0])
       self.path2_layers = th.nn.ModuleList(paths[1])
@@ -361,7 +534,11 @@ class ThWordEntailModel(th.nn.Module):
       self.siam_layers = th.nn.ModuleList(paths[0])
       
     
-    siam_combine = ThSiameseCombine(last_output, self.smethod, norm_each=self.siam_norm)
+    siam_combine = PathsCombiner(
+        last_output, 
+        method=self.smethod, 
+        activ=self.comb_activ,
+        )
     last_output = siam_combine.output_dim
     post_lyrs = [siam_combine]    
     if self.loss_type != 'cl':
@@ -420,14 +597,17 @@ class ThWordEntailModel(th.nn.Module):
 
 class WordEntailClassifier():
   def __init__(self, 
+               model_name,
                siam_lyrs,
                s_l2,
+               s_bn,
+               c_act,
                separ,
                layers,                 
-               input_drop,
-               other_drop,
+               inp_drp,
+               o_drp,
                bn,
-               bn_inputs,
+               bn_inp,
                activ,
                x_dev,
                y_dev,
@@ -435,6 +615,8 @@ class WordEntailClassifier():
                rev,
                lr,
                loss,
+               bal,
+               cl_m=1,
                lr_decay=0.5,
                batch=256,
                l2_strength=0,
@@ -444,13 +626,13 @@ class WordEntailClassifier():
                optim=th.optim.Adam,
                device=th.device("cuda" if th.cuda.is_available() else "cpu"),
                ):
-    self.input_drop = input_drop
+    self.model_name = model_name
     self.layers = layers
     self.siam_lyrs = siam_lyrs
-    self.input_drop = input_drop
-    self.other_drop = other_drop
+    self.input_drop = inp_drp
+    self.other_drop = o_drp
     self.bn = bn
-    self.bn_inputs = bn_inputs
+    self.bn_inputs = bn_inp
     self.activ=activ    
     self.max_epochs = max_epochs
     self.x_dev = x_dev
@@ -468,6 +650,10 @@ class WordEntailClassifier():
     self.separate_paths = separ
     self.loss_type = loss
     self.siam_norm = s_l2
+    self.siam_bn = s_bn
+    self.comb_activ = c_act
+    self.margin = cl_m
+    self.use_balancing = bal
     if loss == 'cl' and not rev:
       raise ValueError("CL must receive reversed targets")
     return
@@ -488,6 +674,8 @@ class WordEntailClassifier():
         smethod=self.siamese_method,
         siam_norm=self.siam_norm,
         loss_type=self.loss_type,
+        siam_bn=self.siam_bn,
+        comb_activ=self.comb_activ,
         )
     return model    
       
@@ -499,34 +687,48 @@ class WordEntailClassifier():
     n_obs = X.shape[0]
     # here is a trick: we consider the words that entail those that have
     # minimal distance if using siamese
-    y = np.array(y).reshape(-1,1).astype(np.float32)
+    np_y = np.array(y).reshape(-1,1)
     if self.reverse_target:
-      y = 1 - y
+      np_y = 1 - np_y
     self.input_dim = X.shape[-1]
     X = th.tensor(X, dtype=th.float32)
-    y = th.tensor(y, dtype=th.float32)
+    y = th.tensor(np_y, dtype=th.float32)
     dataset = th.utils.data.TensorDataset(X, y)
+    
+    sampler = None
+    if self.use_balancing:
+      cls_0 = (np_y == 0).sum()
+      cls_1 = np_y.shape[0] - cls_0
+      cls_weights = 1 / np.array([cls_0, cls_1])
+      weights = [cls_weights[i] for i in np_y.ravel()]
+      sampler = th.utils.data.sampler.WeightedRandomSampler(weights, num_samples=len(weights))
+      
     dataloader = th.utils.data.DataLoader(
-        dataset, batch_size=self.batch_size, shuffle=True,
-        pin_memory=True)
+        dataset, 
+        batch_size=self.batch_size, 
+        shuffle=sampler is None,
+        pin_memory=True,
+        sampler=sampler,
+        )
     # Optimization:
     if self.loss_type == 'bce':
       loss = th.nn.BCEWithLogitsLoss()
     elif self.loss_type == 'cl':
-      self.margin = 1.0
-      loss = self._constrastive_loss
+      loss = ConstrativeLoss(margin=self.margin)
+    elif self.loss_type == 'fl':
+      loss = FocalLoss()
     else:
       raise ValueError('unknown loss {}'.format(self.loss_type))
     if not hasattr(self, "model"):
       self.model = self.define_graph()
-      print("Initialized model {}:\n{}\n{}".format(
-          self.model.__class__.__name__,
+      P("Initialized model {}:\n{}\n{}".format(
+          self.model_name,
           textwrap.indent(str(self.model), " " * 2),
-          textwrap.indent("Loss: " + (str(loss) if loss.__class__.__name__ != 'method' else loss.__name__), " " * 2),
+          textwrap.indent("Loss: " + (str(loss) if loss.__class__.__name__ != 'method' else loss.__name__) + "\n", " " * 2),
           ))
 
     else:
-      print("\rFitting already loaded model...\t\t\t", end='', flush=True)
+      P("\rFitting already loaded model...\t\t\t", end='', flush=True)
     self.model.to(self.device)
     self.model.train()
     optimizer = self.optimizer(
@@ -565,15 +767,19 @@ class WordEntailClassifier():
         patience = 0
         fails = 0
         last_best_fn = best_fn
-        best_fn = "models/_tmp_we_ep_{:03}_f1_{:.4f}.th".format(epoch, macrof1)
+        best_fn = "models/{}_e{:03}_F{:.4f}.th".format(
+            self.model_name, epoch, macrof1)
         best_epoch = epoch
         P("\rFound new best macro-f1 {:.4f} > {:.4f} at epoch {}. \t\t\t".format(macrof1, best_f1, epoch))
         best_f1 = macrof1
         th.save(self.model.state_dict(), best_fn)
         th.save(optimizer.state_dict(), best_fn + '.optim')
         if last_best_fn != '':
-          os.remove(last_best_fn)
-          os.remove(last_best_fn + '.optim')
+          try:
+            os.remove(last_best_fn)
+            os.remove(last_best_fn + '.optim')
+          except:
+            pass
       else:
         patience += 1
         fails += 1
@@ -586,7 +792,7 @@ class WordEntailClassifier():
           optimizer.load_state_dict(th.load(best_fn + '.optim'))
           for param_group in optimizer.param_groups:
             param_group['lr'] = lr_new
-          P("\nPatience reached {}/{} - reloaded from ep {} reduced lr from {:.1e} to {:.1e}".format(
+          P("\nPatience reached {}/{}  -  reloaded from ep {} reduced lr from {:.1e} to {:.1e}".format(
               patience, self.max_patience, best_epoch, lr_old, lr_new))
           patience = 0
           
@@ -608,48 +814,69 @@ class WordEntailClassifier():
       self.model.to(self.device)
       X = th.tensor(X, dtype=th.float).to(self.device)
       preds = self.model(X)
-      if self.loss_type == 'bce':
-        result = th.sigmoid(preds).cpu().numpy()
+      if self.loss_type in ['bce', 'fl']:
+        result = th.sigmoid(preds).cpu().numpy().ravel()
+        if self.reverse_target:
+          result = 1 - result
       else:
-        result = preds.cpu().numpy()
+        result = preds.cpu().numpy().ravel()
       return result
 
 
   def predict(self, X):
     probs = self.predict_proba(X)
-    if self.loss_type == 'bce':
-      classes = (probs >= 0.5).astype(np.int8).ravel()
+    if self.loss_type in ['bce', 'fl']:
+      classes = (probs >= 0.5).astype(np.int8)
+    elif self.loss_type == 'cl':
+      thr = self.margin / 2
+      classes = (probs >= thr).astype(np.int8)
       if self.reverse_target:
         # we have to reverse
         classes = 1 - classes
     else:
-      thr = self.margin / 2
-      classes = (probs >= thr).astype(np.int8).ravel()
-      if self.reverse_target:
-        # we have to reverse
-        classes = 1 - classes
+      raise ValueError('UNK LOSS')
     return classes
   
   
-  def _constrastive_loss(self, dist, gold):
-    th_d_sq = th.pow(dist, 2)
-    th_d_sqm = th.pow(th.clamp(self.margin - dist, 0), 2)
-    loss = (1 - gold) * th_d_sq + gold * th_d_sqm
-    return loss.mean()
+  
+
+  
+  
+  
+  
+class EnsembleWrapper():
+  def __init__(self, models, use_proba=False):
+    self.models = models
+    self.use_proba = use_proba
+    names = [x.model_name.split('_')[1] for x in self.models if hasattr(x, "model_name")]
+    self.model_name = "E_" + "_".join(names)
+    P("Initialized ensemble model with {} models: {}".format(
+        len(self.models),
+        names))
+  
+  def predict(self, x):
+    preds = []
+    for model in self.models:
+      if self.use_proba:
+        if model.loss_type != 'cl':
+          model_preds = model.predict_proba(x)
+        else:
+          model_preds = []
+      else:
+        model_preds = model.predict(x)
+      if len(model_preds) > 0:
+        preds.append(model_preds)        
+    final_preds_cat = np.vstack(preds).T
+    final_preds = final_preds_cat.mean(axis=1)
+    return (final_preds >= 0.5).astype(np.uint8)
+  
+    
+  def fit(self, x, y):
+    P("****** Ensemble model passing fit call ******")
+    return self
     
 
-def add_res(dct, model_name, score, **kwargs):
-  n_existing = len(dct['MODEL'])
-  dct['MODEL'].append(model_name)
-  dct['SCORE'].append(score)
-  for key in kwargs:
-    if key not in dct:
-      dct[key] = [' ' ] * n_existing
-    dct[key].append(kwargs[key])
-  for k in dct:
-    if len(dct[k]) < (n_existing + 1):
-      dct[k] = dct[k] + [' '] * ((n_existing + 1) - len(dct[k]))
-  return dct
+
 
 
 def get_baselines(dct_res, trn, dev):
@@ -673,29 +900,38 @@ def get_baselines(dct_res, trn, dev):
       concat, 
   #    summar,
       ]
-  
-  for vcf in baseline_vector_combo_funcs:
-    for model_name in baseline_model_facts:
-      P("=" * 70)
-      P("Running baseline model '{}' with '{}'".format(
-          model_name, vcf.__name__))
-      model = baseline_model_facts[model_name]()
-      res = nli.wordentail_experiment(
-          train_data=trn,
-          assess_data=dev,
-          vector_func=lower_glove_vec,
-          vector_combo_func=vcf,
-          model=model,
-          )
-      score = res['macro-F1']
-      add_res(dct_res, model_name, score, VECT=vcf.__name__)
-      df = pd.DataFrame(dct_results).sort_values('SCORE')
-      P("\nResults so far:\n{}\n".format(df))
+  for vf in [l_glv, l_glv_rep]:
+    for vcf in baseline_vector_combo_funcs:
+      for model_name in baseline_model_facts:
+        P("=" * 70)
+        P("Running baseline model '{}' with '{}'".format(
+            model_name, vcf.__name__))
+        model = baseline_model_facts[model_name]()
+        x_d, y_d = nli.word_entail_featurize(
+            data=dev, 
+            vector_func=vf, 
+            vector_combo_func=vcf
+            )
+        res = nli.wordentail_experiment(
+            train_data=trn,
+            assess_data=dev,
+            vector_func=vf,
+            vector_combo_func=vcf,
+            model=model,
+            )
+        score = res['macro-F1']
+        y_pred = model.predict(x_d)
+        report = classification_report(y_d, y_pred, digits=3, output_dict=True)
+        assert score == report['macro avg']['f1-score']
+        P_REC = report['1']['recall']
+        add_res(dct_res, model_name, score, P_REC=P_REC, VF=vf.__name__)
+        df = pd.DataFrame(dct_results).sort_values('SCORE')
+        P("\nResults so far:\n{}\n".format(df))
   return dct_res
 
 
 def run_grid_search(dct_res, trn, dev):
-  grid = {
+  grid_non_CL = {
       "siam_lyrs" : [
           [],
           [128],
@@ -710,17 +946,17 @@ def run_grid_search(dct_res, trn, dev):
           ],
       
       "layers" : [
-          [],
           [256, 128, 64],
           [128, 32],
+          [512, 256],
           ],
           
-      "input_drop" : [
+      "inp_drp" : [
           0,
           0.3
           ],
   
-      "other_drop" : [
+      "o_drp" : [
           0,
           0.2,
           0.5,
@@ -731,7 +967,7 @@ def run_grid_search(dct_res, trn, dev):
           False
           ],
           
-      "bn_inputs" : [
+      "bn_inp" : [
           True,
           False
           ],
@@ -744,13 +980,13 @@ def run_grid_search(dct_res, trn, dev):
           ],
           
       "lr"  :[
+          0.01,
           0.005,
-          0.0005,
-          0.00005,
           ],
           
       "s_comb" : [
           'sub',
+          'add',
           'cat',
           'abs',
           'sqr',
@@ -762,6 +998,11 @@ def run_grid_search(dct_res, trn, dev):
           False,
           ],
           
+      's_bn' :[
+          True,
+          False
+          ],
+          
       'rev' :[
           True,
           False,
@@ -769,11 +1010,117 @@ def run_grid_search(dct_res, trn, dev):
           
       'loss' : [
           'bce',
+          'fl',
+          ],
+
+      'c_act' : [
+          None
+          ],
+          
+          
+      'vector_func':[
+          l_glv,
+          l_glv_rep
+          ],
+          
+      'bal' : [
+          True,
+          False,
+          ],
+          
+          
+                
+        
+      }
+
+  grid_CL= {
+      "siam_lyrs" : [
+#          [128],
+          [256, 128],
+#          [256, 128, 64],
+          [512, 256],
+          ],
+          
+      "separ" : [
+          False,
+          ],
+      
+      "layers" : [
+          [],
+          ],
+          
+      "inp_drp" : [
+          0,
+          0.3
+          ],
+  
+      "o_drp" : [
+          0,
+          0.2,
+          0.5,
+          ],
+          
+      "bn" : [
+          True,
+          False
+          ],
+          
+      "bn_inp" : [
+          True,
+          False
+          ],
+          
+      "activ" : [
+#          'tanh',
+          'relu',
+#          'selu',
+#          'sigmoid',
+          ],
+          
+      "lr"  :[
+          0.0001,
+          ],
+          
+      'c_act' : [
+          'tanh',
+          'relu',
+          ],
+          
+      "s_comb" : [
+          'eucl',
+          ],
+      
+      's_l2' : [
+          True,
+          False,
+          ],
+
+      's_bn' : [
+          True,
+          False
+          ],
+          
+      'rev' :[
+          True,
+          ],
+          
+      'loss' : [
           'cl',
           ],
-        
+          
+      'vector_func':[
+          l_glv,
+          l_glv_rep
+          ],
+          
+      'bal' : [
+          True,
+          False,
+          ]
       
+        
       }
+
         
   def filter_func(grid_iter):
     test_contrastive_loss = (
@@ -785,61 +1132,176 @@ def run_grid_search(dct_res, trn, dev):
         )
     if grid_iter['loss'] == 'cl' and test_contrastive_loss:
       return False
-    if grid_iter['layers'] == [] and grid_iter['other_drop'] != 0 :
+    if grid_iter['layers'] == [] and grid_iter['siam_lyrs'] == [] and grid_iter['other_drop'] != 0 :
+      return False
+    if grid_iter['layers'] != [] and grid_iter['s_comb'] == 'eucl':
+      return False
+    if not grid_iter['separ'] and grid_iter['siam_lyrs'] == []:
       return False
     return True
   
-  options = prepare_grid_search(grid, valid_fn=filter_func, nr_trials=100)
+  options1 = prepare_grid_search(grid_non_CL, valid_fn=filter_func, nr_trials=350)
+  options2 = prepare_grid_search(grid_CL, valid_fn=filter_func, nr_trials=250)
+  options = options1 + options2
+  options = [options[x] for x in np.random.choice(len(options), size=len(options), replace=False)]
   timings = []
   t_left = np.inf
-  for grid_iter, option in enumerate(options):
-    model_name = 'H3_v1_{:02}'.format(grid_iter+1)
+  top_models = []
+  k=3
+  last_ensemble = ''
+  for grid_iter, option in enumerate(options):    
+    model_name = 'H3v2_{:03d}'.format(grid_iter+1)
     P("\n\n" + "=" * 70)
     P("Running grid search iteration {}/{} '{}': {}".format(
         grid_iter+1, len(options), model_name, option))
     P("  Time left for grid search completion: {:.1f} hrs".format(t_left / 3600))
   
-    vcf = concat
+    vector_func = option.pop('vector_func')
     _t_start = time()
     #### we need this ...
     x_dev, y_dev = nli.word_entail_featurize(
         data=dev, 
-        vector_func=lower_glove_vec, 
+        vector_func=vector_func, 
         vector_combo_func=arr
         )
     model = WordEntailClassifier(
+        model_name=model_name,
         x_dev=x_dev,
         y_dev=y_dev,
         **option)
     res = nli.wordentail_experiment(
             train_data=trn,
             assess_data=dev,
-            vector_func=lower_glove_vec,
+            vector_func=vector_func,
             vector_combo_func=arr,
             model=model,
-            max_patience=20,
             )
     score = res['macro-F1']
+    top_models = maybe_add_top_model(
+        top_models=top_models,
+        model=model,
+        score=score,
+        k=k
+        )
+    y_pred = model.predict(x_dev)
+    report = classification_report(y_dev, y_pred, digits=3, output_dict=True)
+    assert score == report['macro avg']['f1-score']
+    P_REC = report['1']['recall']
     ####
     t_res = time() - _t_start
     timings.append(t_res)
     t_left = (len(options) - grid_iter - 1) * np.mean(timings)
-    dct_results = add_res(
+    dct_res = add_res(
         dct=dct_res, 
         model_name=model_name, 
         score=score, 
-        VECT=vcf.__name__,
+        P_REC=P_REC,
+        VF=vector_func.__name__,
         **option)
-    df = pd.DataFrame(dct_results).sort_values('SCORE')
-    P("Results so far:\n{}".format(df))
+    if len(top_models) >= k:
+      P("Testing ensemble so far...")
+      ensemble = EnsembleWrapper([x[0] for x in top_models])
+      if last_ensemble != ensemble.model_name:
+        last_ensemble = ensemble.model_name
+        res = nli.wordentail_experiment(
+                train_data=trn,
+                assess_data=dev,
+                vector_func=vector_func,
+                vector_combo_func=arr,
+                model=ensemble,
+                )
+        score = res['macro-F1']
+        y_pred = ensemble.predict(x_dev)
+        report = classification_report(y_dev, y_pred, digits=3, output_dict=True)
+        assert score == report['macro avg']['f1-score']
+        P_REC = report['1']['recall']
+        dct_res = add_res(
+          dct=dct_res, 
+          model_name=ensemble.model_name, 
+          score=score, 
+          P_REC=P_REC,
+          VF=vector_func.__name__,
+          )      
+    df = pd.DataFrame(dct_res).sort_values('SCORE')
+    P("Results so far:\n{}".format(df.iloc[-50:]))
+    df.to_csv("models/"+_date+"_results.csv")
+  # end grid
+  return df
+      
+def vect_neighbors(v, df):
+  import scipy
+  distfunc = scipy.spatial.distance.cosine
+  dists = df.apply(lambda x: distfunc(v, x), axis=1)
+  return dists.sort_values().head()
+
+
+def ensemble_train_test(lst_models_params, trn, dev, vect_func):
+  x_trn, y_trn = nli.word_entail_featurize(
+      data=trn, 
+      vector_func=vect_func, 
+      vector_combo_func=arr
+      )
+  x_dev, y_dev = nli.word_entail_featurize(
+      data=dev, 
+      vector_func=vect_func, 
+      vector_combo_func=arr
+      )
+  clfs = []
+  res = {'MODEL':[],'SCORE':[]}
+  for i, model_params in enumerate(lst_models_params):
+    model_name = 'M_{}'.format(i+1)
+    clf = WordEntailClassifier(model_name=model_name, 
+                               x_dev=x_dev,
+                               y_dev=y_dev,
+                               **model_params)
+    clf.fit(x_trn, y_trn)
+    clfs.append(clf)
+    y_pred = clf.predict(x_dev)
+    report = classification_report(y_dev, y_pred, digits=3, output_dict=True)
+    res = add_res(
+        res, 
+        model_name, 
+        score=report['macro avg']['f1-score'] * 100,
+        pos_f1=report['1']['f1-score'] * 100,
+        pos_rc=report['1']['recall'] * 100,
+        pos_pr=report['1']['precision'] * 100,
+        )
+    df = pd.DataFrame(res).sort_values('SCORE')
+    P("Results:\n{}".format(df))
+    
+  ens = EnsembleWrapper(
+      clfs, 
+      use_proba=True
+      )
+  y_pred = ens.predict(x_dev)
+  report = classification_report(y_dev, y_pred, digits=3, output_dict=True)
+  res = add_res(
+      res, 
+      ens.model_name, 
+      score=report['macro avg']['f1-score'] * 100,
+      pos_f1=report['1']['f1-score'] * 100,
+      pos_rc=report['1']['recall'] * 100,
+      pos_pr=report['1']['precision'] * 100,
+      )
+  df = pd.DataFrame(res).sort_values('SCORE')
+  P("Results:\n{}".format(df))
+  return ens
+  
 
 ###############################################################################
 ###############################################################################
 ###############################################################################
-TEST_GLOVE_VS_TRAIN_DEV = True
-CALC_BASELINES = True
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+pd.set_option('precision', 4)  
+  
+CALC_BASELINES = False
 RUN_GRID = True
 TEST_RUN = False
+TEST_ENSEMBLE = False
+
+
 utils.fix_random_seeds()
 GLOVE_DIM = 300
 if "GLOVE" not in globals():
@@ -852,11 +1314,31 @@ with open(wordentail_filename) as f:
   
 train_data = wordentail_data['word_disjoint']['train']
 dev_data = wordentail_data['word_disjoint']['dev']
-dct_results = OrderedDict({'MODEL':[], 'SCORE':[]})
+dct_results = OrderedDict({'MODEL':[], 'SCORE':[], 'P_REC': []})
 
 
-if TEST_GLOVE_VS_TRAIN_DEV:
-  test_glove_vs_data(train_data, dev_data)
+maybe_find_glove_replacement('aromatization')
+glv_analysis = test_glove_vs_data(train_data, dev_data)
+dct_data = glv_analysis[0]
+miss_train, miss_dev = glv_analysis[1]
+
+if False:
+  if 'df_GLOVE' not in globals():
+    df_GLOVE = pd.DataFrame.from_dict(GLOVE, orient='index')
+  P("Train replacements:")
+  for w in miss_train:
+    repl = l_glv_rep(w)
+    P("replacement for '{}':".format(w))
+    P(vect_neighbors(repl, df_GLOVE))
+    P("")
+  
+  P("Dev replacements:")
+  for w in miss_dev:
+    repl = l_glv_rep(w)
+    P("replacement for '{}':".format(w))
+    P(vect_neighbors(repl, df_GLOVE))
+    P("")
+
 
 
 if CALC_BASELINES:
@@ -869,37 +1351,178 @@ if RUN_GRID:
 
 ##############
 if TEST_RUN:
-  x_dev, y_dev = nli.word_entail_featurize(
-      data=dev_data, 
-      vector_func=lower_glove_vec, 
-      vector_combo_func=arr
-      )
+  dct_res = {
+      "DATA" : [],
+      "VF" : [],
+      "Macro-F1" : [],
+      "Pos F1" : [],
+      "Pos Recall" : [],
+      "Pos Precis" : [],
+      }
+  def _log_data_result(dn, mf1, pf1, rec, prec, vf):
+    dct_res['DATA'].append(dn)
+    dct_res['VF'].append(vf.__name__)
+    dct_res['Macro-F1'].append(mf1)
+    dct_res['Pos F1'].append(pf1)
+    dct_res['Pos Recall'].append(rec)
+    dct_res['Pos Precis'].append(prec)
+
+  for VECT_FUNC in [l_glv]: #, l_glv_rep]:
+    _x_trn, _y_trn = nli.word_entail_featurize(
+        data=train_data, 
+        vector_func=VECT_FUNC, 
+        vector_combo_func=arr
+        )
+    _x_dev, _y_dev = nli.word_entail_featurize(
+        data=dev_data, 
+        vector_func=VECT_FUNC, 
+        vector_combo_func=arr
+        )
   
-  test_model = WordEntailClassifier(
-      siam_lyrs=[256,256],
+      
+    test_model = WordEntailClassifier(
+      siam_lyrs=[512, 256],
       s_l2=False,
-      separ=False,
-      layers=[], 
-      input_drop=0.2,
-      other_drop=0.5,
-      bn=False,
-      bn_inputs=False,
-      activ='tanh',
-      x_dev=x_dev,
-      y_dev=y_dev,
-      s_comb='eucl',
-      loss='cl',
+      s_bn=True,
+      bn=True,
+      bn_inp=True,
+      c_act=None,
+      separ=True,
+      layers=[128, 32],
+      inp_drp=0.3,
+      o_drp=0.5,
+      activ='sigmoid',
+      s_comb='abs',
+      loss='bce',
       rev=True,
-      lr=0.0001,      
+      lr=0.005, 
       batch=256,
-      optim=th.optim.Adam
+      
+      bal=True,
+
+      cl_m=1,
+      
+      x_dev=_x_dev,
+      y_dev=_y_dev,
+      model_name='test',
+      optim=th.optim.Adam  
       )
+    
+    res = nli.wordentail_experiment(
+          train_data=train_data,
+          assess_data=dev_data,
+          vector_func=VECT_FUNC,
+          vector_combo_func=arr,
+          model=test_model,    
+        )
+    
+    
+    
+    
+    y_pred = test_model.predict(_x_dev)
+    report = classification_report(_y_dev, y_pred, digits=3, output_dict=True)
+    _log_data_result(
+        'dev_full', 
+        report['macro avg']['f1-score'] * 100,
+        report['1']['f1-score'] * 100,
+        report['1']['recall'] * 100,
+        report['1']['precision'] * 100,
+        VECT_FUNC,
+        )
+    y_pred = test_model.predict(_x_trn)
+    report = classification_report(_y_trn, y_pred, digits=3, output_dict=True)
+    _log_data_result(
+        'train_full', 
+        report['macro avg']['f1-score'] * 100,
+        report['1']['f1-score'] * 100,
+        report['1']['recall'] * 100,
+        report['1']['precision'] * 100,
+        VECT_FUNC,
+        )
+    
+    for test_name in dct_data:
+      P("\n\nTesting on '{}':".format(test_name))
+      _x, _y = nli.word_entail_featurize(
+          data=dct_data[test_name], 
+          vector_func=VECT_FUNC, 
+          vector_combo_func=arr
+          )
+      _yh = test_model.predict(_x)
+      P(classification_report(_y, _yh, digits=3))
+      report = classification_report(_y, _yh, digits=3, output_dict=True)
+      _log_data_result(
+          test_name, 
+          report['macro avg']['f1-score'] * 100,
+          report['1']['f1-score'] * 100,
+          report['1']['recall'] * 100,
+          report['1']['precision'] * 100,
+          VECT_FUNC,
+          )
+    df = pd.DataFrame(dct_res).sort_values('Macro-F1')
+    P(df)
+    
   
-  res = nli.wordentail_experiment(
-        train_data=train_data,
-        assess_data=dev_data,
-        vector_func=lower_glove_vec,
-        vector_combo_func=arr,
-        model=test_model,    
+if TEST_ENSEMBLE:
+  lst_models =[
+      {'siam_lyrs': [512, 256],
+       's_l2': False,
+       's_bn': True,
+       'bn': True,
+       'bn_inp': True,
+       'c_act': None,
+       'separ': True,
+       'layers': [128, 32],
+       'inp_drp': 0.3,
+       'o_drp': 0.5,
+       'activ': 'sigmoid',
+       's_comb': 'abs',
+       'loss': 'bce',
+       'bal' : xxx,
+       'rev': True,
+       'lr': 0.005,
+       'batch': 256
+       },
+       
+      {'siam_lyrs': [512, 256],
+       's_l2': False,
+       's_bn': True,
+       'bn': True,
+       'bn_inp': True,
+       'c_act': None,
+       'separ': True,
+       'layers': [128, 32],
+       'inp_drp': 0.3,
+       'o_drp': 0.5,
+       'activ': 'sigmoid',
+       's_comb': 'abs',
+       'loss': 'fl',
+       'bal' : xxx,
+       'rev': True,
+       'lr': 0.005,
+       'batch': 256},
+       
+      {'siam_lyrs': [128],
+       's_l2': False,
+       's_bn': False,
+       'bn': True,
+       'bn_inp': False,
+       'c_act': None,
+       'separ': True,
+       'layers': [256, 128, 64],
+       'inp_drp': 0.3,
+       'o_drp': 0.3,
+       'activ': 'relu',
+       's_comb': 'cat',
+       'loss': 'bce',
+       'bal' : xxx,
+       'rev': False,
+       'lr': 0.005,
+       'batch': 256},
+      ]
+  
+  ens_model = ensemble_train_test(
+      lst_models_params=lst_models,
+      trn=train_data, 
+      dev=dev_data, 
+      vect_func=l_glv,
       )
-  print(res['macro-F1'])

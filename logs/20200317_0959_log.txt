@@ -1,22 +1,0 @@
-Found new best macro-f1 0.5935 > 0.0000 at epoch 1. Saving model and optimizer.	
-Found new best macro-f1 0.6391 > 0.5935 at epoch 2. Saving model and optimizer.	
-Found new best macro-f1 0.6654 > 0.6391 at epoch 3. Saving model and optimizer.	
-Found new best macro-f1 0.6720 > 0.6654 at epoch 4. Saving model and optimizer.	
-Found new best macro-f1 0.6763 > 0.6720 at epoch 5. Saving model and optimizer.	
-Found new best macro-f1 0.6828 > 0.6763 at epoch 6. Saving model and optimizer.	
-Found new best macro-f1 0.6901 > 0.6828 at epoch 9. Saving model and optimizer.	
-Found new best macro-f1 0.6924 > 0.6901 at epoch 20. Saving model and optimizer.	
-Found new best macro-f1 0.7075 > 0.6924 at epoch 23. Saving model and optimizer.	
-Found new best macro-f1 0.7119 > 0.7075 at epoch 27. Saving model and optimizer.	
-Found new best macro-f1 0.7127 > 0.7119 at epoch 28. Saving model and optimizer.	
-Found new best macro-f1 0.7149 > 0.7127 at epoch 29. Saving model and optimizer.	
-Found new best macro-f1 0.7225 > 0.7149 at epoch 35. Saving model and optimizer.	
-Found new best macro-f1 0.7306 > 0.7225 at epoch 41. Saving model and optimizer.	
-Found new best macro-f1 0.7311 > 0.7306 at epoch 51. Saving model and optimizer.	
-
-Patience reached 0/10 - reloaded from ep 51 reduced lr from 5.0e-04 to 2.5e-04
-
-Patience reached 0/10 - reloaded from ep 51 reduced lr from 2.5e-04 to 1.3e-04
-
-Max fails 31/30 reached!
-Loading model from epoch 51 with macro-f1 0.7311

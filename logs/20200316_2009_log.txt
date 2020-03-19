@@ -1,6 +1,0 @@
-Generated 50 random grid-search iters out of a total of iters
-
-
-======================================================================
-Running grid search iteration 1/50 'H3_v1_01': {'dual_path': None, 'layers': [64], 'input_drop': 0.3, 'other_drop': 0.3, 'bn': False, 'bn_inputs': True, 'activ': 'tanh'}
-  Time left for grid search completion: inf hrs

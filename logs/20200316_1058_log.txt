@@ -1,4 +1,0 @@
-GloVe-300 loaded.
-train_cross found in globals
-dev_cross found in globals
-train_glove_sents NOT loaded

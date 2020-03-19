@@ -1,3 +1,0 @@
-GloVe-300 loaded.
-======================================================================
-Running sent encoders with learned embeddings...

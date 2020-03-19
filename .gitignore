@@ -79,3 +79,7 @@ rel_ext_data*
 *.th
 
 *.clf
+
+logs/
+
+models/

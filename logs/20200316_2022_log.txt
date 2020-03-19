@@ -1,14 +1,0 @@
-Training model TorchDeepNeuralClassifier
-Found new best macro-f1 0.4706 > 0.0000 at epoch 1			
-
-Max patience 11/10 reached!
-Loading model from epoch 1 with macro-f1 0.4706
-              precision    recall  f1-score   support
-
-           0      0.889     1.000     0.941      1910
-           1      0.000     0.000     0.000       239
-
-    accuracy                          0.889      2149
-   macro avg      0.444     0.500     0.471      2149
-weighted avg      0.790     0.889     0.836      2149
-

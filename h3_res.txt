@@ -1,3 +1,5 @@
+1st experiment
+
            MODEL     SCORE    VECT  dual_path          layers input_drop other_drop     bn bn_inputs activ     eta
 819    H3_v1_815  0.724020  concat       None            [64]        0.3          0   True     False  relu   0.005
 126    H3_v1_122  0.724329  concat  [128, 64]       [128, 64]        0.3          0   True      True  selu  0.0005
@@ -40,3 +42,102 @@
 887    H3_v1_883  0.747550  concat       None       [128, 32]        0.3        0.5  False     False  relu   0.005
 380    H3_v1_376  0.754119  concat      [128]  [256, 128, 64]        0.3        0.3   True      True  relu  0.0005
 
+2nd experiment
+
+           MODEL     SCORE    VECT       siam_lyrs  separ          layers input_drop other_drop     bn bn_inputs    activ      lr s_comb   s_l2    rev loss
+261     H3v1_257  0.100084  concat  [256, 128, 64]  False              []          0        0.2  False     False  sigmoid  0.0005   eucl  False   True   cl
+64       H3v1_60  0.100084  concat  [256, 128, 64]  False              []          0        0.2  False      True  sigmoid  0.0005   eucl  False   True   cl
+393     H3v1_389  0.455318  concat              []   True  [256, 128, 64]        0.3          0   True     False     tanh   5e-05    abs  False   True  bce
+259     H3v1_255  0.470037  concat           [128]  False              []          0        0.2   True     False     selu  0.0005   eucl  False   True   cl
+2      BaseNN_50  0.638647  concat                                                                                                                         
+1    BaseLR_C4L1  0.644517  concat                                                                                                                         
+0    BaseLR_C6L2  0.645644  concat                                                                                                                         
+4     BaseNN_300  0.654306  concat                                                                                                                         
+3     BaseNN_150  0.655262  concat                                                                                                                         
+218     H3v1_214  0.669272  concat      [256, 128]  False              []        0.3        0.5  False      True     selu  0.0005   eucl   True   True   cl
+233     H3v1_229  0.669328  concat  [256, 128, 64]  False              []          0        0.5  False      True     relu  0.0005   eucl   True   True   cl
+417     H3v1_413  0.673463  concat  [256, 128, 64]  False              []        0.3        0.2   True      True     relu  0.0005   eucl   True   True   cl
+85       H3v1_81  0.676771  concat      [256, 128]  False              []        0.3          0  False     False     relu  0.0005   eucl  False   True   cl
+186     H3v1_182  0.685790  concat      [256, 128]  False              []        0.3        0.2   True      True  sigmoid  0.0005   eucl   True   True   cl
+230     H3v1_226  0.686211  concat      [256, 128]  False              []          0        0.5  False      True     relu  0.0005   eucl   True   True   cl
+255     H3v1_251  0.721480  concat      [256, 128]  False       [128, 32]          0        0.5   True      True     relu   0.005    cat   True   True  bce
+404     H3v1_400  0.724905  concat              []  False       [128, 32]        0.3        0.5   True      True     relu   0.005    cat   True   True  bce
+33       H3v1_29  0.725952  concat              []   True  [256, 128, 64]          0        0.5  False      True     tanh  0.0005   eucl   True   True  bce
+390     H3v1_386  0.729344  concat              []   True      [512, 256]          0          0   True      True     relu   0.005   eucl   True  False  bce
+350     H3v1_346  0.729885  concat      [256, 128]  False      [512, 256]        0.3        0.2   True     False     relu  0.0005    abs   True  False  bce
+49       H3v1_45  0.734879  concat  [256, 128, 64]   True       [128, 32]        0.3        0.5  False      True     selu  0.0005    abs  False  False  bce
+345     H3v1_341  0.737920  concat      [256, 128]  False      [512, 256]          0        0.5   True     False     relu   0.005    sub   True   True  bce
+297     H3v1_293  0.743336  concat      [512, 256]   True       [128, 32]        0.3        0.5   True      True  sigmoid   0.005    abs  False   True  bce
+
+
+3rd experiment
+
+                            MODEL     SCORE     P_REC    VECT       siam_lyrs  separ          layers input_drop other_drop     bn bn_inputs    activ      lr s_comb   s_l2    rev loss
+242                      H3v2_231  0.686108  0.506276  concat              []  False  [256, 128, 64]        0.3        0.2   True     False     relu   0.005    sub  False   True  bce
+460                      H3v2_449  0.686680  0.397490  concat      [256, 128]   True       [128, 32]        0.3        0.5   True      True     selu  0.0005    sub   True  False  bce
+141                      H3v2_132  0.687299  0.405858  concat           [128]  False       [128, 32]        0.3        0.5  False     False  sigmoid   0.005    cat  False  False  bce
+23                       H3v2_014  0.687666  0.435146  concat      [512, 256]  False              []        0.3          0  False      True     relu  0.0005   eucl  False   True   cl
+37                       H3v2_028  0.687768  0.426778  concat      [256, 128]   True       [128, 32]          0        0.2  False      True     relu   0.005    sub  False   True  bce
+94                       H3v2_085  0.687812  0.422594  concat           [128]   True      [512, 256]        0.3        0.5  False      True     tanh  0.0005    abs  False   True  bce
+485                      H3v2_474  0.688388  0.426778  concat      [512, 256]   True      [512, 256]        0.3        0.2   True     False     tanh  0.0005    abs   True   True  bce
+144                      H3v2_135  0.688573  0.405858  concat      [512, 256]  False  [256, 128, 64]          0        0.2   True      True  sigmoid   0.005    cat  False   True  bce
+351                      H3v2_340  0.688620  0.531381  concat      [512, 256]   True  [256, 128, 64]        0.3        0.5   True     False     tanh   5e-05    abs  False  False  bce
+287                      H3v2_276  0.688622  0.389121  concat      [512, 256]   True      [512, 256]        0.3        0.5  False      True  sigmoid   0.005    sub   True  False  bce
+27                       H3v2_018  0.688746  0.472803  concat           [128]  False      [512, 256]        0.3        0.5  False     False     relu   0.005    sqr   True   True  bce
+315                      H3v2_304  0.689819  0.451883  concat  [256, 128, 64]   True  [256, 128, 64]          0        0.5   True      True     selu  0.0005    cat   True   True  bce
+222                      H3v2_211  0.690499  0.405858  concat  [256, 128, 64]   True       [128, 32]        0.3          0   True      True     relu  0.0005    sub  False  False  bce
+204                      H3v2_193  0.690889  0.426778  concat  [256, 128, 64]   True      [512, 256]          0        0.5  False     False     tanh   0.005    sqr  False  False  bce
+25                       H3v2_016  0.691070  0.564854  concat  [256, 128, 64]  False      [512, 256]          0        0.2   True      True  sigmoid   5e-05    cat   True  False  bce
+195                      H3v2_184  0.691236  0.506276  concat           [128]  False      [512, 256]        0.3        0.2  False      True     relu   0.005    sqr   True   True  bce
+82                       H3v2_073  0.691421  0.531381  concat      [256, 128]  False              []          0        0.5  False      True     relu  0.0005   eucl   True   True   cl
+424                      H3v2_413  0.693357  0.623431  concat              []  False      [512, 256]          0        0.2   True      True     relu   0.005    sub  False   True  bce
+89                       H3v2_080  0.693641  0.518828  concat           [128]  False      [512, 256]          0        0.5   True      True     relu   0.005    sub  False   True  bce
+166                      H3v2_156  0.694033  0.364017  concat      [256, 128]   True      [512, 256]          0          0  False      True     relu   5e-05    cat  False   True  bce
+486                      H3v2_475  0.694061  0.426778  concat      [512, 256]   True       [128, 32]          0          0   True     False     relu   0.005    sqr  False  False  bce
+436                      H3v2_425  0.694443  0.631799  concat      [512, 256]  False      [512, 256]        0.3        0.5   True      True     tanh   0.005    sqr   True  False  bce
+371                      H3v2_360  0.694443  0.631799  concat      [256, 128]  False      [512, 256]          0        0.5  False     False     relu   0.005    sqr   True   True  bce
+464                      H3v2_453  0.694454  0.539749  concat      [256, 128]   True      [512, 256]        0.3        0.5   True      True     relu  0.0005    cat   True  False  bce
+218                      H3v2_207  0.694614  0.430962  concat           [128]  False       [128, 32]        0.3        0.2   True      True     selu   0.005    cat  False   True  bce
+444                      H3v2_433  0.695584  0.443515  concat  [256, 128, 64]   True      [512, 256]        0.3        0.5  False      True     relu   0.005    sqr  False   True  bce
+252                      H3v2_241  0.695979  0.531381  concat      [256, 128]  False  [256, 128, 64]        0.3        0.2  False     False     selu   0.005    sqr   True  False  bce
+482                      H3v2_471  0.696084  0.376569  concat      [512, 256]   True      [512, 256]        0.3        0.5   True     False     selu   0.005    sub  False  False  bce
+254                      H3v2_243  0.696328  0.439331  concat  [256, 128, 64]   True      [512, 256]          0        0.5  False      True     tanh   0.005    sqr   True   True  bce
+271                      H3v2_260  0.696485  0.456067  concat  [256, 128, 64]   True      [512, 256]          0          0  False     False     tanh  0.0005    abs  False   True  bce
+251                      H3v2_240  0.696626  0.728033  concat      [256, 128]  False  [256, 128, 64]        0.3        0.5   True     False     tanh   0.005    sqr   True  False  bce
+461                      H3v2_450  0.696999  0.493724  concat  [256, 128, 64]   True  [256, 128, 64]        0.3        0.5   True      True     selu  0.0005    sub   True   True  bce
+465                      H3v2_454  0.697111  0.456067  concat              []   True      [512, 256]        0.3        0.5   True     False     selu   5e-05    cat   True   True  bce
+217                      H3v2_206  0.697184  0.430962  concat      [512, 256]   True      [512, 256]        0.3          0   True      True     tanh   0.005    cat   True   True  bce
+76                       H3v2_067  0.697388  0.384937  concat              []   True       [128, 32]          0          0  False      True     relu  0.0005    cat   True  False  bce
+124                      H3v2_115  0.697677  0.506276  concat           [128]   True  [256, 128, 64]          0        0.5   True      True     relu  0.0005    cat   True  False  bce
+276                      H3v2_265  0.698228  0.460251  concat              []   True  [256, 128, 64]          0        0.2   True      True     tanh  0.0005    sub  False  False  bce
+59                       H3v2_050  0.699765  0.485356  concat           [128]   True  [256, 128, 64]          0        0.5  False      True     relu   0.005    sub  False   True  bce
+160                      H3v2_150  0.699943  0.397490  concat  [256, 128, 64]  False       [128, 32]        0.3        0.2   True     False  sigmoid   0.005    cat  False   True  bce
+329                      H3v2_318  0.700023  0.493724  concat      [512, 256]   True  [256, 128, 64]          0          0  False     False     selu  0.0005    abs  False  False  bce
+432                      H3v2_421  0.700339  0.548117  concat      [256, 128]  False              []        0.3        0.5  False      True     relu  0.0005   eucl   True   True   cl
+311                      H3v2_300  0.700633  0.531381  concat      [512, 256]  False              []        0.3        0.5  False      True     relu  0.0005   eucl   True   True   cl
+52                       H3v2_043  0.701105  0.430962  concat           [128]   True  [256, 128, 64]        0.3          0  False      True  sigmoid   0.005    sqr   True   True  bce
+135                      H3v2_126  0.701274  0.506276  concat      [256, 128]   True      [512, 256]        0.3          0   True      True     relu   0.005    cat  False  False  bce
+230                      H3v2_219  0.702278  0.497908  concat      [256, 128]   True       [128, 32]        0.3        0.5   True      True     selu   0.005    cat  False   True  bce
+161                      H3v2_151  0.703617  0.435146  concat  [256, 128, 64]   True  [256, 128, 64]          0        0.2   True      True  sigmoid  0.0005    sub  False   True  bce
+336                      H3v2_325  0.703909  0.426778  concat              []  False      [512, 256]          0          0   True     False     relu  0.0005    sub   True   True  bce
+400                      H3v2_389  0.704118  0.397490  concat      [512, 256]  False  [256, 128, 64]        0.3        0.5  False     False     relu   5e-05    cat   True  False  bce
+118                      H3v2_109  0.705411  0.422594  concat  [256, 128, 64]   True       [128, 32]        0.3        0.5  False     False     tanh   0.005    abs   True   True  bce
+292                      H3v2_281  0.706625  0.443515  concat  [256, 128, 64]  False      [512, 256]          0        0.5   True      True     tanh   0.005    cat   True  False  bce
+78                       H3v2_069  0.706741  0.456067  concat  [256, 128, 64]   True      [512, 256]        0.3        0.5   True     False     relu   0.005    cat  False   True  bce
+343                      H3v2_332  0.707141  0.430962  concat           [128]   True      [512, 256]          0        0.2  False      True     relu   0.005    sub  False   True  bce
+106                      H3v2_097  0.711274  0.430962  concat  [256, 128, 64]   True       [128, 32]        0.3          0  False      True     relu  0.0005    sqr   True  False  bce
+21                       H3v2_013  0.714280  0.594142  concat      [512, 256]  False      [512, 256]        0.3        0.2   True     False     relu   0.005    sub  False  False  bce
+22   E_H3v2_013_H3v2_013_H3v2_013  0.714280  0.594142                                                                                                                                 
+146                      H3v2_137  0.715946  0.502092  concat      [512, 256]  False  [256, 128, 64]        0.3          0   True      True     tanh  0.0005    cat  False  False  bce
+147  E_H3v2_137_H3v2_137_H3v2_137  0.715946  0.502092                                                                                                                                 
+376                      H3v2_365  0.720082  0.460251  concat  [256, 128, 64]   True  [256, 128, 64]        0.3        0.5   True      True  sigmoid   0.005    sqr  False   True  bce
+435                      H3v2_424  0.722305  0.468619  concat              []  False  [256, 128, 64]        0.3        0.2   True     False  sigmoid   0.005    sub   True  False  bce
+177                      H3v2_167  0.724576  0.493724  concat              []   True      [512, 256]        0.3        0.2   True     False     relu  0.0005    cat  False  False  bce
+178  E_H3v2_167_H3v2_167_H3v2_167  0.724576  0.493724                                      
+504                      H3v2_493  0.727278  0.556485  concat           [128]   True  [256, 128, 64]        0.3        0.2  False     False  sigmoid  0.0005    sqr  False   True  bce
+505  E_H3v2_493_H3v2_493_H3v2_493  0.727278  0.556485 
+
+4th experiment
+
+      MODEL   SCORE   P_REC         VF   siam_lyrs  separ     layers  inp_drp  o_drp    bn  bn_inp activ     lr s_comb  s_l2  s_bn   rev loss c_act    bal
+0  H3v2_001  0.7493  0.5941  l_glv_rep  [256, 128]  False  [128, 32]      0.3    0.5  True    True  relu  0.005    sub  True  True  True   fl  None  False

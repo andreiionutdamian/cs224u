@@ -4,6 +4,10 @@ import pandas as pd
 from scipy.spatial.distance import euclidean
 import utils
 
+from nltk.corpus import wordnet as wn
+from collections import defaultdict
+import os
+
 __author__ = "Christopher Potts"
 __version__ = "CS224u, Stanford, Spring 2020"
 
@@ -169,11 +173,14 @@ def convert_edges_to_indices(edges, Q):
               index_edges[s] = f
   return index_edges  
 
+def retrofit(X):
+  wn_edges = get_wordnet_edges(wn)
+  wn_index_edges = convert_edges_to_indices(wn_edges, X)
+  wn_retro = Retrofitter(verbose=True)  
+  X_retro = wn_retro.fit(X, wn_index_edges)  
+  return X_retro
   
 if __name__ == '__main__':
-  from nltk.corpus import wordnet as wn
-  from collections import defaultdict
-  import os
   
   data_home = 'data'
   

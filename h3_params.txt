@@ -1,0 +1,85 @@
+  
+MF1: 73.84, 1F1: 53.78, 1R: 56.49
+      siam_lyrs=[512, 256],
+      s_l2=False,
+      s_bn=True,
+      bn=True,
+      bn_inp=True,
+      c_act=None,
+      separ=True,
+      layers=[128, 32],
+      inp_drp=0.3,
+      o_drp=0.5,
+      activ='sigmoid',
+      s_comb='abs',
+      loss='bce',
+      rev=True,
+      lr=0.005, 
+      batch=256,
+      model_name='test',
+      optim=th.optim.Adam
+
+
+MF1: 72.36, 1F1: 52.85, 1R: 69.87 
+      siam_lyrs=[512, 256],
+      s_l2=False,
+      s_bn=True,
+      bn=True,
+      bn_inp=True,
+      c_act=None,
+      separ=True,
+      layers=[128, 32],
+      inp_drp=0.3,
+      o_drp=0.5,
+      activ='sigmoid',
+      s_comb='abs',
+      loss='fl',
+      rev=True,
+      lr=0.005, 
+      batch=256,
+      model_name='test',
+      optim=th.optim.Adam
+
+  
+MF1: 74.00, 1F1: 53.30, 1R: 48.95  
+      siam_lyrs=[128],
+      s_l2=False,
+      s_bn=False,
+      bn=True,
+      bn_inp=False,
+      c_act=None,
+      separ=True,
+      layers=[256, 128, 64], 
+      inp_drp=0.3,
+      o_drp=0.3,
+      activ='relu',
+      s_comb='cat',
+      loss='bce',
+      rev=False,
+      lr=0.005,      
+      batch=256,
+      model_name='test',
+      optim=th.optim.Adam
+      
+        
+MF1: 70.38, 1F1: 48.00, 1R: 52.72
+      siam_lyrs=[512, 256],
+      s_l2=True,
+      s_bn=False,
+      bn=False,
+      bn_inp=True,
+      c_act=None,
+      separ=False,
+      layers=[], 
+      inp_drp=0.3,
+      o_drp=0.5,
+      activ='relu',
+      s_comb='eucl',
+      loss='cl',
+      rev=True,
+      lr=0.0001,      
+      batch=256,
+      cl_m=1,
+      model_name='test',
+      optim=th.optim.Adam  
+  
