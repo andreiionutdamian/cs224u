@@ -738,7 +738,7 @@ class WordEntailClassifier():
                max_patience=10,   # maximum patience before reload & lr decay  
                max_fails=40,      # max consecutive fails before stop
                optim=th.optim.Adam,
-               
+               no_remove=False,
                device=th.device("cuda" if th.cuda.is_available() else "cpu"),
                ):
     self.model = None
@@ -770,6 +770,7 @@ class WordEntailClassifier():
     self.comb_activ = c_act
     self.margin = cl_m
     self.use_balancing = bal
+    self.no_remove = no_remove
     self.focal_loss_alpha = 0.3 if loss == 'flb' else 4
     self.focan_loss_gamma = fl_g
     self.vector_func_name = VF if type(VF) == str else VF.__name__
@@ -936,7 +937,7 @@ class WordEntailClassifier():
       P("Loading model from epoch {} with macro-f1 {:.4f}".format(best_epoch, best_f1))
       self.model.load_state_dict(th.load(best_fn))        
       not_del_fns.append(best_fn + '.optim')
-      if best_f1 < 0.67:
+      if (best_f1 < 0.67) and (not self.no_remove):
         P("  Removing '{}'".format(best_fn))        
         not_del_fns.append(best_fn)
       else:
@@ -1119,7 +1120,7 @@ def get_baselines(dct_res, trn, dev):
             model_name, 
             score=round(score * 100,2), 
             P_REC=round(P_REC*100,2), 
-            P_PRE=round( report['1']['precision'], 2),
+            P_PRE=round( report['1']['precision'] * 100, 2),
             VF=vf.__name__,
             )
         df = pd.DataFrame(dct_results).sort_values('SCORE')
@@ -1653,7 +1654,7 @@ def test_model_configs(dct_test_models, dct_res):
   
       
 
-def train_models(dct_models, trn, dev):
+def train_models(dct_models, trn, dev, no_remove=False):
   all_models = []
   for i, (model_name, model_params) in enumerate(dct_models.items()):
     P("\nLoading or training/saving model {}/{}".format(i+1, len(dct_models)))
@@ -1674,6 +1675,7 @@ def train_models(dct_models, trn, dev):
       y_dev=y_dev,
       model_name=model_name,
       optim=th.optim.Adam,
+      no_remove=no_remove,
       **model_params      
       )  
     if model.has_saved():
@@ -1834,7 +1836,7 @@ __dct_models = __dct_all_models[GLOVE_DIM]
 
 ##############################################################################
 if RUN_ALL_TRAIN:
-  _ = train_models(__dct_models, trn=train_data, dev=dev_data)
+  _ = train_models(__dct_models, trn=train_data, dev=dev_data, no_remove=True)
       
 ##############################################################################
 if RUN_ALL_TEST:
