@@ -20,6 +20,8 @@ CONDITION_NAMES = [
 
 
 def word_entail_featurize(data, vector_func, vector_combo_func):
+    utils.fix_random_seeds()
+#    print("Preprocessing data with '{}'".format(vector_func.__name__))
     X = []
     y = []
     for (w1, w2), label in data:
@@ -117,6 +119,7 @@ def bake_off_evaluation(experiment_results, test_data_filename=None):
     predictions = experiment_results['model'].predict(X_test)
     # Report:
     print(classification_report(y_test, predictions, digits=3))
+    
 
 
 

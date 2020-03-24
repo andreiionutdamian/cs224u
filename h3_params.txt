@@ -1,85 +1,99 @@
-  
-MF1: 73.84, 1F1: 53.78, 1R: 56.49
-      siam_lyrs=[512, 256],
-      s_l2=False,
-      s_bn=True,
-      bn=True,
-      bn_inp=True,
-      c_act=None,
-      separ=True,
-      layers=[128, 32],
-      inp_drp=0.3,
-      o_drp=0.5,
-      activ='sigmoid',
-      s_comb='abs',
-      loss='bce',
-      rev=True,
-      lr=0.005, 
-      batch=256,
-      model_name='test',
-      optim=th.optim.Adam
+       MODEL    SCORE      pf1      prc      ppr
+12  H3_3G283  70.5877  49.1409  59.8326  41.6910
+11  H3_3R020  72.4773  51.4735  54.8117  48.5185
+9   H3_2R321  72.8769  52.9101  62.7615  45.7317
+4   H3_3G015  73.0251  54.1213  72.8033  43.0693
+10  H3_2R335  73.1663  52.3013  52.3013  52.3013
+1   H3_2G424  73.2915  52.2876  50.2092  54.5455
+0   H3_2G197  73.5365  53.1440  54.8117  51.5748
+2   H3_2G500  73.6656  53.0172  51.4644  54.6667
+8   H3_3G093  74.0431  55.3333  69.4561  45.9834
+5   H3_3G171  74.3145  54.5455  56.4854  52.7344
+6   H3_3G197  74.4320  54.6939  56.0669  53.3865
+7   H3_3G396  74.4640  54.9407  58.1590  52.0599
+3   H3_3G017  74.6551  54.8180  53.5565  56.1404
+
+l_glv:
+
+  MF1: 74.66, 1F1: 54.82, 1R: 53.56, 1P: 56.14    
+    'H3v3_3017' : {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.005, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': False},
 
 
-MF1: 72.36, 1F1: 52.85, 1R: 69.87 
-      siam_lyrs=[512, 256],
-      s_l2=False,
-      s_bn=True,
-      bn=True,
-      bn_inp=True,
-      c_act=None,
-      separ=True,
-      layers=[128, 32],
-      inp_drp=0.3,
-      o_drp=0.5,
-      activ='sigmoid',
-      s_comb='abs',
-      loss='fl',
-      rev=True,
-      lr=0.005, 
-      batch=256,
-      model_name='test',
-      optim=th.optim.Adam
+  MF1: 74.46, 1F1: 54.94, 1R: 58.16, 1P: 52.06    
+    'H3v3_3396' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
 
-  
-MF1: 74.00, 1F1: 53.30, 1R: 48.95  
-      siam_lyrs=[128],
-      s_l2=False,
-      s_bn=False,
-      bn=True,
-      bn_inp=False,
-      c_act=None,
-      separ=True,
-      layers=[256, 128, 64], 
-      inp_drp=0.3,
-      o_drp=0.3,
-      activ='relu',
-      s_comb='cat',
-      loss='bce',
-      rev=False,
-      lr=0.005,      
-      batch=256,
-      model_name='test',
-      optim=th.optim.Adam
+
+  MF1: 74.43, 1F1: 54.69, 1R: 56.07, 1P: 53.39    
+    'H3v3_3197' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+
+
+  MF1: 74.31, 1F1: 54.55, 1R: 56.49, 1P: 52.73
+    'H3v3_3171' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+
+
+  MF1: 73.67, 1F1: 53.02, 1R: 51.46, 1P: 54.67
+    'H3v2_2500': {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'bce', 'c_act': None, 'VF' : 'l_glv', 'bal': False}    
+
+
+  MF1: 73.54, 1F1: 53.14, 1R: 54.81, 1P: 51.57 
+    "H3v2_2197" : {'siam_lyrs': [512, 256], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': False, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': False, 's_bn': False, 'rev': True, 'loss': 'fl', 'c_act': None, 'bal': False, 'VF':'l_glv'},
       
-        
-MF1: 70.38, 1F1: 48.00, 1R: 52.72
-      siam_lyrs=[512, 256],
-      s_l2=True,
-      s_bn=False,
-      bn=False,
-      bn_inp=True,
-      c_act=None,
-      separ=False,
-      layers=[], 
-      inp_drp=0.3,
-      o_drp=0.5,
-      activ='relu',
-      s_comb='eucl',
-      loss='cl',
-      rev=True,
-      lr=0.0001,      
-      batch=256,
-      cl_m=1,
-      model_name='test',
-      optim=th.optim.Adam  
   
+  MF1: 73.29, 1F1: 52.29, 1R: 50.21, 1P: 54.55
+    'H3v2_2424': {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fl', 'c_act': None, 'VF': 'l_glv', 'bal': True}
+
+    
+  MF1: 73.03, 1F1: 54.12, 1R: 72.80, 1P: 43.07    
+    'H3v3_3015' : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sqr', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True}
+
+
+    'H3_4R1D236' : {'siam_lyrs': [200, 100], 'separ': True, 'layers': [368, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sqr', 's_l2': True, 's_bn': False, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv_rep', 'bal': False, 'cl_m': None}    
+
+l_glv_rep:
+
+  MF1: 72.88, 1F1: 52.91, 1R: 62.76, 1P: 45.73
+    "H3v2_2321" : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': False, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'sqr', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'bce', 'c_act': None, 'bal': True, 'VF' : 'l_glv_rep'},
+
+  MF1: 73.17, 1F1: 52.30, 1R: 52.30, 1P: 52.30
+    "H3v2_2335" : {'siam_lyrs': [256, 128], 'separ': False, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fl', 'c_act': None, 'VF':'l_glv_rep', 'bal': False},
+
+  MF1: 72.48, 1F1: 51.47, 1R: 54.81, 1P: 48.52
+    'H3v3_3020' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv_rep', 'bal': False}
+    
+    
+    
+125  E_424_017_321  77.0067  58.8496  55.6485  62.4413      l_glv
+34   E_197_500_171  77.0146  58.6605  53.1381  65.4639  l_glv_rep
+231  E_017_015_197  77.0480  59.0517  57.3222  60.8889      l_glv
+52   E_197_017_396  77.0518  58.8235  54.3933  64.0394  l_glv_rep
+31   E_197_500_015  77.0747  58.9286  55.2301  63.1579      l_glv
+236  E_017_015_321  77.0793  59.5661  63.1799  56.3433  l_glv_rep
+33   E_197_500_171  77.0960  58.7963  53.1381  65.8031      l_glv
+104  E_424_500_015  77.1084  58.8506  53.5565  65.3061  l_glv_rep
+46   E_197_017_015  77.1434  59.2751  58.1590  60.4348  l_glv_rep
+126  E_424_017_321  77.1749  59.1611  56.0669  62.6168  l_glv_rep
+103  E_424_500_015  77.1898  58.9862  53.5565  65.6410      l_glv
+51   E_197_017_396  77.2126  59.0909  54.3933  64.6766      l_glv
+45   E_197_017_015  77.2977  59.5289  58.1590  60.9649      l_glv
+193  E_500_015_321  77.3055  59.5745  58.5774  60.6061      l_glv
+194  E_500_015_321  77.3055  59.5745  58.5774  60.6061  l_glv_rep
+259  E_017_396_321  77.3130  59.6195  58.9958  60.2564      l_glv
+48   E_197_017_171  77.3141  59.3258  55.2301  64.0777  l_glv_rep
+238  E_017_015_335  77.3423  59.4714  56.4854  62.7907  l_glv_rep
+260  E_017_396_321  77.3967  59.7895  59.4142  60.1695  l_glv_rep
+237  E_017_015_335  77.4216  59.6026  56.4854  63.0841      l_glv
+111  E_424_500_321  77.4561  59.4966  54.3933  65.6566      l_glv
+230  E_017_015_171  77.4670  59.8726  58.9958  60.7759  l_glv_rep
+47   E_197_017_171  77.4752  59.5937  55.2301  64.7059      l_glv
+218  E_500_396_321  77.5012  59.7345  56.4854  63.3803  l_glv_rep
+112  E_424_500_321  77.5472  59.6811  54.8117  65.5000  l_glv_rep
+245  E_017_171_321  77.5506  60.0423  59.4142  60.6838      l_glv
+217  E_500_396_321  77.5810  59.8670  56.4854  63.6792      l_glv
+246  E_017_171_321  77.6334  60.2105  59.8326  60.5932  l_glv_rep
+242  E_017_171_197  77.6374  59.8639  55.2301  65.3465  l_glv_rep
+241  E_017_171_197  77.7190  60.0000  55.2301  65.6716      l_glv
+229  E_017_015_171  77.7833  60.4255  59.4142  61.4719      l_glv
+240  E_017_015_020  78.0222  60.8511  59.8326  61.9048  l_glv_rep
+204  E_500_171_321  78.1480  60.8108  56.4854  65.8537  l_glv_rep
+203  E_500_171_321  78.1480  60.8108  56.4854  65.8537      l_glv
+239  E_017_015_020  78.2611  61.2766  60.2510  62.3377      l_glv    

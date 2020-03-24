@@ -1118,6 +1118,13 @@ def bakeoff_eval(title, embds, dct_res):
     print("\n\n{} {} evaluation on the TRAINING DATA".format(
         title, embds.shape))
     trn_res = full_word_similarity_evaluation(embds)
+
+    distfunc = vsm.cosine
+    print("\n{} {} results on the TEST sets using distfunc '{}'".format(
+        title, embds.shape, distfunc.__name__), flush=True)
+    res = full_word_similarity_evaluation(embds, readers=BAKEOFF, distfunc=distfunc, verbose=True)
+
+    distfunc = vsm.jaccard
     print("\n{} {} results on the TEST sets using distfunc '{}'".format(
         title, embds.shape, distfunc.__name__), flush=True)
     res = full_word_similarity_evaluation(embds, readers=BAKEOFF, distfunc=distfunc, verbose=True)
@@ -1240,7 +1247,7 @@ if __name__ == '__main__':
   pp_n_l_r = retrofit(pp_n_l)
   results = bakeoff_eval('PP_N_L_R', pp_n_l_r, results)
 
-  ae = TorchAutoencoder(hidden_dim=512, max_iter=100)
+  ae = TorchAutoencoder(hidden_dim=392, max_iter=100)
   pp_n_l_r_ae = ae.fit(pp_n_l_r)
   results = bakeoff_eval('PP_N_L_R_AE', pp_n_l_r_ae, results)
 
@@ -1296,3 +1303,6 @@ if __name__ == '__main__':
   df_res = pd.DataFrame(results).sort_values('BAKE')
   print(df_res)
   
+  
+  df_orig = pd.read_csv("models/h1/_h1_best_model_05842.csv.gz", index_col=0)
+  results = bakeoff_eval('ORIG', df_orig, results)
