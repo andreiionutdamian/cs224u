@@ -459,8 +459,8 @@ def macro_average_results(results):
     return avg_result
 
 
-def evaluate(splits, classifier, test_split='dev', verbose=True):
-    test_kbts_by_rel, true_labels_by_rel = splits[test_split].build_dataset()
+def evaluate(splits, classifier, test_split='dev', sampling_rate=0.1, verbose=True):
+    test_kbts_by_rel, true_labels_by_rel = splits[test_split].build_dataset(sampling_rate=sampling_rate)
     results = {}
     if verbose:
         print_statistics_header()
@@ -484,10 +484,11 @@ def train_models(
         split_name='train',
         model_factory=(lambda: LogisticRegression(
             fit_intercept=True, solver='liblinear', random_state=42)),
+        sampling_rate=0.1,
         vectorize=True,
         verbose=True):
     train_dataset = splits[split_name]
-    train_o, train_y = train_dataset.build_dataset()
+    train_o, train_y = train_dataset.build_dataset(sampling_rate=sampling_rate)
     train_X, vectorizer = train_dataset.featurize(
         train_o, featurizers, vectorize=vectorize)
     models = {}
@@ -508,11 +509,11 @@ def train_models(
         'vectorize': vectorize}
 
 
-def predict(splits, train_result, split_name='dev', vectorize=True):
+def predict(splits, train_result, split_name='dev', sampling_rate=0.1, vectorize=True):
     print("Running predict...", flush=True)
     assess_dataset = splits[split_name]
     print("  Building dataset...", flush=True)
-    assess_o, assess_y = assess_dataset.build_dataset()
+    assess_o, assess_y = assess_dataset.build_dataset(sampling_rate=sampling_rate)
     print("  Featurizing...", flush=True)
     test_X, _ = assess_dataset.featurize(
         assess_o,
@@ -551,6 +552,8 @@ def experiment(
         test_split='dev',
         model_factory=(lambda: LogisticRegression(
             fit_intercept=True, solver='liblinear', random_state=42)),
+        train_sampling_rate=0.1,
+        test_sampling_rate=0.1,
         vectorize=True,
         verbose=True,
         return_macro=False):
@@ -559,12 +562,14 @@ def experiment(
         featurizers=featurizers,
         split_name=train_split,
         model_factory=model_factory,
+        sampling_rate=train_sampling_rate,
         vectorize=vectorize,
         verbose=verbose)
     predictions, test_y = predict(
         splits,
         train_result,
         split_name=test_split,
+        sampling_rate=test_sampling_rate,
         vectorize=vectorize)
     eval_res = evaluate_predictions(
                   predictions,
