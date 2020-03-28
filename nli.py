@@ -208,7 +208,7 @@ class NLIReader(object):
             filter_unlabeled=True,
             samp_percentage=None,
             random_state=None,
-            gold_label_attr_name='gold_label'):
+            gold_label_attr_name='gold_label',
             data_size=None):
         self.src_filename = src_filename
         self.filter_unlabeled = filter_unlabeled

@@ -337,6 +337,9 @@ def l_glv(w):
   a zeros vector."""
   return GLOVE.get(w.lower(), np.zeros(GLOVE_DIM))
 
+def glv(w):    
+  return GLOVE.get(w, np.zeros(GLOVE_DIM))
+
   
 def concat(u, v):
   return np.concatenate((u,v))
@@ -1034,7 +1037,7 @@ class WordEntailClassifier():
 class EnsembleWrapper():
   def __init__(self, models, vector_func_name, verbose=False):
     self.models = models
-    self.vector_func_name = vector_func_name
+    self.vector_func_name = vector_func_name if type(vector_func_name) == str else vector_func_name.__name__
     names = [x.model_name.split('_')[1] for x in self.models]
     self.model_name = "E_" + "_".join(names)
     if verbose:
@@ -1091,7 +1094,7 @@ def get_baselines(dct_res, trn, dev):
       concat, 
   #    summar,
       ]
-  for vf in [l_glv, l_glv_rep]:
+  for vf in [l_glv, l_glv_rep, glv]:
     for vcf in baseline_vector_combo_funcs:
       for model_name in baseline_model_facts:
         P("=" * 70)
@@ -1702,16 +1705,18 @@ pd.set_option('display.max_colwidth', 500)
 pd.set_option('display.width', 1000)
 pd.set_option('precision', 4)  
   
-CALC_BASELINES  = True
+CALC_BASELINES  = False
 
 RUN_GRID        = False
-RUN_ALL_TRAIN   = True
-RUN_ALL_TEST    = True
+RUN_ALL_TRAIN   = False
+RUN_ALL_TEST    = False
 RUN_SINGLE      = False
 RUN_ENS_SEARCH  = False
 
-RUN_ORIGINAL_SYSTEM = True
 
+RUN_ORIGINAL_SYSTEM = False
+
+RUN_BAKE_ENS = True
 
 utils.fix_random_seeds()
 GLOVE_DIM = 300
@@ -1795,36 +1800,36 @@ if RUN_GRID:
 __dct_all_models = {
   # l_glv      
   300 : {
-  'B3_3G017' : {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.005, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': False},  
-  'B3_3G396' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
-  'B3_3G197' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},  
-  'B3_3G015' : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sqr', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
-  'B3_2G424': {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fl', 'c_act': None, 'VF': 'l_glv', 'bal': True},
-  'B3_3G093' : {'siam_lyrs': [], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv', 'bal': False},
-  'B3_3G171' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},  
-
-
-#  'H3_2G424': {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fl', 'c_act': None, 'VF': 'l_glv', 'bal': True},
-#  'H3_3G017' : {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.005, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': False},  
-#  'H3_3G015' : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sqr', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
-#  'H3_3G093' : {'siam_lyrs': [], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv', 'bal': False},
-#  "H3_2G197" : {'siam_lyrs': [512, 256], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': False, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': False, 's_bn': False, 'rev': True, 'loss': 'fl', 'c_act': None, 'bal': False, 'VF':'l_glv'},      
-#  'H3_2G500': {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'bce', 'c_act': None, 'VF' : 'l_glv', 'bal': False},
-#  'H3_3G171' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},  
-#  'H3_3G197' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},  
-#  'H3_3G396' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
-#  
-#  # l_glv_rep
-#  "H3_2R321" : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': False, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'sqr', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'bce', 'c_act': None, 'bal': True, 'VF' : 'l_glv_rep'},
-#  "H3_2R335" : {'siam_lyrs': [256, 128], 'separ': False, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fl', 'c_act': None, 'VF':'l_glv_rep', 'bal': False},  
-#  'H3_3R020' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv_rep', 'bal': False},
+#  'B3_3G017' : {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.005, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': False},  
+#  'B3_3G396' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+#  'B3_3G197' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},  
+#  'B3_3G015' : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sqr', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+#  'B3_2G424': {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fl', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+#  'B3_3G093' : {'siam_lyrs': [], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv', 'bal': False},
+#  'B3_3G171' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},  
 #
-#  'H3_4R3D1' : {'siam_lyrs': [600, 300], 'separ': True, 'layers': [512, 128], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sqr', 's_l2': True, 's_bn': False, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv_rep', 'bal': False, 'cl_m': None},
-#  
-#  # CL l_glv  
-#  'H3_3G283' : {'siam_lyrs': [512, 256], 'separ': False, 'layers': [], 'inp_drp': 0, 'o_drp': 0.5, 'bn': None, 'bn_inp': True, 'activ': 'relu', 'lr': 0.0001, 'c_act': None, 's_comb': 'eucl', 's_l2': True, 's_bn': False, 'rev': True, 'loss': 'cl', 'VF': 'l_glv', 'bal': False, 'cl_m' : 1},
 
-#  'H3_4G1' : {'siam_lyrs': [512, 256], 'separ': False, 'layers': [], 'inp_drp': 0, 'o_drp': 0.5, 'bn': None, 'bn_inp': True, 'activ': 'relu', 'lr': 0.0001, 'c_act': None, 's_comb': 'eucl', 's_l2': True, 's_bn': False, 'rev': True, 'loss': 'cl', 'VF': 'l_glv', 'bal': False, 'cl_m' : 0.2},
+  'H3_2G424': {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fl', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+  'H3_3G017' : {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.005, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': False},  
+  'H3_3G015' : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sqr', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+  'H3_3G093' : {'siam_lyrs': [], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv', 'bal': False},
+  "H3_2G197" : {'siam_lyrs': [512, 256], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': False, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': False, 's_bn': False, 'rev': True, 'loss': 'fl', 'c_act': None, 'bal': False, 'VF':'l_glv'},      
+  'H3_2G500': {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'bce', 'c_act': None, 'VF' : 'l_glv', 'bal': False},
+  'H3_3G171' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},  
+  'H3_3G197' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},  
+  'H3_3G396' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sub', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+  
+  # l_glv_rep
+  "H3_2R321" : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': False, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'sqr', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'bce', 'c_act': None, 'bal': True, 'VF' : 'l_glv_rep'},
+  "H3_2R335" : {'siam_lyrs': [256, 128], 'separ': False, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fl', 'c_act': None, 'VF':'l_glv_rep', 'bal': False},  
+  'H3_3R020' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv_rep', 'bal': False},
+
+  'H3_4R3D1' : {'siam_lyrs': [600, 300], 'separ': True, 'layers': [512, 128], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sqr', 's_l2': True, 's_bn': False, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv_rep', 'bal': False, 'cl_m': None},
+  
+  # CL l_glv  
+  'H3_3G283' : {'siam_lyrs': [512, 256], 'separ': False, 'layers': [], 'inp_drp': 0, 'o_drp': 0.5, 'bn': None, 'bn_inp': True, 'activ': 'relu', 'lr': 0.0001, 'c_act': None, 's_comb': 'eucl', 's_l2': True, 's_bn': False, 'rev': True, 'loss': 'cl', 'VF': 'l_glv', 'bal': False, 'cl_m' : 1},
+
+  'H3_4G1' : {'siam_lyrs': [512, 256], 'separ': False, 'layers': [], 'inp_drp': 0, 'o_drp': 0.5, 'bn': None, 'bn_inp': True, 'activ': 'relu', 'lr': 0.0001, 'c_act': None, 's_comb': 'eucl', 's_l2': True, 's_bn': False, 'rev': True, 'loss': 'cl', 'VF': 'l_glv', 'bal': False, 'cl_m' : 0.2},
   },
       
   100 : {
@@ -1888,18 +1893,37 @@ if RUN_ENS_SEARCH:
       )
 
 ##############################################################################
-if RUN_ORIGINAL_SYSTEM:  
-  
-  
-  USE_NEW_SPLIT = True
-  
-  sol_models_params = {
+
+sol_models_params = {
   'H3_2G424': {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fl', 'c_act': None, 'VF': 'l_glv', 'bal': True},
   'H3_3G017' : {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.005, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': False},  
   'H3_3G015' : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sqr', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
   'H3_3G093' : {'siam_lyrs': [], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv', 'bal': False},
   "H3_2R321" : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': False, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'sqr', 's_l2': False, 's_bn': True, 'rev': True, 'loss': 'bce', 'c_act': None, 'bal': True, 'VF' : 'l_glv_rep'},
-      }
+    }
+
+best_sol_models_params = {
+  'H3_2G424': {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': False, 'activ': 'relu', 'lr': 0.005, 's_comb': 'sub', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'fl', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+  'H3_3G093' : {'siam_lyrs': [], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv', 'bal': False},
+  'H3_3R020' : {'siam_lyrs': [256, 128], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv_rep', 'bal': False},
+  'H3_2G500': {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': False, 'rev': False, 'loss': 'bce', 'c_act': None, 'VF' : 'l_glv', 'bal': False},
+    }
+
+bakeoff_sol_models_params = {
+  'H3_3G017' : {'siam_lyrs': [], 'separ': True, 'layers': [128, 32], 'inp_drp': 0.3, 'o_drp': 0.2, 'bn': True, 'bn_inp': True, 'activ': 'sigmoid', 'lr': 0.005, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': False},  
+  'H3_3G015' : {'siam_lyrs': [256, 128, 64], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0.5, 'bn': False, 'bn_inp': False, 'activ': 'relu', 'lr': 0.01, 's_comb': 'sqr', 's_l2': True, 's_bn': True, 'rev': False, 'loss': 'fla', 'c_act': None, 'VF': 'l_glv', 'bal': True},
+  'H3_3G093' : {'siam_lyrs': [], 'separ': True, 'layers': [256, 128, 64], 'inp_drp': 0.3, 'o_drp': 0, 'bn': True, 'bn_inp': True, 'activ': 'tanh', 'lr': 0.01, 's_comb': 'abs', 's_l2': True, 's_bn': True, 'rev': True, 'loss': 'flb', 'c_act': None, 'VF': 'l_glv', 'bal': False},
+    }
+
+
+
+if RUN_ORIGINAL_SYSTEM:  
+  
+  
+  USE_NEW_SPLIT = True
+  
+  
+    
   
   for SOL_VECT_FUNC in [l_glv_rep, l_glv]:
     SUFIX = '_R' if SOL_VECT_FUNC == l_glv_rep else '_g'
@@ -1984,6 +2008,71 @@ if RUN_ORIGINAL_SYSTEM:
 #        )
   
 #  nli.bake_off_evaluation(solution_result)
+
+if RUN_BAKE_ENS:
+
+  base_sol_models = train_models(
+      sol_models_params, 
+      trn=train_data, 
+      dev=dev_data,
+      )
+
+  base_solution_ens = EnsembleWrapper(
+      models=base_sol_models,
+      vector_func_name=l_glv,
+      verbose=True
+      )  
+  
+  dct_results = test_model(
+      base_solution_ens,
+      train_data,
+      dev_data,
+      dct_res=dct_results,
+      )    
+  
+  ############
+
+  bakeoff_sol_models = train_models(
+      bakeoff_sol_models_params, 
+      trn=train_data, 
+      dev=dev_data,
+      )
+
+  bakeoff_solution_ens = EnsembleWrapper(
+      models=bakeoff_sol_models,
+      vector_func_name=l_glv,
+      verbose=True
+      )  
+  
+  dct_results = test_model(
+      bakeoff_solution_ens,
+      train_data,
+      dev_data,
+      dct_res=dct_results,
+      )    
+
+  ############
+
+
+  best_sol_models = train_models(
+      best_sol_models_params, 
+      trn=train_data, 
+      dev=dev_data,
+      )
+
+  best_solution_ens = EnsembleWrapper(
+      models=best_sol_models,
+      vector_func_name=l_glv,
+      verbose=True
+      )  
+  
+  dct_results = test_model(
+      best_solution_ens,
+      train_data,
+      dev_data,
+      dct_res=dct_results,
+      )    
+
 
 df = pd.DataFrame(dct_results).sort_values('SCORE')
 P(df)
