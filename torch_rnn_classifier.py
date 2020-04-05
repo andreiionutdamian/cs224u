@@ -22,8 +22,8 @@ class TorchRNNDataset(torch.utils.data.Dataset):
     def collate_fn(batch):
         X, seq_lengths, y = zip(*batch)
         X = torch.nn.utils.rnn.pad_sequence(X, batch_first=True)
-        seq_lengths = torch.tensor(seq_lengths, dtype=torch.long)
-        y = torch.tensor(y, dtype=torch.long)
+        seq_lengths = torch.tensor(seq_lengths)
+        y = torch.tensor(y)
         return X, seq_lengths, y
 
     def __len__(self):
@@ -100,7 +100,7 @@ class TorchRNNClassifierModel(nn.Module):
         if embedding is None:
             return nn.Embedding(vocab_size, embed_dim)
         else:
-            embedding = torch.tensor(embedding, dtype=torch.float)
+            embedding = torch.FloatTensor(embedding)
             return nn.Embedding.from_pretrained(embedding)
 
 
@@ -222,6 +222,10 @@ class TorchRNNClassifier(TorchModelBase):
         # Graph:
         if not self.warm_start or not hasattr(self, "model"):
             self.model = self.build_graph()
+            self.opt = self.optimizer(
+                self.model.parameters(),
+                lr=self.eta,
+                weight_decay=self.l2_strength)
         self.model.to(self.device)
         self.model.train()
         # Make sure this value is up-to-date; self.`model` might change
@@ -229,10 +233,6 @@ class TorchRNNClassifier(TorchModelBase):
         self.embed_dim = self.model.embed_dim
         # Optimization:
         loss = nn.CrossEntropyLoss()
-        optimizer = self.optimizer(
-            self.model.parameters(),
-            lr=self.eta,
-            weight_decay=self.l2_strength)
         # Train:
         for iteration in range(1, self.max_iter+1):
             epoch_error = 0.0
@@ -242,9 +242,9 @@ class TorchRNNClassifier(TorchModelBase):
                 err = loss(batch_preds, y_batch)
                 epoch_error += err.item()
                 # Backprop:
-                optimizer.zero_grad()
+                self.opt.zero_grad()
                 err.backward()
-                optimizer.step()
+                self.opt.step()
             # Incremental predictions where possible:
             if X_dev is not None and iteration > 0 and iteration % dev_iter == 0:
                 self.dev_predictions[iteration] = self.predict(X_dev)
@@ -315,13 +315,13 @@ class TorchRNNClassifier(TorchModelBase):
             unk_index = index['$UNK']
             for ex in X:
                 seq = [index.get(w, unk_index) for w in ex]
-                seq = torch.tensor(seq, dtype=torch.long)
+                seq = torch.tensor(seq)
                 new_X.append(seq)
                 seq_lengths.append(len(seq))
         else:
-            new_X = [torch.FloatTensor(ex) for ex in X]
+            new_X = [torch.tensor(ex) for ex in X]
             seq_lengths = [len(ex) for ex in X]
-        return new_X, torch.LongTensor(seq_lengths)
+        return new_X, torch.tensor(seq_lengths)
 
 
 def simple_example(initial_embedding=False, use_embedding=True):
