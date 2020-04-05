@@ -77,3 +77,5 @@ rel_ext_data*
 *.gz
 
 models/
+
+logs/
