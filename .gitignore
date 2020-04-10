@@ -87,3 +87,11 @@ models/
 ~$D_literature_review.docx
 
 experiment_data/
+
+exp_data/df_tran_proc_top_13.5k.csv
+
+exp_data/df_items_top_13.5k.csv
+
+exp_data/df_tran_proc_top_15k.csv
+
+exp_models/mco.npz
