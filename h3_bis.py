@@ -442,12 +442,20 @@ if __name__ == '__main__':
       NLIDATA_HOME, 'nli_wordentail_bakeoff_data.json')  
   
   utils.fix_random_seeds()
-  GLOVE_DIM = 300
+  GLOVE_DIM = 100
     
   if "GLOVE" not in globals() or len(next(iter(GLOVE.values()))) != GLOVE_DIM:
     P("Loading GloVe-{}...".format(GLOVE_DIM))
     GLOVE = utils.glove2dict(os.path.join(GLOVE_HOME, 'glove.6B.{}d.txt'.format(GLOVE_DIM)))  
     P("GloVe-{} loaded.".format(GLOVE_DIM))  
+    np_words = np.array([x for x in GLOVE])
+    np_embds = np.array([GLOVE[x] for x in np_words])
+    np.savez(
+        os.path.join(GLOVE_HOME, 'glove_words_and_embeds_{}d'.format(GLOVE_DIM)),
+        np_words,
+        np_embds,
+        )
+    
     
   
   with open(wordentail_filename) as f:
