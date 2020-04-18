@@ -99,3 +99,5 @@ exp_models/mco.npz
 exp_data/df_tran_top_13.5k.csv
 
 exp_data/df_tran_top_15k.csv
+
+exp_data/glove_words_and_embeds_100d.npz

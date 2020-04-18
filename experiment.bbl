@@ -1,0 +1,51 @@
+\begin{thebibliography}{1}
+
+\bibitem{pennington2014glove}
+Jeffrey Pennington, Richard Socher, and Christopher~D Manning.
+\newblock Glove: Global vectors for word representation.
+\newblock In {\em Proceedings of the 2014 conference on empirical methods in
+  natural language processing (EMNLP)}, pages 1532--1543, 2014.
+
+\bibitem{grbovic2015commerce}
+Mihajlo Grbovic, Vladan Radosavljevic, Nemanja Djuric, Narayan Bhamidipati,
+  Jaikit Savla, Varun Bhagwan, and Doug Sharp.
+\newblock E-commerce in your inbox: Product recommendations at scale.
+\newblock In {\em Proceedings of the 21th ACM SIGKDD international conference
+  on knowledge discovery and data mining}, pages 1809--1818, 2015.
+
+\bibitem{mikolov2013efficient}
+Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean.
+\newblock Efficient estimation of word representations in vector space.
+\newblock {\em arXiv preprint arXiv:1301.3781}, 2013.
+
+\bibitem{faruqui2014retrofitting}
+Manaal Faruqui, Jesse Dodge, Sujay~K Jauhar, Chris Dyer, Eduard Hovy, and
+  Noah~A Smith.
+\newblock Retrofitting word vectors to semantic lexicons.
+\newblock {\em arXiv preprint arXiv:1411.4166}, 2014.
+
+\bibitem{mrkvsic2016counter}
+Nikola Mrk{\v{s}}i{\'c}, Diarmuid~O S{\'e}aghdha, Blaise Thomson, Milica
+  Ga{\v{s}}i{\'c}, Lina Rojas-Barahona, Pei-Hao Su, David Vandyke, Tsung-Hsien
+  Wen, and Steve Young.
+\newblock Counter-fitting word vectors to linguistic constraints.
+\newblock {\em arXiv preprint arXiv:1603.00892}, 2016.
+
+\bibitem{dingwall2018mittens}
+Nicholas Dingwall and Christopher Potts.
+\newblock Mittens: an extension of glove for learning domain-specialized
+  representations.
+\newblock {\em arXiv preprint arXiv:1803.09901}, 2018.
+
+\bibitem{lengerich2017retrofitting}
+Benjamin~J Lengerich, Andrew~L Maas, and Christopher Potts.
+\newblock Retrofitting distributional embeddings to knowledge graphs with
+  functional relations.
+\newblock {\em arXiv preprint arXiv:1708.00112}, 2017.
+
+\bibitem{miller1995wordnet}
+George~A Miller.
+\newblock Wordnet: a lexical database for english.
+\newblock {\em Communications of the ACM}, 38(11):39--41, 1995.
+
+\end{thebibliography}
