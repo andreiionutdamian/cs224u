@@ -22,6 +22,28 @@ from torch_autoencoder import TorchAutoencoder
 
 import torch as th
 
+from datetime import datetime as dt
+
+
+lst_log = []
+_date = dt.now().strftime("%Y%m%d_%H%M")
+log_fn = dt.now().strftime("logs/"+_date+"_log.txt")
+
+def P(s=''):
+  lst_log.append(s)
+  print(s, flush=True)
+  try:
+    with open(log_fn, 'w') as f:
+      for item in lst_log:
+        f.write("{}\n".format(item))
+  except:
+    pass
+  return
+
+def Pr(s=''):
+  print('\r' + str(s), end='', flush=True)
+  
+
 class L2_Normalizer(th.nn.Module):
   def __init__(self,):
     super().__init__()
@@ -1212,13 +1234,16 @@ if __name__ == '__main__':
 2      DPPMI1  0.488581  0.479645
 
   """
-  results = {'MODEL':[], 'BAKE':[], 'TRAIN':[]}
+#  results = {'MODEL':[], 'BAKE':[], 'TRAIN':[]}
   if 'mco_data' not in globals():
+    P("Reading data...")
     mco_data = pd.read_csv(os.path.join(VSM_HOME, "imdb_window5-scaled.csv.gz"), index_col=0)    
-  results = bakeoff_eval('MCO', mco_data, results)
-  
+    P("Done reading data.")
+#  results = bakeoff_eval('MCO', mco_data, results)
+#
   pp = vsm.pmi(mco_data, positive=True)
-  results = bakeoff_eval('PP', pp, results)
+  pp_r = retrofit(pp)
+#  results = bakeoff_eval('PP', pp, results)
 
 #  pp_tt = ttest(pp)
 #  results = bakeoff_eval('PP_TT', pp_tt, results)
@@ -1234,27 +1259,27 @@ if __name__ == '__main__':
 #
 #  ae = TorchAutoencoder(hidden_dim=256, max_iter=100)
 #  pp_tt_r_l_n_ae = pd.DataFrame(ae.fit(pp_tt_r_l_n), index=pp_tt_r_l_n.index)
-#  results = bakeoff_eval('PP_TT_R_L_N_AE', pp_tt_r_l_n_ae, results)
-
-  ########################################
-  
-  pp_n = pp.apply(vsm.length_norm, axis=1)
-  results = bakeoff_eval('PP_N', pp_n, results)
-
-  pp_n_l = vsm.lsa(pp_n, k=1024)
-  results = bakeoff_eval('PP_N_L', pp_n_l, results)
-
-  pp_n_l_r = retrofit(pp_n_l)
-  results = bakeoff_eval('PP_N_L_R', pp_n_l_r, results)
-
-  ae = TorchAutoencoder(hidden_dim=392, max_iter=100)
-  pp_n_l_r_ae = ae.fit(pp_n_l_r)
-  results = bakeoff_eval('PP_N_L_R_AE', pp_n_l_r_ae, results)
-
-  pp_n_l_r_ae_r = retrofit(pp_n_l_r_ae)
-  results = bakeoff_eval('PP_N_L_R_AE_R', pp_n_l_r_ae_r, results)
-
-  ########################################
+##  results = bakeoff_eval('PP_TT_R_L_N_AE', pp_tt_r_l_n_ae, results)
+#
+#  ########################################
+#  
+#  pp_n = pp.apply(vsm.length_norm, axis=1)
+#  results = bakeoff_eval('PP_N', pp_n, results)
+#
+#  pp_n_l = vsm.lsa(pp_n, k=1024)
+#  results = bakeoff_eval('PP_N_L', pp_n_l, results)
+#
+#  pp_n_l_r = retrofit(pp_n_l)
+#  results = bakeoff_eval('PP_N_L_R', pp_n_l_r, results)
+#
+#  ae = TorchAutoencoder(hidden_dim=392, max_iter=100)
+#  pp_n_l_r_ae = ae.fit(pp_n_l_r)
+#  results = bakeoff_eval('PP_N_L_R_AE', pp_n_l_r_ae, results)
+#
+#  pp_n_l_r_ae_r = retrofit(pp_n_l_r_ae)
+#  results = bakeoff_eval('PP_N_L_R_AE_R', pp_n_l_r_ae_r, results)
+#
+#  ########################################
 
   
 #  dp1 = pmid(mco_data, positive=True, delta_on_pmi=False)
@@ -1299,10 +1324,10 @@ if __name__ == '__main__':
 
   
 
-  
-  df_res = pd.DataFrame(results).sort_values('BAKE')
-  print(df_res)
-  
-  
-  df_orig = pd.read_csv("models/h1/_h1_best_model_05842.csv.gz", index_col=0)
-  results = bakeoff_eval('ORIG', df_orig, results)
+#  
+#  df_res = pd.DataFrame(results).sort_values('BAKE')
+#  print(df_res)
+#  
+#  
+#  df_orig = pd.read_csv("models/h1/_h1_best_model_05842.csv.gz", index_col=0)
+#  results = bakeoff_eval('ORIG', df_orig, results)

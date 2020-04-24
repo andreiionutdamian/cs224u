@@ -6,7 +6,6 @@ Created on Tue Apr  7 09:29:46 2020
 """
 
 import numpy as np
-from mittens import GloVe
 from scipy import sparse
 import os
 import pandas as pd
@@ -14,29 +13,27 @@ import pandas as pd
 import matplotlib.pyplot as plt
 print_df = True
 
-
-
-
 DEBUG = True # in-development flag
-
 MODEL_NAME = 'exp_v1'
-
 DATA_HOME = 'exp_data'
 MODEL_HOME = 'exp_models'
 DATA_FILE = os.path.join(DATA_HOME, 'df_tran_proc_top_13.5k.csv')
 DATA_SLICE_FILE = os.path.join(DATA_HOME, 'df_tran_proc_top_13.5k_slice.csv')
 META_FILE = os.path.join(DATA_HOME, 'df_items_top_13.5k.csv')
 META_INFO = os.path.join(DATA_HOME, 'obfuscated_keys.txt')
-
 MCO_OUT_FILE = os.path.join(MODEL_HOME, 'exp_mco.npz')
-
 EMB_OUT_FILE = os.path.join(MODEL_HOME, MODEL_NAME + '_embeds.npy')
-
-_MCO_FILE  = os.path.join(MODEL_HOME, 'mco_top_13.5k.npz')
-
+EMB128_5k_FN = 'exp_v3_i5k.npy'
+EMB128_10k_FN = 'exp_v2_i10k.npy'
+EMB128_250k_FN = 'exp_v1_embeds.npy' 
+EMB128_ES33_FN = 'exp_v4es_033.npy'
+EMB128_5k = os.path.join(MODEL_HOME, EMB128_5k_FN)
+EMB128_10k = os.path.join(MODEL_HOME, EMB128_10k_FN)
+EMB128_250k = os.path.join(MODEL_HOME, EMB128_250k_FN)
+EMB128_ES33 = os.path.join(MODEL_HOME, EMB128_ES33_FN)
 CHUNK_SIZE = 100 * 1024 ** 2 # read 100MB chunks
-
 MAX_N_TOP_PRODUCTS = 13000  # top sold products
+_MCO_FILE  = os.path.join(MODEL_HOME, 'mco_top_13.5k.npz') # debug pre-prepared mco
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -51,12 +48,12 @@ np.set_printoptions(linewidth=500)
 plt.style.use('ggplot')
 
 
-from prove import Log
-from prove import load_categs_from_json
-from prove import generate_sparse_mco
-from prove import show_neighbors
-from prove import filter_categs
-from prove import show_categs
+from prove_utils import Log
+from prove_utils import load_categs_from_json
+from prove_utils import generate_sparse_mco
+from prove_utils import show_neighbors
+from prove_utils import filter_categs
+from prove_utils import show_categs
   
 
 log = Log()
@@ -97,10 +94,12 @@ chunk_reader.close()
 
 ## NLU meets BPA
 
-csr_mco, tran_sizes = generate_sparse_mco(
-    DATA_FILE, mco_out_file=MCO_OUT_FILE,
-    plot=True, return_counts=True, log=log,
-    DEBUG=DEBUG, mco_file=_MCO_FILE)
+if not print_df or 'csr_mco' not in globals():
+  csr_mco, tran_sizes = generate_sparse_mco(
+      DATA_FILE, mco_out_file=MCO_OUT_FILE,
+      return_counts=True, log=log,
+      DEBUG=DEBUG, mco_file=_MCO_FILE,
+      plot=not print_df)
 
 
 ### Meta-information & categories
@@ -184,41 +183,139 @@ def mrr_k(np_cands_batch, np_gold_batch, k=5):
   
 
 
-## Hyperparameters
+## Hyperparameters & hand-picked validation data
 
 EMBED_SIZE = 128
 MAX_FREQ = 250
-MAX_ITERS = 250000
-SAVE_ITERS = 1000
+MAX_EPOCHS = 10000
+RETROFIT_TOL = 1e-5
+FULL_EDGES = True
+
+test_items = [
+    (12071, 11418, 5312), 
+    (10088, 5369, 8527), 
+    (9251, 4671, 2433), 
+    (9845, 7837, 6440), 
+    (8956,6020 ,2599), 
+    (1150, 129, 1361),
+]
+
+org_items = [x[0] for x in test_items]
+pos_items = [x[1] for x in test_items]
+neg_items = [x[2] for x in test_items]
 
 ## ProVe implementation
 
-if os.path.isfile(EMB_OUT_FILE):
-    embeds = np.load(EMB_OUT_FILE)
-else:
-    np_data = csr_mco.toarray()
-    glove_model = GloVe(
-        n=EMBED_SIZE, 
-        xmax=MAX_FREQ, 
-        max_iter=MAX_ITERS,
-        save_folder=MODEL_HOME,
-        save_iters=SAVE_ITERS,
-        name='exp_v1',
+#
+#from prove_model import ProVe
+#
+#prove_model = ProVe(
+#    default_embeds_file=EMB128_ES33,
+#    name='exp_v5es',
+#    log=log,
+#    )
+#
+#if prove_model.embeds is None:
+#    prove_model.fit(
+#        mco=np_mco,
+#        embed_size=EMBED_SIZE, 
+#        max_cooccure=MAX_FREQ, 
+#        epochs=5000, #MAX_EPOCHS,
+#        save_folder=MODEL_HOME,
+#        interactive_session=True,
+#        validation_data=(org_items, pos_items)
+#    )
+#
+
+embeds_name = EMB128_ES33_FN #prove_model.name
+embeds = np.load(EMB128_ES33) # prove_model.embeds
+
+
+from prove_engine import EmbedsEngine
+prod_eng = EmbedsEngine(
+    np_embeddings=embeds,
+    df_metadata=df_meta,
+    name_field='ItemName',
+    id_field='IDE',
+    log=log,
+    categ_fields=['Ierarhie1', 'Ierarhie2'],
+    dct_categ_names=dct_categories,
+    save_folder=MODEL_HOME
     )
-    embeds = glove_model.fit(np_data)
-log.P("ProVe embeds {} loaded.".format(embeds.shape))
 
-def show_prod(pid ,k=10):
-    show_neighbors(pid, embeds, dct_i2n, k=k, log=log)
-
-def show_prod_df(pid,k=10):
-    df = show_neighbors(pid, embeds, dct_i2n, df=df_meta, k=k, log=log)
-    if print_df:
-      log.P(df)
-    else:
-      return df
-    
-############################################    
-      
+## Refining evaluation data using trained ProVe
       
     
+
+
+exp_id, pos_id, neg_id = test_items[0]
+
+
+
+prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, 
+                      embeds_name=embeds_name)
+prod_eng.get_similar_items(exp_id, filtered=False, show=print_df, 
+                           name='Non-filtered neighbors of {} using {} model'.format(
+                               exp_id, embeds_name))    
+  
+##################################  
+  
+#prod_eng.get_similar_items(exp_id, filtered=True, show=print_df,
+#                           name='Filtered neighbors of {} using {} model'.format(
+#                               exp_id, embeds_name))    
+                           
+      
+# The full Pipeline 
+
+#dct_prod_info = prod_eng.get_item_info(exp_id, verbose=True)
+
+new_embeds = prod_eng.get_retrofitted_embeds(
+#    prod_ids=exp_id, 
+#    dct_negative={exp_id:[neg_id]},
+    method='v2_tf', 
+    tol=RETROFIT_TOL,
+    full_edges=FULL_EDGES,
+    eager=False,
+    batch_size=16384*4,
+    lr=0.1,
+    use_fit=False,
+    gpu_optim=False,
+    )
+
+n_dif = (np.abs(new_embeds - embeds).sum(axis=1) > 1e-3).sum()
+log.P("Total {} embeddings modified".format(n_dif))
+
+
+##################
+
+prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, embeds=new_embeds,
+                      embeds_name=embeds_name+'_RETRO')   
+
+##################
+prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=False, show=print_df,
+                           name='Non-filtered neighbors of {} using retrofitted {} model'.format(
+                               exp_id, embeds_name))    
+
+##############
+#df = prod_eng.get_similar_items(exp_id, embeds=new_embeds, filtered=True, show=print_df,
+#                                name='Filtered neighbors of {} using retrofitted {} model'.format(
+#                                exp_id, embeds_name))    
+
+#################
+
+
+    
+### Changing the max-epoch threshold
+#
+#embeds_10ke = np.load(EMB128_10k)
+#prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, embeds=embeds_10ke, 
+#                      embeds_name=EMB128_10k_FN)
+#
+#prod_eng.get_similar_items(exp_id, filtered=False, show=print_df, embeds=embeds_10ke,
+#                           name='Non-filtered neighbors of {} using {} model'.format(
+#                               exp_id, EMB128_10k_FN))    
+#                           
+###################
+#prod_eng.get_similar_items(exp_id, filtered=True, show=print_df, embeds=embeds_10ke,
+#                           name='Filtered neighbors of {} using {} model'.format(
+#                               exp_id, EMB128_10k_FN))    

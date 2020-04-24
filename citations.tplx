@@ -21,7 +21,7 @@
 %===============================================================================
 
 ((* block input scoped *))
-   ((( custom_add_prompt(cell.source | wrap_text(88) | highlight_code(strip_verbatim=True), cell, 'In ', 'incolor') )))
+		((( custom_add_prompt(cell.source | wrap_text(88) | highlight_code(strip_verbatim=True), cell, 'In ', 'incolor') )))
 ((* endblock input *))
 
 %===============================================================================
@@ -30,15 +30,15 @@
 
 % Display stream ouput with coloring
 ((* block stream *))
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		((( output.text | wrap_text(86) | escape_latex | ansi2latex )))
-    \end{Verbatim}
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+((( output.text | wrap_text(86) | escape_latex | ansi2latex )))
+\end{Verbatim}
 ((* endblock stream *))
 
 ((* block execute_result scoped *))
-	((* block display_data scoped *))
-		((( super() )))
-	((* endblock display_data *))
+((* block display_data scoped *))
+((( super() )))
+((* endblock display_data *))
 ((* endblock execute_result *))
 
 

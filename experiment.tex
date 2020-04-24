@@ -431,10 +431,9 @@ products to a maximum of 13,000 top sold products.
 \emph{Further information on the data can be observed in the data
 loading, preparation and minimal visualization of the experiment.}
 
-    \emph{We load the required packages and setup the notebook environment}
-
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}1}]:} \PY{c+c1}{\PYZsh{} We load the required packages and setup the notebook environment}
+        \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
         \PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k}{import} \PY{n}{sparse}
         \PY{k+kn}{import} \PY{n+nn}{itertools}
         \PY{k+kn}{import} \PY{n+nn}{os}
@@ -449,29 +448,23 @@ loading, preparation and minimal visualization of the experiment.}
 
     \emph{We prepare the majority of our global variables}
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{print\PYZus{}df} \PY{o}{=} \PY{k+kc}{False}
-        
-        \PY{n}{DEBUG} \PY{o}{=} \PY{k+kc}{True} \PY{c+c1}{\PYZsh{} in\PYZhy{}development flag}
-        
-        \PY{n}{MODEL\PYZus{}NAME} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}v1}\PY{l+s+s1}{\PYZsq{}}
-        
-        \PY{n}{DATA\PYZus{}HOME} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}data}\PY{l+s+s1}{\PYZsq{}}
-        \PY{n}{MODEL\PYZus{}HOME} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}models}\PY{l+s+s1}{\PYZsq{}}
-        \PY{n}{DATA\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{df\PYZus{}tran\PYZus{}proc\PYZus{}top\PYZus{}13.5k.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{DATA\PYZus{}SLICE\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{df\PYZus{}tran\PYZus{}proc\PYZus{}top\PYZus{}13.5k\PYZus{}slice.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{META\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{df\PYZus{}items\PYZus{}top\PYZus{}13.5k.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{META\PYZus{}INFO} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{obfuscated\PYZus{}keys.txt}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        
-        \PY{n}{MCO\PYZus{}OUT\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}mco.npz}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        
-        \PY{n}{EMB\PYZus{}OUT\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,} \PY{n}{MODEL\PYZus{}NAME} \PY{o}{+} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}embeds.npy}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        
-        \PY{n}{CHUNK\PYZus{}SIZE} \PY{o}{=} \PY{l+m+mi}{100} \PY{o}{*} \PY{l+m+mi}{1024} \PY{o}{*}\PY{o}{*} \PY{l+m+mi}{2} \PY{c+c1}{\PYZsh{} read 100MB chunks}
-        
-        \PY{n}{MAX\PYZus{}N\PYZus{}TOP\PYZus{}PRODUCTS} \PY{o}{=} \PY{l+m+mi}{13000}  \PY{c+c1}{\PYZsh{} top sold products}
-        
-        \PY{n}{\PYZus{}MCO\PYZus{}FILE}  \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mco\PYZus{}top\PYZus{}13.5k.npz}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{c+c1}{\PYZsh{} debug pre\PYZhy{}prepared mco}
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}25}]:} \PY{n}{print\PYZus{}df} \PY{o}{=} \PY{k+kc}{False}
+         \PY{n}{DEBUG} \PY{o}{=} \PY{k+kc}{True} \PY{c+c1}{\PYZsh{} in\PYZhy{}development flag}
+         \PY{n}{MODEL\PYZus{}NAME} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}v1}\PY{l+s+s1}{\PYZsq{}}
+         \PY{n}{DATA\PYZus{}HOME} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}data}\PY{l+s+s1}{\PYZsq{}}
+         \PY{n}{MODEL\PYZus{}HOME} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}models}\PY{l+s+s1}{\PYZsq{}}
+         \PY{n}{DATA\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{df\PYZus{}tran\PYZus{}proc\PYZus{}top\PYZus{}13.5k.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{DATA\PYZus{}SLICE\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{df\PYZus{}tran\PYZus{}proc\PYZus{}top\PYZus{}13.5k\PYZus{}slice.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{META\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{df\PYZus{}items\PYZus{}top\PYZus{}13.5k.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{META\PYZus{}INFO} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{obfuscated\PYZus{}keys.txt}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{MCO\PYZus{}OUT\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}mco.npz}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{EMB\PYZus{}OUT\PYZus{}FILE} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,} \PY{n}{MODEL\PYZus{}NAME} \PY{o}{+} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}embeds.npy}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{EMB128\PYZus{}10k} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}v2\PYZus{}embeds.npy}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{EMB128\PYZus{}250k} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}v1\PYZus{}embeds.npy}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{CHUNK\PYZus{}SIZE} \PY{o}{=} \PY{l+m+mi}{100} \PY{o}{*} \PY{l+m+mi}{1024} \PY{o}{*}\PY{o}{*} \PY{l+m+mi}{2} \PY{c+c1}{\PYZsh{} read 100MB chunks}
+         \PY{n}{MAX\PYZus{}N\PYZus{}TOP\PYZus{}PRODUCTS} \PY{o}{=} \PY{l+m+mi}{13000}  \PY{c+c1}{\PYZsh{} top sold products}
+         \PY{n}{\PYZus{}MCO\PYZus{}FILE}  \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mco\PYZus{}top\PYZus{}13.5k.npz}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{c+c1}{\PYZsh{} debug pre\PYZhy{}prepared mco}
 \end{Verbatim}
 
     \hypertarget{data-processing-approach}{%
@@ -482,51 +475,56 @@ transactions each with many individual items we generate the proposed
 matric o co-occurence (MCO) with efficient batch reading of the
 transactional data.
 
-\emph{For the purpose of efficiently processing the transactional
-records we have \texttt{generate\_sparse\_mco(file\_name)} function with
-its \texttt{add\_to\_mco} helper method}
+    \emph{For the purpose of efficiently processing the transactional
+records we use sparse arrays and a few helper functions within the
+\texttt{prove.py} module. We load our ProVe framework as well as other
+utility functions and pretty-prints settings for \texttt{Pandas} and
+\texttt{NumPy}. In order to ensure experiment replicability for all
+iterations we have setup a simple logging process (the class
+\texttt{Log}). All the source code in the current development stage for
+the \texttt{prove.py} module can be found at
+https://github.com/andreiionutdamian/cs224u/blob/develop/prove.py}
 
-    \emph{We load our ProVe framework as well as other utility functions and
-pretty-prints settings for \texttt{Pandas} and \texttt{NumPy}. In order
-to ensure experiment replicability for all iterations we have setup a
-simple logging process}
-
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}3}]:} \PY{k+kn}{from} \PY{n+nn}{prove} \PY{k}{import} \PY{n}{Log}
         \PY{k+kn}{from} \PY{n+nn}{prove} \PY{k}{import} \PY{n}{load\PYZus{}categs\PYZus{}from\PYZus{}json}
         \PY{k+kn}{from} \PY{n+nn}{prove} \PY{k}{import} \PY{n}{generate\PYZus{}sparse\PYZus{}mco}
         \PY{k+kn}{from} \PY{n+nn}{prove} \PY{k}{import} \PY{n}{show\PYZus{}neighbors}
         \PY{k+kn}{from} \PY{n+nn}{prove} \PY{k}{import} \PY{n}{filter\PYZus{}categs}
         \PY{k+kn}{from} \PY{n+nn}{prove} \PY{k}{import} \PY{n}{show\PYZus{}categs}
+        \PY{k+kn}{from} \PY{n+nn}{prove} \PY{k}{import} \PY{n}{ProVe}
+        \PY{k+kn}{from} \PY{n+nn}{prove} \PY{k}{import} \PY{n}{EmbedsEngine}
 \end{Verbatim}
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}4}]:} \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.max\PYZus{}rows}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{500}\PY{p}{)}
-        \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.max\PYZus{}columns}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{500}\PY{p}{)}
-        \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.max\PYZus{}colwidth}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{500}\PY{p}{)}
-        \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.width}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}
-        \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{precision}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{)}
-        \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.notebook\PYZus{}repr\PYZus{}html}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{k+kc}{True}\PY{p}{)}
-        
-        \PY{k}{def} \PY{n+nf}{\PYZus{}repr\PYZus{}latex\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
-            \PY{n}{str\PYZus{}latex} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}
-            \PY{n}{str\PYZus{}latex} \PY{o}{+}\PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{scriptsize}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{\PYZsq{}}
-            \PY{n}{str\PYZus{}latex} \PY{o}{+}\PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{to\PYZus{}latex}\PY{p}{(}
-                \PY{n}{bold\PYZus{}rows}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}
-                \PY{n}{index\PYZus{}names}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,}
-            \PY{p}{)}
-            \PY{k}{return} \PY{n}{str\PYZus{}latex}
-        
-        \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{o}{.}\PY{n}{\PYZus{}repr\PYZus{}latex\PYZus{}} \PY{o}{=} \PY{n}{\PYZus{}repr\PYZus{}latex\PYZus{}}  \PY{c+c1}{\PYZsh{} monkey patch pandas DataFrame}
-        
-        
-        \PY{n}{np}\PY{o}{.}\PY{n}{set\PYZus{}printoptions}\PY{p}{(}\PY{n}{precision}\PY{o}{=}\PY{l+m+mi}{3}\PY{p}{)}
-        \PY{n}{np}\PY{o}{.}\PY{n}{set\PYZus{}printoptions}\PY{p}{(}\PY{n}{suppress}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
-        \PY{n}{np}\PY{o}{.}\PY{n}{set\PYZus{}printoptions}\PY{p}{(}\PY{n}{linewidth}\PY{o}{=}\PY{l+m+mi}{500}\PY{p}{)}
-        
-        \PY{n}{plt}\PY{o}{.}\PY{n}{style}\PY{o}{.}\PY{n}{use}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ggplot}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        
-        \PY{n}{log} \PY{o}{=} \PY{n}{Log}\PY{p}{(}\PY{p}{)}
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}29}]:} \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.max\PYZus{}rows}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{500}\PY{p}{)}
+         \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.max\PYZus{}columns}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{500}\PY{p}{)}
+         \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.max\PYZus{}colwidth}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{500}\PY{p}{)}
+         \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.width}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{1000}\PY{p}{)}
+         \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{precision}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{)}
+         \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.float\PYZus{}format}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{\PYZob{}:.3f\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{)}
+         \PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.notebook\PYZus{}repr\PYZus{}html}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{k+kc}{True}\PY{p}{)}
+         
+         \PY{k}{def} \PY{n+nf}{\PYZus{}repr\PYZus{}latex\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+             \PY{n}{str\PYZus{}latex} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}
+             \PY{n}{str\PYZus{}latex} \PY{o}{+}\PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}\PYZbs{}}\PY{l+s+s1}{begin}\PY{l+s+si}{\PYZob{}center\PYZcb{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{\PYZsq{}}
+             \PY{n}{str\PYZus{}latex} \PY{o}{+}\PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{scriptsize}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{\PYZsq{}}
+             \PY{n}{str\PYZus{}latex} \PY{o}{+}\PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{to\PYZus{}latex}\PY{p}{(}
+                 \PY{n}{bold\PYZus{}rows}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,}
+                 \PY{n}{index\PYZus{}names}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,}
+             \PY{p}{)}
+             \PY{n}{str\PYZus{}latex} \PY{o}{+}\PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{end}\PY{l+s+si}{\PYZob{}center\PYZcb{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{\PYZsq{}}
+             \PY{k}{return} \PY{n}{str\PYZus{}latex}
+         
+         \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{o}{.}\PY{n}{\PYZus{}repr\PYZus{}latex\PYZus{}} \PY{o}{=} \PY{n}{\PYZus{}repr\PYZus{}latex\PYZus{}}  \PY{c+c1}{\PYZsh{} monkey patch pandas DataFrame}
+         \PY{n}{np}\PY{o}{.}\PY{n}{set\PYZus{}printoptions}\PY{p}{(}\PY{n}{precision}\PY{o}{=}\PY{l+m+mi}{3}\PY{p}{)}
+         \PY{n}{np}\PY{o}{.}\PY{n}{set\PYZus{}printoptions}\PY{p}{(}\PY{n}{suppress}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+         \PY{n}{np}\PY{o}{.}\PY{n}{set\PYZus{}printoptions}\PY{p}{(}\PY{n}{linewidth}\PY{o}{=}\PY{l+m+mi}{500}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{style}\PY{o}{.}\PY{n}{use}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ggplot}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{k+kn}{from} \PY{n+nn}{IPython}\PY{n+nn}{.}\PY{n+nn}{display} \PY{k}{import} \PY{n}{Markdown}\PY{p}{,} \PY{n}{display}
+         \PY{k}{def} \PY{n+nf}{printmd}\PY{p}{(}\PY{n}{string}\PY{p}{)}\PY{p}{:}
+             \PY{n}{display}\PY{p}{(}\PY{n}{Markdown}\PY{p}{(}\PY{n}{string}\PY{p}{)}\PY{p}{)}
+         \PY{n}{log} \PY{o}{=} \PY{n}{Log}\PY{p}{(}\PY{n}{printmd}\PY{p}{)}
 \end{Verbatim}
 
     \hypertarget{understanding-the-data}{%
@@ -563,7 +561,7 @@ customer identifier field and a product availability indicator.
 while for the transactional database we take a quick look at the first
 chunk of 15 rows}
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}5}]:} \PY{k}{def} \PY{n+nf}{show\PYZus{}product}\PY{p}{(}\PY{n}{IDE}\PY{p}{,} \PY{n}{df}\PY{p}{)}\PY{p}{:}
             \PY{n}{rec} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{n}{df}\PY{o}{.}\PY{n}{IDE}\PY{o}{==}\PY{n}{IDE}\PY{p}{]}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
             \PY{n}{log}\PY{o}{.}\PY{n}{P}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{   Name:  }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{rec}\PY{o}{.}\PY{n}{ItemName}\PY{p}{)}\PY{p}{)}
@@ -587,8 +585,8 @@ chunk of 15 rows}
         \PY{n}{df\PYZus{}meta}\PY{p}{[}\PY{n}{df\PYZus{}meta}\PY{o}{.}\PY{n}{ItemName}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{len}\PY{p}{(}\PY{p}{)}\PY{o}{\PYZlt{}}\PY{l+m+mi}{30}\PY{p}{]}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{15}\PY{p}{,}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		Metatada information:
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Metatada information:
   Total no of products: 13000
   Total no of level 1 hierarchies: 24
   Total no of level 2 hierarchies: 181
@@ -603,11 +601,12 @@ chunk of 15 rows}
    Freq:  156
    Hrchy: 1/0
 
-    \end{Verbatim}
+\end{Verbatim}
 
-	
-		
-    \scriptsize
+
+
+    \begin{center}
+\scriptsize
 \begin{tabular}{lrrrlrr}
 \toprule
 {} &  ItemId &  IDE &   Freq &                       ItemName &  Ierarhie1 &  Ierarhie2 \\
@@ -629,26 +628,27 @@ chunk of 15 rows}
 \textbf{59} &  258417 &   59 &   4765 &    M85 REDBUSH BAKED APPLE 50G &         13 &         79 \\
 \bottomrule
 \end{tabular}
+\end{center}
 
 
     
-	
 
-    \hypertarget{as-we-are-working-with-a-real-life-normed-relational-database-the-hyerarchi-fields-do-not-tell-much-information-other-than-a-simple-int-identifier.-now-we-can-deobfuscate-the-ierarhie1-and-ierarhie2-fields}{%
-\subparagraph{\texorpdfstring{As we are working with a real-life normed
-relational database the hyerarchi fields do not tell much information
-other than a simple \texttt{int} identifier. Now we can deobfuscate the
-\texttt{Ierarhie1} and \texttt{Ierarhie2}
-fields}{As we are working with a real-life normed relational database the hyerarchi fields do not tell much information other than a simple int identifier. Now we can deobfuscate the Ierarhie1 and Ierarhie2 fields}}\label{as-we-are-working-with-a-real-life-normed-relational-database-the-hyerarchi-fields-do-not-tell-much-information-other-than-a-simple-int-identifier.-now-we-can-deobfuscate-the-ierarhie1-and-ierarhie2-fields}}
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+    As we are working with a real-life normed relational database the
+hyerarchi fields do not tell much information other than a simple
+\texttt{int} identifier however we can deobfuscate them
+(\texttt{Ierarhie1} and \texttt{Ierarhie2}) in our database fields with
+additional external data-source.
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}6}]:} \PY{n}{df\PYZus{}meta}\PY{p}{,} \PY{n}{dct\PYZus{}categories} \PY{o}{=} \PY{n}{load\PYZus{}categs\PYZus{}from\PYZus{}json}\PY{p}{(}\PY{n}{df\PYZus{}meta}\PY{p}{,} \PY{n}{META\PYZus{}INFO}\PY{p}{)}
         \PY{n}{df\PYZus{}meta}\PY{p}{[}\PY{n}{df\PYZus{}meta}\PY{o}{.}\PY{n}{ItemName}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{len}\PY{p}{(}\PY{p}{)}\PY{o}{\PYZlt{}}\PY{l+m+mi}{30}\PY{p}{]}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{15}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{7}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{]}\PY{p}{]}
 \end{Verbatim}
 
-	
-		
-    \scriptsize
+
+
+    \begin{center}
+\scriptsize
 \begin{tabular}{llll}
 \toprule
 {} &                       ItemName &  Ierarhie1\_name &       Ierarhie2\_name \\
@@ -670,19 +670,21 @@ fields}{As we are working with a real-life normed relational database the hyerar
 \textbf{59} &    M85 REDBUSH BAKED APPLE 50G &  GASTRONOMIE AA &                 Ceai \\
 \bottomrule
 \end{tabular}
+\end{center}
 
 
     
-	
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}7}]:} \PY{n}{chunk\PYZus{}reader} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{n}{DATA\PYZus{}SLICE\PYZus{}FILE}\PY{p}{,} \PY{n}{iterator}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
         \PY{n}{chunk\PYZus{}reader}\PY{o}{.}\PY{n}{get\PYZus{}chunk}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{)}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{]}
 \end{Verbatim}
 
-	
-		
-    \scriptsize
+
+
+    \begin{center}
+\scriptsize
 \begin{tabular}{lrrrlrr}
 \toprule
 {} &  BasketId &  ItemId &  SiteId &                TimeStamp &  Qtty &  ClientId \\
@@ -704,12 +706,13 @@ fields}{As we are working with a real-life normed relational database the hyerar
 \textbf{14} &   7130822 &  464013 &      20 &  2016-01-01 16:05:18.960 &   1.0 &      -103 \\
 \bottomrule
 \end{tabular}
+\end{center}
 
 
     
-	
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}8}]:} \PY{n}{chunk\PYZus{}reader}\PY{o}{.}\PY{n}{close}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
@@ -750,38 +753,91 @@ item co-counts.
 \emph{Now the next logical step is to generate the matrix of item
 co-occurrence counts}
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}9}]:} \PY{n}{csr\PYZus{}mco}\PY{p}{,} \PY{n}{tran\PYZus{}sizes} \PY{o}{=} \PY{n}{generate\PYZus{}sparse\PYZus{}mco}\PY{p}{(}
             \PY{n}{DATA\PYZus{}FILE}\PY{p}{,} \PY{n}{mco\PYZus{}out\PYZus{}file}\PY{o}{=}\PY{n}{MCO\PYZus{}OUT\PYZus{}FILE}\PY{p}{,}
             \PY{n}{plot}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{return\PYZus{}counts}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{log}\PY{o}{=}\PY{n}{log}\PY{p}{,}
             \PY{n}{DEBUG}\PY{o}{=}\PY{n}{DEBUG}\PY{p}{,} \PY{n}{mco\PYZus{}file}\PY{o}{=}\PY{n}{\PYZus{}MCO\PYZus{}FILE}\PY{p}{)}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		Loading MCO{\ldots}
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Loading MCO{\ldots}
 Loading raw data{\ldots}
-  MCO Processing done in 0.08 min (sparse mat creation: 0.08 min):
+  MCO Processing done in 0.09 min (sparse mat creation: 0.09 min):
   Start date: None
   End date:   None
   Max co-occ: 5998.0
 
-  Co-occurence distribution:
+\end{Verbatim}
+
+
+    
+
+    
+
+
+    \textbf{Co-occurence distribution:}
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
     Counts:   00 6382178 913964 293414 138452 77970 49730 34124 24904 18758
     Nr items:  0       1      2      3      4     5     6     7     8     9
 
-  Transactions size distrib:
+\end{Verbatim}
+
+
+    
+
+    
+
+
+    \textbf{Transactions size distribution:}
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
     Counts:   00 00 1210270 484388 194496 86254 41847 21134 11616 6430
     Nr items:  0  1       2      3      4     5     6     7     8    9
 
-  Transactional data:
-       BasketId  ItemId  SiteId                TimeStamp  Qtty  ClientId
-    0   7130756  441093      26  2016-01-01 14:49:02.403   1.0      -103
-    1   7130756  464012      26  2016-01-01 14:49:02.403   1.0      -103
-    2   7130756  464013      26  2016-01-01 14:49:02.403   1.0      -103
-    3   7130802  377742      20  2016-01-01 15:49:03.860   1.0      -103
-    4   7130802  405083      20  2016-01-01 15:49:03.860   1.0      -103
+\end{Verbatim}
 
-  MCO data: (only 7x7 values displayed)
+
+    
+
+    
+
+
+    \textbf{Transactional data structure:}
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+    RangeIndex: 5767223 entries, 0 to 5767222
+    Data columns (total 8 columns):
+     \#   Column     Dtype
+    ---  ------     -----
+     0   BasketId   int64
+     1   ItemId     int64
+     2   SiteId     int64
+     3   TimeStamp  object
+     4   Qtty       float64
+     5   ClientId   int64
+     6   IsActive   int64
+     7   IDE        int64
+    dtypes: float64(1), int64(6), object(1)
+    memory usage: 352.0+ MB
+
+
+
+\end{Verbatim}
+
+
+    MCO data: (only 7x7 values displayed)
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
     [[   0.   25.   49. 5998.  297.   85.   28.]
      [  25.    0.   32.   19.    6.    9.   15.]
      [  49.   32.    0.   22.    8.   15.   28.]
@@ -790,26 +846,26 @@ Loading raw data{\ldots}
      [  85.    9.   15.   42.  141.    0.   11.]
      [  28.   15.   28.   13.   11.   11.    0.]]
 
-    \end{Verbatim}
+\end{Verbatim}
 
-		
+
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{experiment_files/experiment_17_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{experiment_files/experiment_16_12.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-	
-		
+
+
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{experiment_files/experiment_17_2.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{experiment_files/experiment_16_13.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-	
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		Saving 'exp\_models\textbackslash{}exp\_mco.npz'
 
-    \end{Verbatim}
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Saving 'exp\_models\textbackslash{}exp\_mco.npz'
+
+\end{Verbatim}
 
     \hypertarget{meta-information-categories}{%
 \subsubsection{Meta-information \&
@@ -818,9 +874,11 @@ categories}\label{meta-information-categories}}
 With regard to the meta-data that can generate important knowledge graph
 information for our self-supervised approach we found out that the
 \emph{detail category} - or the so called ``level 2 hierarchy'' - has a
-finer granularity than the first level hierarchical information.
+finer granularity than the first level hierarchical information. Further
+information regarding how this information is processed in order o
+obtain our knowledge graph will be presented in the modelling section.
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}10}]:} \PY{n}{dct\PYZus{}i2n} \PY{o}{=} \PY{p}{\PYZob{}}\PY{n}{k}\PY{p}{:}\PY{n}{v} \PY{k}{for} \PY{n}{k}\PY{p}{,}\PY{n}{v} \PY{o+ow}{in} \PY{n+nb}{zip}\PY{p}{(}\PY{n}{df\PYZus{}meta}\PY{o}{.}\PY{n}{IDE}\PY{p}{,} \PY{n}{df\PYZus{}meta}\PY{o}{.}\PY{n}{ItemName}\PY{p}{)}\PY{p}{\PYZcb{}}
          
          \PY{c+c1}{\PYZsh{} we slice and convert the sparse matrix}
@@ -833,21 +891,33 @@ finer granularity than the first level hierarchical information.
          \PY{n}{show\PYZus{}categs}\PY{p}{(}\PY{n}{df\PYZus{}meta}\PY{p}{,} \PY{n}{dct\PYZus{}categories}\PY{p}{,} \PY{n}{k}\PY{o}{=}\PY{l+m+mi}{5}\PY{p}{,} \PY{n}{log}\PY{o}{=}\PY{n}{log}\PY{p}{)}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		Hierarchy level 1 'Ierarhie1' contains 32 categories
+
+    \emph{Hierarchy level 1 `Ierarhie1' contains 32 categories}
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
   Category name: ACCESORII GASTRO AA  Id:   9  Prods:  523
   Category name: ALTELE               Id:  26  Prods:    9
   Category name: CARTE ROM            Id:   1  Prods: 7202
   Category name: CARTE STRAINA        Id:   0  Prods:  736
   {\ldots}
-Hierarchy level 2 'Ierarhie2' contains 356 categories
+
+\end{Verbatim}
+
+
+    \emph{Hierarchy level 2 `Ierarhie2' contains 356 categories}
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
   Category name: ACCESORII              Id: 116  Prods:    3
   Category name: ACCESORII FASHION      Id: 274  Prods:   21
   Category name: ACCESORII MASA         Id: 249  Prods:   26
   Category name: ALTELE                 Id:  60  Prods:   60
   {\ldots}
 
-    \end{Verbatim}
+\end{Verbatim}
 
     \hypertarget{analogy-with-word-vectors}{%
 \subsubsection{Analogy with
@@ -861,7 +931,7 @@ analysis for a word such as ``beatles'' and obtain ``lennon''b,
 ``mccartney'' we expect to have similar outputs from our product
 semantic vector space model.
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}11}]:} \PY{k}{if} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{wemb}\PY{l+s+s1}{\PYZsq{}} \PY{o+ow}{not} \PY{o+ow}{in} \PY{n+nb}{globals}\PY{p}{(}\PY{p}{)}\PY{p}{:}
              \PY{n}{log}\PY{o}{.}\PY{n}{P}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Loading GloVe word embeddings}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
              \PY{n}{glove\PYZus{}words} \PY{o}{=} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{DATA\PYZus{}HOME}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{glove\PYZus{}words\PYZus{}and\PYZus{}embeds\PYZus{}100d.npz}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
@@ -875,9 +945,17 @@ semantic vector space model.
          \PY{n}{show\PYZus{}word}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{beatles}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		Loading GloVe word embeddings
-Top neighbors for 'beatles'
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Loading GloVe word embeddings
+
+\end{Verbatim}
+
+
+    Top neighbors for 9440: `beatles':
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
   beatles:    0.000
   lennon:     0.246
   mccartney:  0.276
@@ -889,7 +967,7 @@ Top neighbors for 'beatles'
   motown:     0.327
   presley:    0.333
 
-    \end{Verbatim}
+\end{Verbatim}
 
     \hypertarget{self-supervised-training-and-supervised-testing}{%
 \subsection{Self-supervised training and supervised
@@ -908,7 +986,7 @@ Following the manual selection of product candidates for evaluation
 data, for each individual chosen item the top neighbors items have been
 prepared using cosine distance.
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}12}]:} \PY{n}{proposed\PYZus{}test\PYZus{}categs} \PY{o}{=} \PY{p}{\PYZob{}}
            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Ierarhie1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{p}{\PYZob{}}
                \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{COMICS\PYZam{}MANGA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{21}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{GASTRONOMIE}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{20}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HOME\PYZam{}DECO AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{10}\PY{p}{,}
@@ -940,8 +1018,12 @@ prepared using cosine distance.
                \PY{p}{]}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		Hierarchy level 1 'Ierarhie1' contains 8 categories
+
+    \emph{Hierarchy level 1 `Ierarhie1' contains 8 categories}
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
   Category name: COMICS\&MANGA  Id:  21  Prods:  135
   Category name: GASTRONOMIE   Id:  20  Prods:  196
   Category name: HOME\&DECO AA  Id:  10  Prods:  174
@@ -950,7 +1032,15 @@ prepared using cosine distance.
   Category name: MUZICA        Id:   2  Prods:  219
   Category name: NOVELTY       Id:  23  Prods:  103
   Category name: VINURI        Id:  14  Prods:   23
-Hierarchy level 2 'Ierarhie2' contains 14 categories
+
+\end{Verbatim}
+
+
+    \emph{Hierarchy level 2 `Ierarhie2' contains 14 categories}
+
+    
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
   Category name: Audiobook CD           Id: 111  Prods:    7
   Category name: BLU-RAY                Id:  36  Prods:   16
   Category name: BOARD GAMES            Id: 140  Prods:  165
@@ -966,7 +1056,7 @@ Hierarchy level 2 'Ierarhie2' contains 14 categories
   Category name: Travelling collection  Id:  75  Prods:   19
   Category name: Vinyl                  Id:  10  Prods:   52
 
-    \end{Verbatim}
+\end{Verbatim}
 
     \hypertarget{metrics-and-overall-evaluation}{%
 \section{Metrics and overall
@@ -992,7 +1082,7 @@ no candidate matches the gold value). Finally we decided to use only MRR
 as evaluation metric with various small number of candidates (K=1 and
 K=5).
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}13}]:} \PY{k}{def} \PY{n+nf}{mrr\PYZus{}k}\PY{p}{(}\PY{n}{np\PYZus{}cands\PYZus{}batch}\PY{p}{,} \PY{n}{np\PYZus{}gold\PYZus{}batch}\PY{p}{,} \PY{n}{k}\PY{o}{=}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{:}
            \PY{l+s+sd}{\PYZdq{}\PYZdq{}\PYZdq{}}
          \PY{l+s+sd}{  will compute Mean Reciprocal Rank for a batch of predictions}
@@ -1040,7 +1130,7 @@ vector representation is obtained when the loss starts to decrease at a
 rate of 0.1 per iteration. We save during our ProVe optimization after
 each 1000 iterations.
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}14}]:} \PY{n}{EMBED\PYZus{}SIZE} \PY{o}{=} \PY{l+m+mi}{128}
          \PY{n}{MAX\PYZus{}FREQ} \PY{o}{=} \PY{l+m+mi}{250}
          \PY{n}{MAX\PYZus{}ITERS} \PY{o}{=} \PY{l+m+mi}{250000}
@@ -1060,39 +1150,57 @@ the Mittens \cite{dingwall2018mittens} was modified so that it allows a
 finer control of the iterations as well as full in-GPU training without
 any RAM-to-VRAM transfer.
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}15}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} ProVe implementation}
+We train our product embeddings for 10,000 epochs (first loss graph
+below) and for 250,000 epochs (second loss graph)
+\includegraphics{exp_v2_loss.png} \includegraphics{exp_v1_loss.png}
+
+We compare the resulting embeddings based on our neighborhood similarity
+tests.
+
+\emph{A secondary class entitled \texttt{EmbedsEngine} has been
+developed. It encapsulates methods for post-processing, visualization
+and high-end features based on pre-trained ProVe models}
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}15}]:} \PY{n}{prove\PYZus{}model} \PY{o}{=} \PY{n}{ProVe}\PY{p}{(}
+             \PY{n}{default\PYZus{}embeds\PYZus{}file}\PY{o}{=}\PY{n}{EMB128\PYZus{}250k}\PY{p}{,}
+             \PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}v1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+             \PY{n}{log}\PY{o}{=}\PY{n}{log}\PY{p}{,}
+             \PY{p}{)}
          
-         \PY{k}{if} \PY{n}{os}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{isfile}\PY{p}{(}\PY{n}{EMB\PYZus{}OUT\PYZus{}FILE}\PY{p}{)}\PY{p}{:}
-             \PY{n}{embeds} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{load}\PY{p}{(}\PY{n}{EMB\PYZus{}OUT\PYZus{}FILE}\PY{p}{)}
-         \PY{k}{else}\PY{p}{:}
-             \PY{n}{np\PYZus{}data} \PY{o}{=} \PY{n}{csr\PYZus{}mco}\PY{o}{.}\PY{n}{toarray}\PY{p}{(}\PY{p}{)}
-             \PY{n}{glove\PYZus{}model} \PY{o}{=} \PY{n}{GloVe}\PY{p}{(}
-                 \PY{n}{n}\PY{o}{=}\PY{n}{EMBED\PYZus{}SIZE}\PY{p}{,}
-                 \PY{n}{xmax}\PY{o}{=}\PY{n}{MAX\PYZus{}FREQ}\PY{p}{,}
-                 \PY{n}{max\PYZus{}iter}\PY{o}{=}\PY{n}{MAX\PYZus{}ITERS}\PY{p}{,}
+         \PY{k}{if} \PY{n}{prove\PYZus{}model}\PY{o}{.}\PY{n}{embeds} \PY{o+ow}{is} \PY{k+kc}{None}\PY{p}{:}
+             \PY{n}{prove\PYZus{}model}\PY{o}{.}\PY{n}{fit}\PY{p}{(}
+                 \PY{n}{mco}\PY{o}{=}\PY{n}{csr\PYZus{}mco}\PY{p}{,}
+                 \PY{n}{embed\PYZus{}size}\PY{o}{=}\PY{n}{EMBED\PYZus{}SIZE}\PY{p}{,}
+                 \PY{n}{max\PYZus{}cooccure}\PY{o}{=}\PY{n}{MAX\PYZus{}FREQ}\PY{p}{,}
+                 \PY{n}{epochs}\PY{o}{=}\PY{n}{MAX\PYZus{}ITERS}\PY{p}{,}
                  \PY{n}{save\PYZus{}folder}\PY{o}{=}\PY{n}{MODEL\PYZus{}HOME}\PY{p}{,}
                  \PY{n}{save\PYZus{}iters}\PY{o}{=}\PY{n}{SAVE\PYZus{}ITERS}\PY{p}{,}
-                 \PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{exp\PYZus{}v1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
              \PY{p}{)}
-             \PY{n}{embeds} \PY{o}{=} \PY{n}{glove\PYZus{}model}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{np\PYZus{}data}\PY{p}{)}
-         \PY{n}{log}\PY{o}{.}\PY{n}{P}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ProVe embeds }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s2}{ loaded.}\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{embeds}\PY{o}{.}\PY{n}{shape}\PY{p}{)}\PY{p}{)}
          
-         \PY{k}{def} \PY{n+nf}{show\PYZus{}prod}\PY{p}{(}\PY{n}{pid} \PY{p}{,}\PY{n}{k}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{)}\PY{p}{:}
-             \PY{n}{show\PYZus{}neighbors}\PY{p}{(}\PY{n}{pid}\PY{p}{,} \PY{n}{embeds}\PY{p}{,} \PY{n}{dct\PYZus{}i2n}\PY{p}{,} \PY{n}{k}\PY{o}{=}\PY{n}{k}\PY{p}{,} \PY{n}{log}\PY{o}{=}\PY{n}{log}\PY{p}{)}
+         \PY{n}{embeds} \PY{o}{=} \PY{n}{prove\PYZus{}model}\PY{o}{.}\PY{n}{embeds}
          
-         \PY{k}{def} \PY{n+nf}{show\PYZus{}prod\PYZus{}df}\PY{p}{(}\PY{n}{pid}\PY{p}{,}\PY{n}{k}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{)}\PY{p}{:}
-             \PY{n}{df} \PY{o}{=} \PY{n}{show\PYZus{}neighbors}\PY{p}{(}\PY{n}{pid}\PY{p}{,} \PY{n}{embeds}\PY{p}{,} \PY{n}{dct\PYZus{}i2n}\PY{p}{,} \PY{n}{df}\PY{o}{=}\PY{n}{df\PYZus{}meta}\PY{p}{,} \PY{n}{k}\PY{o}{=}\PY{n}{k}\PY{p}{,} \PY{n}{log}\PY{o}{=}\PY{n}{log}\PY{p}{)}
-             \PY{k}{if} \PY{n}{print\PYZus{}df}\PY{p}{:}
-               \PY{n}{log}\PY{o}{.}\PY{n}{P}\PY{p}{(}\PY{n}{df}\PY{p}{)}
-             \PY{k}{else}\PY{p}{:}
-               \PY{k}{return} \PY{n}{df}
+         \PY{n}{prod\PYZus{}eng} \PY{o}{=} \PY{n}{EmbedsEngine}\PY{p}{(}
+             \PY{n}{np\PYZus{}embeddings}\PY{o}{=}\PY{n}{embeds}\PY{p}{,}
+             \PY{n}{df\PYZus{}metadata}\PY{o}{=}\PY{n}{df\PYZus{}meta}\PY{p}{,}
+             \PY{n}{name\PYZus{}field}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ItemName}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+             \PY{n}{id\PYZus{}field}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{IDE}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+             \PY{n}{log}\PY{o}{=}\PY{n}{log}\PY{p}{,}
+             \PY{n}{categ\PYZus{}fields}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Ierarhie1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Ierarhie2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}
+             \PY{n}{dct\PYZus{}categ\PYZus{}names}\PY{o}{=}\PY{n}{dct\PYZus{}categories}
+             \PY{p}{)}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		ProVe embeds (13000, 128) loaded.
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+ProVe embeds (13000, 128) loaded.
+Found category string in 'Ierarhie1\_name'
+Found category string in 'Ierarhie2\_name'
+Constructing items knowledge graph
+  Retrieving products for category 'Ierarhie1'
+  Retrieving products for category 'Ierarhie2'
+  Created products graph 100.0\%
 
-    \end{Verbatim}
+\end{Verbatim}
 
     \hypertarget{refining-evaluation-data-using-trained-prove}{%
 \subsection{Refining evaluation data using trained
@@ -1105,23 +1213,38 @@ selected manually each individual evaluation item in order to find those
 that would clearly fail at proposing a good replacement candidate with
 just a cosine distance neighbor search within the products vector space.
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+Aside from the straightforward neighborhood search we also hand-picked
+two other products - one that is obviously a potential replacement for
+our product (``Best of David Bowie - 2002'') and another one that is
+clearly not a replacement (``NLP - by Ian McDermott''). For these two
+additional products we constantly measure the distances during the
+various phases of our experiment.
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
 {\color{incolor}In [{\color{incolor}16}]:} \PY{n}{test\PYZus{}items} \PY{o}{=} \PY{p}{[}
-             \PY{l+m+mi}{12071}\PY{p}{,} \PY{l+m+mi}{10088}\PY{p}{,} \PY{l+m+mi}{9251}\PY{p}{,}
+             \PY{l+m+mi}{12071}\PY{p}{,} \PY{l+m+mi}{11418}\PY{p}{,} \PY{l+m+mi}{10088}\PY{p}{,} \PY{l+m+mi}{9251}\PY{p}{,}
              \PY{l+m+mi}{9845}\PY{p}{,} \PY{l+m+mi}{8956}\PY{p}{,} \PY{l+m+mi}{6020}\PY{p}{,}
              \PY{l+m+mi}{129}\PY{p}{,} \PY{l+m+mi}{1150}\PY{p}{,} \PY{l+m+mi}{3852}
          \PY{p}{]}
-         \PY{n}{show\PYZus{}prod\PYZus{}df}\PY{p}{(}\PY{l+m+mi}{12071}\PY{p}{)}
+         \PY{n}{exp\PYZus{}id} \PY{o}{=} \PY{l+m+mi}{12071}
+         \PY{n}{pos\PYZus{}id} \PY{o}{=} \PY{l+m+mi}{11418}
+         \PY{n}{neg\PYZus{}id} \PY{o}{=} \PY{l+m+mi}{5312}
+         
+         \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{analize\PYZus{}item}\PY{p}{(}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{positive\PYZus{}id}\PY{o}{=}\PY{n}{pos\PYZus{}id}\PY{p}{,} \PY{n}{negative\PYZus{}id}\PY{o}{=}\PY{n}{neg\PYZus{}id}\PY{p}{)}
+         \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{get\PYZus{}similar\PYZus{}items}\PY{p}{(}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{filtered}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,} \PY{n}{show}\PY{o}{=}\PY{n}{print\PYZus{}df}\PY{p}{)}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		Top neighbors for 'CD / DAVID BOWIE / BLACKSTAR (2016)'
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'
+  Distance from positive 11418:  0.921
+  Distance from negative 5312:   0.653
 
-    \end{Verbatim}
+\end{Verbatim}
 
-	
-		
-    \scriptsize
+
+
+    \begin{center}
+\scriptsize
 \begin{tabular}{lrrlll}
 \toprule
 {} &     ID &    DIST &                                      NAME &               H1 &                    H2 \\
@@ -1138,10 +1261,95 @@ just a cosine distance neighbor search within the products vector space.
 \textbf{9} &   9334 &  0.7229 &            SET 6 COASTERS PARIS MONUMENTS &  ACCESORII GASTR &  Accesorii servit mas \\
 \bottomrule
 \end{tabular}
+\end{center}
 
 
     
-	
+
+
+    As we can see from above table our proposed ``anchor'' product
+(\texttt{12071}) is clearly \emph{closer} to a lot of products that
+might be in a complementarity relationship to it than to products from
+its own category (music, rock, etc). We can run the same similarity
+analysis using a filter that would give us only products from the same
+generic inventory hierarchical category.
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}17}]:} \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{get\PYZus{}similar\PYZus{}items}\PY{p}{(}\PY{l+m+mi}{12071}\PY{p}{,} \PY{n}{filtered}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{show}\PY{o}{=}\PY{n}{print\PYZus{}df}\PY{p}{)}
+\end{Verbatim}
+
+
+
+    \begin{center}
+\scriptsize
+\begin{tabular}{lrrlll}
+\toprule
+{} &     ID &    DIST &                                      NAME &      H1 &                   H2 \\
+\midrule
+\textbf{0  } &  12071 &  0.0000 &       CD / DAVID BOWIE / BLACKSTAR (2016) &  MUZICA &     CD International \\
+\textbf{140} &  10604 &  0.7962 &  LP / LED ZEPPELIN / PHYSICAL GRAFFITI -1 &  MUZICA &                Vinyl \\
+\textbf{205} &   9991 &  0.8102 &  CD / LED ZEPPELIN / REMASTERS (1990) CD2 &  MUZICA &     CD International \\
+\textbf{219} &   8599 &  0.8127 &  CD / AC/DC / BACK IN BLACK -1980- (2003) &  MUZICA &     CD International \\
+\textbf{453} &   3139 &  0.8368 &  CD / METALLICA / MASTER OF PUPPETS (1986 &  MUZICA &     CD International \\
+\textbf{515} &   9333 &  0.8414 &    CD / GREEN DAY / AMERICAN IDIOT (2004) &  MUZICA &     CD International \\
+\textbf{638} &   9811 &  0.8509 &  LP / ELVIS PRESLEY / THE ESSENTIAL (2016 &  MUZICA &                Vinyl \\
+\textbf{677} &   7932 &  0.8533 &         CD / METALLICA / METALLICA (1991) &  MUZICA &     CD International \\
+\textbf{690} &   6256 &  0.8541 &  LP / RED HOT CHILI PEPPERS / CALIFORNICA &  MUZICA &                Vinyl \\
+\textbf{710} &   7645 &  0.8552 &       CD / DELIA / LIVE (DIGIPACK) (2017) &  MUZICA &  CD Repertoriu Local \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+    
+
+
+    We also test the embeddings resulted from the 10,000 epochs training.
+Worth to mention is that the GPU 10,000 iterations took around 40' while
+the 250,000 took more than 12 hours. We discover that the lower epochs
+model behaves radically better than the 12 hrs trained model pointing to
+further investigation and the implementation of additional optimization
+heuristics (such as an early stopping mechanism)
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}30}]:} \PY{n}{embeds\PYZus{}10ke} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{load}\PY{p}{(}\PY{n}{EMB128\PYZus{}10k}\PY{p}{)}
+         \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{analize\PYZus{}item}\PY{p}{(}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{positive\PYZus{}id}\PY{o}{=}\PY{n}{pos\PYZus{}id}\PY{p}{,} \PY{n}{negative\PYZus{}id}\PY{o}{=}\PY{n}{neg\PYZus{}id}\PY{p}{,}
+         \PY{n}{embeds}\PY{o}{=}\PY{n}{embeds\PYZus{}10ke}\PY{p}{)}
+         \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{get\PYZus{}similar\PYZus{}items}\PY{p}{(}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{filtered}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,} \PY{n}{show}\PY{o}{=}\PY{n}{print\PYZus{}df}\PY{p}{,} \PY{n}{embeds}\PY{o}{=}\PY{n}{embeds\PYZus{}10ke}\PY{p}{)}
+\end{Verbatim}
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'
+  Distance from positive 11418:  0.664
+  Distance from negative 5312:   1.010
+
+\end{Verbatim}
+
+
+
+    \begin{center}
+\scriptsize
+\begin{tabular}{lrrlll}
+\toprule
+{} &     ID &  DIST &                                      NAME &             H1 &                   H2 \\
+\midrule
+\textbf{0} &  12071 & 0.000 &       CD / DAVID BOWIE / BLACKSTAR (2016) &         MUZICA &     CD International \\
+\textbf{1} &  11418 & 0.664 &  CD / DAVID BOWIE / BEST OF BOWIE (2002)  &         MUZICA &     CD International \\
+\textbf{2} &  10035 & 0.688 &  CD / AEROSMITH / THE ESSENTIAL AEROSMITH &         MUZICA &     CD International \\
+\textbf{3} &   9040 & 0.689 &  CD / LEONARD COHEN / YOU WANT IT DARKER  &         MUZICA &     CD International \\
+\textbf{4} &   5707 & 0.691 &    PLASTILINA  AMOS 4/SET IC18P4 (B X 12) &        JUCARII &         Necatalogate \\
+\textbf{5} &   8639 & 0.699 &  KNOCK KNOCK 100 REASON TO PANIC BOOK ABO &  CARTE STRAINA &           GIFT BOOKS \\
+\textbf{6} &   1352 & 0.704 &  PLASTILINA  AMOS PVCIC18G 18G/CUTIE GALB &        JUCARII &         Necatalogate \\
+\textbf{7} &   6964 & 0.708 &  CELLA SERGHI / PE FIRUL DE PAIANJEN AL M &      CARTE ROM &  BIOGRAFII / MEMORII \\
+\textbf{8} &   8807 & 0.709 &          SIMON SEBAG MONTEFIORE / SASENKA &      CARTE ROM &             FICTIUNE \\
+\textbf{9} &  12668 & 0.712 &   DAVID MCKEE / PRIMA MEA CARTICICA ELMER &      CARTE ROM &   CARTI PENTRU COPII \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+    
+
 
     \hypertarget{the-full-pipeline}{%
 \section{The full Pipeline}\label{the-full-pipeline}}
@@ -1150,7 +1358,8 @@ There are two main pipelines, one for each of our two individual
 objectives : that of finding product replacements and the second one of
 cold-start-ing new products in inventories:
 
-\textbf{Algorithm \#1 - Product Replacement Modelling}
+\textbf{Algorithm \#1 \texttt{GetProductReplacement} - Product
+Replacement Modelling pipeline}
 
 \begin{verbatim}
  1. Create MCO
@@ -1161,7 +1370,8 @@ cold-start-ing new products in inventories:
      4.2. Retrofit the product using connected products  
 \end{verbatim}
 
-\textbf{Algorithm \#2 - Cold-start new products}
+\textbf{Algorithm \#2 \texttt{ColdStartProduct} - cold-starting new
+products embeddings}
 
 \begin{verbatim}
  1. Setup embeddings of existing products and extract knowledge graph information from meta-data
@@ -1172,8 +1382,111 @@ cold-start-ing new products in inventories:
  6. Retrofit the new product embedding to all similar products 
 \end{verbatim}
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor} }]:} 
+At this point we have discussed regarding the MCO preparation and
+processing the count matrix with \emph{ProVe} in order to obtain the
+initial products embedding space. The next logical step (\texttt{2.} in
+our algorithm) is to process the available hierarchical information in
+order to construct the knowledge graph. For this we are going to treat
+each category provided by the inventory's category management database
+as a potential source of information that can provide knowledge graph
+edges for each product in its domain. For our previous item example
+\texttt{12071} (David Bowie's ``Blackstar'') the product information is
+presented below:
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}18}]:} \PY{n}{dct\PYZus{}prod\PYZus{}info} \PY{o}{=} \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{get\PYZus{}item\PYZus{}info}\PY{p}{(}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{verbose}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Product '12071' info:
+  NAME: CD / DAVID BOWIE / BLACKSTAR (2016)
+  Level 'Ierarhie1': 2
+  Level 'Ierarhie1\_name': MUZICA
+  Level 'Ierarhie2': 4
+  Level 'Ierarhie2\_name': CD International
+  EDGES: \{10759, 1032, 12305, 3091, 4627, 10780, 9251, 1232
+
+\end{Verbatim}
+
+    At this point we can proceed with the final step presented in Algorithm
+\#1, that of using the knowledge graph and pulling closer the products
+that have edges. Our proposed framework has multiple flavors when it
+comes to selecting the part of the embedding space we want to modify and
+in this case, for the sake of the experiment and for a clearer
+intuition, we chose only to modify the vector space portion that is most
+relevant for our chose product (\texttt{12071})
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}19}]:} \PY{n}{new\PYZus{}embeds} \PY{o}{=} \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{get\PYZus{}retrofitted\PYZus{}embeds}\PY{p}{(}\PY{n}{prod\PYZus{}ids}\PY{o}{=}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{method}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{v1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Performing retrofitting on (13000, 128) embedding matrix{\ldots}
+  Stop tel:    5.0e-03
+  Start-edges: 1
+Iteration 1; change was 3.5e+00
+Iteration 2; change was 8.0e-03
+Retrofiting converged at iteration 3; change was 0.0000
+
+\end{Verbatim}
+
+    The next logical step is to verify the results of our retrofitting
+process re-running the past neighborhood tests both with and without
+filtering. First we run the search with no filtering:
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}20}]:} \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{get\PYZus{}similar\PYZus{}items}\PY{p}{(}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{embeds}\PY{o}{=}\PY{n}{new\PYZus{}embeds}\PY{p}{,} \PY{n}{filtered}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,} \PY{n}{show}\PY{o}{=}\PY{n}{print\PYZus{}df}\PY{p}{)}
+\end{Verbatim}
+
+
+
+    \begin{center}
+\scriptsize
+\begin{tabular}{lrrlll}
+\toprule
+{} &     ID &        DIST &                                      NAME &               H1 &                    H2 \\
+\midrule
+\textbf{0} &  12071 &  1.7881e-07 &       CD / DAVID BOWIE / BLACKSTAR (2016) &           MUZICA &      CD International \\
+\textbf{1} &   5312 &  6.6791e-01 &  IAN MCDERMOTT / NLP PENTRU CARIERA SI VI &        CARTE ROM &  DEZVOLTARE PERSONALA \\
+\textbf{2} &   9997 &  6.7252e-01 &                    HOLLY SMALE / TOCILARA &        CARTE ROM &  FICTIUNE ADOLESCENTI \\
+\textbf{3} &  10047 &  6.8937e-01 &             MAGNET METAL - BATMAN (JOKER) &     COMICS\&MANGA &                Comics \\
+\textbf{4} &   1115 &  6.9019e-01 &  DAN LUNGU / SUNT O BABA COMUNISTA (TOP10 &        CARTE ROM &              FICTIUNE \\
+\textbf{5} &   7132 &  6.9034e-01 &  SALLY GARDNER / ARIPI SI CO 3: MISTERIOA &        CARTE ROM &    CARTI PENTRU COPII \\
+\textbf{6} &   6443 &  6.9186e-01 &                      DVD / DUNKIRK (2017) &       MULTIMEDIA &                   DVD \\
+\textbf{7} &  12399 &  7.0380e-01 &  YOU GIVE ME A REASON MINI CARD / KELLY H &     PAPETARIE AA &               Cadouri \\
+\textbf{8} &   2883 &  7.0732e-01 &  HARRIET MUNCASTER / ISADORA MOON MERGE C &        CARTE ROM &    CARTI PENTRU COPII \\
+\textbf{9} &   9334 &  7.2087e-01 &            SET 6 COASTERS PARIS MONUMENTS &  ACCESORII GASTR &  Accesorii servit mas \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+    
+
+
+    And then we run it with filtering using the hierarchy management
+database.
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}21}]:} \PY{n}{df} \PY{o}{=} \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{get\PYZus{}similar\PYZus{}items}\PY{p}{(}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{embeds}\PY{o}{=}\PY{n}{new\PYZus{}embeds}\PY{p}{,} \PY{n}{filtered}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{show}\PY{o}{=}\PY{n}{print\PYZus{}df}\PY{p}{)}
+\end{Verbatim}
+
+    Now we can repeat our hand-picked positive vs negative examples test and
+observe an improvement in the distances (slightly lower for the positive
+and slightly higher for the negative). However, this improvement is far
+from our desired objective of determining the replacement (the actual
+positive example in this case) with the simple cosine distance
+measurement.
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}22}]:} \PY{n}{prod\PYZus{}eng}\PY{o}{.}\PY{n}{analize\PYZus{}item}\PY{p}{(}\PY{n}{exp\PYZus{}id}\PY{p}{,} \PY{n}{positive\PYZus{}id}\PY{o}{=}\PY{n}{pos\PYZus{}id}\PY{p}{,} \PY{n}{negative\PYZus{}id}\PY{o}{=}\PY{n}{neg\PYZus{}id}\PY{p}{,} \PY{n}{embeds}\PY{o}{=}\PY{n}{new\PYZus{}embeds}\PY{p}{)}
+\end{Verbatim}
+
+\begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'
+  Distance from positive 11418:  0.903
+  Distance from negative 5312:   0.668
+
 \end{Verbatim}
 
     \hypertarget{progress-history}{%
@@ -1190,14 +1503,46 @@ early work of Grbovic et al \cite{grbovic2015commerce} who use the
 k-means based clusters in order to separate potential similarities from
 complementarities.
 
-   \begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
-{\color{incolor}In [{\color{incolor}17}]:} \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Experiment end}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+Progress has also been made with regard to the final stages of the
+proposed pipeline as the first iteration of experimentation with Faruqui
+et al \cite{faruqui2014retrofitting} has been implemented as presented
+before.
+
+There is still a extensive list of actions and problems that have to be
+tackled such as:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Review the ProVe training and find the required heuristics that would
+  aid us in finind the best time-vs-embeddings quality ratio.
+\item
+  Review the knowledge graph preparation process as well as optimize the
+  v1 retrofitting method
+\item
+  Tune the ProVe hyperparameters and scalability. Re-train the model
+  with maximum energy efficiency vs performance
+\item
+  Evaluate these initial results with the proposed \texttt{MRR} metric
+  on a larger set of manually chosen items
+\item
+  Add optimized versions of the retrofitting as well as functional
+  retrofitting (Lengerich et al \cite{lengerich2017retrofitting})
+\item
+  Evaluate the results for the advanced methods and compare with (1)
+\item
+  Complete the \texttt{ColdStartProduct} pipeline (Algorithm \#2)
+\end{enumerate}
+
+		\begin{Verbatim}[commandchars=\\\{\},fontsize=\scriptsize]
+{\color{incolor}In [{\color{incolor}23}]:} \PY{n}{printmd}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{END of Experimental Protocol.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\},fontsize=\footnotesize]
-		Experiment end
 
-    \end{Verbatim}
+    END of Experimental Protocol.
+
+    
 
 
     % Add a bibliography block to the postdoc

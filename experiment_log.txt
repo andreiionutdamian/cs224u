@@ -1,0 +1,297 @@
+================================================================================================
+
+retrofit TOL 1e-3 / model 250k epochs
+
+PRE-RETROFIT:
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'
+  Distance from positive 11418:  0.921
+  Distance from negative 5312:   0.653
+
+POST-RETROFIT:
+  
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'
+  Distance from positive 11418:  0.903
+  Distance from negative 5312:   0.668
+  
+ 
+================================================================================================
+
+
+model 3300 epochs
+RETROFIT_TOL = 1e-5
+NO full edges
+
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033
+  Distance from positive 11418:  0.644
+  Distance from negative 5312:   1.128
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033 model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  5   7933 0.675               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT. MAREA CA        CARTE ROM  PRACTIC / TIMP LIBER
+
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033_RETRO
+  Distance from positive 11418:  0.647
+  Distance from negative 5312:   1.112
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033 model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1   4416 0.609  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  2  11418 0.647  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  3   4865 0.671  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   4400 0.671          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  5   9745 0.674  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  6  10135 0.679  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  7   1408 0.689  CD / QUEEN / THE PLATINUM COLLECTION (20           MUZICA      CD International
+  8   8392 0.692                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  9   7933 0.694               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  
+
+================================================================================================  
+
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033
+  Distance from positive 11418:  0.644
+  Distance from negative 5312:   1.128
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033 model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  5   7933 0.675               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT. MAREA CA        CARTE ROM  PRACTIC / TIMP LIBER
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  12071
+  Full edges:  True
+  Method 'Faruqui et al'
+  Stop tol:    1.0e-05
+  Start-edges: 219
+Iteration 1; change was 7.2e+00
+Iteration 2; change was 3.1e-01
+Iteration 3; change was 1.1e-01
+Iteration 4; change was 3.6e-02
+Iteration 5; change was 1.0e-02
+Iteration 6; change was 2.8e-03
+Iteration 7; change was 8.0e-04
+Iteration 8; change was 2.3e-04
+Iteration 9; change was 6.3e-05
+Iteration 10; change was 1.8e-05
+Retrofiting converged at iteration 11; change was 0.0000 
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033_RETRO
+  Distance from positive 11418:  0.577
+  Distance from negative 5312:   1.112
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033 model
+        ID  DIST                                      NAME         H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)     MUZICA      CD International
+  1   4416 0.549  CD / COLDPLAY / 4 CD CATALOGUE SET (2012     MUZICA      CD International
+  2  11418 0.577  CD / DAVID BOWIE / BEST OF BOWIE (2002)      MUZICA      CD International
+  3   4865 0.594  CD / COLDPLAY / A HEAD FULL OF DREAMS (2     MUZICA      CD International
+  4  12225 0.601  CD / FRANK SINATRA / NOTHING BUT THE BES     MUZICA      CD International
+  5   1408 0.634  CD / QUEEN / THE PLATINUM COLLECTION (20     MUZICA      CD International
+  6   1068 0.647  CD / DAMIAN AND BROTHERS / GYPSY ROCK (2     MUZICA   CD Repertoriu Local
+  7   3898 0.655  CD / PARAZITII / LOVITURA DE PEDEAPSA (2     MUZICA   CD Repertoriu Local
+  8   4400 0.671          CARTEA SARUTURILOR / IV CEL NAIV  CARTE ROM  POEZIE / TEATRU / ST
+  9   9745 0.674  MASINI DIE-CAST 7.5cm III ASST / GOKI120    JUCARII               JUCARII
+
+
+================================================================================================  
+
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 5312:   1.128
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033.npy model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  5   7933 0.675               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT. MAREA CA        CARTE ROM  PRACTIC / TIMP LIBER
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  12071
+  Full edges:  True
+  Method '_get_retrofitted_embeds_v2_tf'
+  Start-edges: 219
+  Preparing retrofit data based on dict(219)...
+    Preparing positive edges 0.5%
+  Preparing model...
+  Training model for 10 epochs with batch size 65536, lr=1.0e-01
+    Epoch 01/10 - loss: 6874.18, time: 0.3s, batch: (48593, 4), fails: 0
+    Epoch 02/10 - loss: 3056.51, time: 0.1s, batch: (48593, 4), fails: 0
+    Epoch 03/10 - loss: 2439.47, time: 0.1s, batch: (48593, 4), fails: 0
+    Epoch 04/10 - loss: 2339.48, time: 0.1s, batch: (48593, 4), fails: 0
+    Epoch 05/10 - loss: 2323.02, time: 0.1s, batch: (48593, 4), fails: 0
+    Epoch 06/10 - loss: 2320.06, time: 0.1s, batch: (48593, 4), fails: 0
+    Epoch 07/10 - loss: 2319.29, time: 0.1s, batch: (48593, 4), fails: 0
+    Epoch 08/10 - loss: 2318.87, time: 0.1s, batch: (48593, 4), fails: 0
+    Epoch 09/10 - loss: 2318.51, time: 0.1s, batch: (48593, 4), fails: 0
+    Epoch 10/10 - loss: 2318.16, time: 0.1s, batch: (48593, 4), fails: 0
+Retrofit with '_get_retrofitted_embeds_v2_tf' took 1.2s
+Total 298 embeddings modified
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.484
+  Distance from negative 5312:   1.094
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                                      NAME      H1                   H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)  MUZICA     CD International
+  1   4416 0.441  CD / COLDPLAY / 4 CD CATALOGUE SET (2012  MUZICA     CD International
+  2  12225 0.446  CD / FRANK SINATRA / NOTHING BUT THE BES  MUZICA     CD International
+  3  11418 0.484  CD / DAVID BOWIE / BEST OF BOWIE (2002)   MUZICA     CD International
+  4   1408 0.487  CD / QUEEN / THE PLATINUM COLLECTION (20  MUZICA     CD International
+  5   4865 0.496  CD / COLDPLAY / A HEAD FULL OF DREAMS (2  MUZICA     CD International
+  6   1068 0.523  CD / DAMIAN AND BROTHERS / GYPSY ROCK (2  MUZICA  CD Repertoriu Local
+  7   7004 0.532  CD / PINK MARTINI / JE DIS OUI! (CRISTAL  MUZICA     CD International
+  8   7798 0.534  CD / ALEXANDRA USURELU - LA CAPATUL LUMI  MUZICA  CD Rep. Local Terti
+  9  12707 0.539          CD / INXS / THE VERY BEST (2011)  MUZICA     CD International
+  
+
+================================================================================================  
+================================================================================================  
+================================================================================================  
+
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 5312:   1.128
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033.npy model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  5   7933 0.675               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT. MAREA CA        CARTE ROM  PRACTIC / TIMP LIBER
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method '_get_retrofitted_embeds_v1'
+  Start-edges: 13000
+  Stop tol:    1.0e-05
+Retrofiting converged at iteration 13 - change was 3.3e-06 
+Retrofit with '_get_retrofitted_embeds_v1' took 575.4s
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.577
+  Distance from negative 5312:   1.112
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                                      NAME         H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)     MUZICA      CD International
+  1   4416 0.548  CD / COLDPLAY / 4 CD CATALOGUE SET (2012     MUZICA      CD International
+  2  11418 0.577  CD / DAVID BOWIE / BEST OF BOWIE (2002)      MUZICA      CD International
+  3   4865 0.594  CD / COLDPLAY / A HEAD FULL OF DREAMS (2     MUZICA      CD International
+  4  12225 0.600  CD / FRANK SINATRA / NOTHING BUT THE BES     MUZICA      CD International
+  5   1408 0.634  CD / QUEEN / THE PLATINUM COLLECTION (20     MUZICA      CD International
+  6   1068 0.647  CD / DAMIAN AND BROTHERS / GYPSY ROCK (2     MUZICA   CD Repertoriu Local
+  7   3898 0.655  CD / PARAZITII / LOVITURA DE PEDEAPSA (2     MUZICA   CD Repertoriu Local
+  8   4400 0.672          CARTEA SARUTURILOR / IV CEL NAIV  CARTE ROM  POEZIE / TEATRU / ST
+  9   7798 0.674  CD / ALEXANDRA USURELU - LA CAPATUL LUMI     MUZICA   CD Rep. Local Terti
+  
+  
+================================================================================================  
+
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 5312:   1.128
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033.npy model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  5   7933 0.675               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT. MAREA CA        CARTE ROM  PRACTIC / TIMP LIBER
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method '_get_retrofitted_embeds_v2_tf'
+  Start-edges: 13000
+  Preparing retrofit data based on dict(13000)...
+    Preparing positive edges 99.0%
+  Preparing model...
+  Training model for 20 epochs with batch size 65536, lr=1.0e-01
+    Epoch 01/20 - loss: 441.53, time: 53.5s, batch: (65536, 4), fails: 0
+    Epoch 02/20 - loss: 251.85, time: 51.9s, batch: (65536, 4), fails: 0
+    Epoch 03/20 - loss: 209.09, time: 53.8s, batch: (65536, 4), fails: 0
+    Epoch 04/20 - loss: 200.29, time: 55.2s, batch: (65536, 4), fails: 0
+    Epoch 05/20 - loss: 198.93, time: 55.4s, batch: (65536, 4), fails: 0
+    Epoch 06/20 - loss: 198.97, time: 56.2s, batch: (65536, 4), fails: 1
+    Epoch 07/20 - loss: 199.17, time: 55.4s, batch: (65536, 4), fails: 2
+    Stopping traing at epoch 7
+Retrofit with '_get_retrofitted_embeds_v2_tf' took 433.6s
+Total 13000 embeddings modified
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.522
+  Distance from negative 5312:   1.100
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                                      NAME      H1                   H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)  MUZICA     CD International
+  1   4416 0.469  CD / COLDPLAY / 4 CD CATALOGUE SET (2012  MUZICA     CD International
+  2  12225 0.512  CD / FRANK SINATRA / NOTHING BUT THE BES  MUZICA     CD International
+  3   4865 0.515  CD / COLDPLAY / A HEAD FULL OF DREAMS (2  MUZICA     CD International
+  4  11418 0.522  CD / DAVID BOWIE / BEST OF BOWIE (2002)   MUZICA     CD International
+  5   1408 0.530  CD / QUEEN / THE PLATINUM COLLECTION (20  MUZICA     CD International
+  6   1068 0.555  CD / DAMIAN AND BROTHERS / GYPSY ROCK (2  MUZICA  CD Repertoriu Local
+  7   3898 0.577  CD / PARAZITII / LOVITURA DE PEDEAPSA (2  MUZICA  CD Repertoriu Local
+  8   7798 0.578  CD / ALEXANDRA USURELU - LA CAPATUL LUMI  MUZICA  CD Rep. Local Terti
+  9   6275 0.578  CD / LANA DEL REY / LUST FOR LIFE (2017)  MUZICA     CD International
+
+
+================================================================================================  
+
+
+
+
+
+
+
+
+
+
+
+
