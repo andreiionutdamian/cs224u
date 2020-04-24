@@ -270,7 +270,7 @@ prod_eng.get_similar_items(exp_id, filtered=False, show=print_df,
 #dct_prod_info = prod_eng.get_item_info(exp_id, verbose=True)
 
 new_embeds = prod_eng.get_retrofitted_embeds(
-#    prod_ids=exp_id, 
+    prod_ids=exp_id, 
 #    dct_negative={exp_id:[neg_id]},
     method='v2_tf', 
     tol=RETROFIT_TOL,

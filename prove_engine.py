@@ -564,7 +564,8 @@ class EmbedsEngine():
       raise ValueError("`dct_positive` must have more than 1 item")
     if split:
       # split in ids(N,) positives(N, var) negatives(N, var), pos_w(N), neg_w(N)
-      pass
+      dct_negative = {} if dct_negative is None else dct_negative
+      start_products = set(dct_positive.keys()) + set(dct_negative.keys())
     else:
       all_data = []  
       n_pos = len(dct_positive)
@@ -744,8 +745,15 @@ class EmbedsEngine():
           break          
       self.P("  End eager dubug training")
       # end EAGER DEBUG training        
-    else:        
+    else:              
       model.compile(optimizer=opt, loss=identity_loss)      
+      tf.keras.utils.plot_model(
+          model,
+          to_file=os.path.join(self._save_folder,'model.png'),
+          show_shapes=True,
+          show_layer_names=True,
+          expand_nested=True,
+          )
       if use_fit:
         model.fit(x=data, y=data, epochs=epochs, batch_size=batch_size)
       else:
@@ -808,6 +816,7 @@ class EmbedsEngine():
     data = self._prepare_retrofit_data(
         dct_positive=dct_edges,
         dct_negative=dct_negative,
+        split=True,
         )
     
     self.P("  Preparing model...")
@@ -829,9 +838,7 @@ class EmbedsEngine():
     
     th_emb_new = th.nn.Embedding(vocab_size, embedding_dim).to(device)
     th_emb_new.weight = th.nn.Parameter(data=th_embeds)
-
-    opt = th.optim.SGD
-    
+    opt = th.optim.SGD    
     for epoch in range(1, epochs + 1):
       epoch_losses = []
       t1 = time()
