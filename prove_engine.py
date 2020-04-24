@@ -813,19 +813,35 @@ class EmbedsEngine():
     self.P("  Preparing model...")
     
     device = th.device("cuda" if th.cuda.is_available() else "cpu")
-    ....th_data = th.tensor(data, requires_grad=False, device=device)
     vocab_size = self.embeds.shape[0]
     embedding_dim = self.embeds.shape[1]
+    
+    tensors = [th.tensor(x, requires_grad=False, device=device) for x in data]
+
     th_embeds = th.tensor(self.embeds, dtype='float32', required_grad=False, device=device)
     
-    ds = th.utils.data.TensorDataset(th_data)
+    ds = th.utils.data.TensorDataset(tensors)
     dl = th.utils.data.DataLoader(
         dataset=ds,
         batch_size=batch_size, 
-        shuffle=True)
+        shuffle=True
+        )
     
     th_emb_new = th.nn.Embedding(vocab_size, embedding_dim).to(device)
-    th_emb_new.weight = th.nn.Parameter(data=tf_embeds)
+    th_emb_new.weight = th.nn.Parameter(data=th_embeds)
+
+    opt = th.optim.SGD
+    
+    for epoch in range(1, epochs + 1):
+      epoch_losses = []
+      t1 = time()
+      for i, tf_batch in enumerate(ds):
+          
+        opt.zero_grad()
+        th_loss.backward()
+        opt.step()
+      t2 = time()
+        
     
     
     
