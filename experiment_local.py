@@ -31,7 +31,7 @@ EMB128_5k = os.path.join(MODEL_HOME, EMB128_5k_FN)
 EMB128_10k = os.path.join(MODEL_HOME, EMB128_10k_FN)
 EMB128_250k = os.path.join(MODEL_HOME, EMB128_250k_FN)
 EMB128_ES33 = os.path.join(MODEL_HOME, EMB128_ES33_FN)
-CHUNK_SIZE = 100 * 1024 ** 2 # read 100MB chunks
+CHUNK_SIZE = 100 * 1024 ** 2 # read100MB chunks
 MAX_N_TOP_PRODUCTS = 13000  # top sold products
 _MCO_FILE  = os.path.join(MODEL_HOME, 'mco_top_13.5k.npz') # debug pre-prepared mco
 
@@ -192,7 +192,7 @@ RETROFIT_TOL = 1e-5
 FULL_EDGES = True
 
 test_items = [
-    (12071, 11418, 5312), 
+    (12071, 11418, 9745), 
     (10088, 5369, 8527), 
     (9251, 4671, 2433), 
     (9845, 7837, 6440), 
@@ -251,6 +251,7 @@ prod_eng = EmbedsEngine(
 exp_id, pos_id, neg_id = test_items[0]
 
 
+dct_prod_info = prod_eng.get_item_info(exp_id, verbose=True, show_relations=True)
 
 prod_eng.analize_item(exp_id, positive_id=pos_id, negative_id=neg_id, 
                       embeds_name=embeds_name)
@@ -267,19 +268,15 @@ prod_eng.get_similar_items(exp_id, filtered=False, show=print_df,
       
 # The full Pipeline 
 
-#dct_prod_info = prod_eng.get_item_info(exp_id, verbose=True)
 
 new_embeds = prod_eng.get_retrofitted_embeds(
     prod_ids=exp_id, 
-#    dct_negative={exp_id:[neg_id]},
-    method='v2_tf', 
-    tol=RETROFIT_TOL,
-    full_edges=FULL_EDGES,
-    eager=False,
-    batch_size=16384*4,
-    lr=0.1,
-    use_fit=False,
-    gpu_optim=False,
+    dct_negative={exp_id:[neg_id]},
+    skip_negative=False,
+    method='v3_th', 
+    batch_size=81, #256,
+#    DEBUG=True,
+    dist='l1',
     )
 
 n_dif = (np.abs(new_embeds - embeds).sum(axis=1) > 1e-3).sum()

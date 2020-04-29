@@ -15,6 +15,7 @@ import textwrap
 import os
 import io
 from datetime import datetime as dt
+from time import time as tm
 from collections import OrderedDict, deque
 import random
 import pickle
@@ -27,6 +28,8 @@ class Log():
     self.print_func = print_func
     self._date = dt.now().strftime("%Y%m%d_%H%M")
     self.log_fn = dt.now().strftime("logs/"+self._date+"_log.txt")
+    self.timer_level = 0
+    self.timers = {}
 
   def P(self, s=''):
     if type(s) != str:
@@ -76,6 +79,74 @@ class Log():
   
   def Pr(self, s=''):
       print('\r' + str(s), end='', flush=True)
+      
+
+  def start_timer(self, sname):
+    if not self.DEBUG:
+      return -1
+
+    count_key = sname+"___COUNT"
+    start_key = sname+"___START"
+    pass_key  = sname+"___PASS"
+    level_key = sname+"___level"
+    if not (count_key in self.timers.keys()):
+      self.timers[count_key] = 0
+      self.timers[sname] = 0
+      self.timers[pass_key] = True
+      self.timers[level_key] = self.timer_level
+    ctime = tm()
+    self.timers[start_key] = ctime
+    self.timer_level += 1
+    return ctime
+
+
+  def end_timer(self, sname, skip_first_timing = True):
+    result = 0
+    if self.DEBUG:
+      self.timer_level -= 1
+      count_key = sname+"___COUNT"
+      start_key = sname+"___START"
+      end_key   = sname+"___END"
+      pass_key  = sname+"___PASS"
+
+      self.timers[end_key] = tm()
+      result = self.timers[end_key] - self.timers[start_key]
+      _count = self.timers[count_key]
+      _prev_avg = self.timers[sname]
+      avg =  _count *  _prev_avg
+
+      if self.timers[pass_key] and skip_first_timing:
+        self.timers[pass_key] = False
+        return result # do not record first timing in average
+
+      self.timers[count_key] = _count + 1
+      avg += result
+      avg = avg / self.timers[sname+"___COUNT"]
+      self.timers[sname] = avg
+    return result
+
+
+  def show_timer_total(self, key):
+    cnt = self.timers[key+"___COUNT"]
+    val = self.timers[key] * cnt
+    self.P("  {} = {:.3f} in {} laps".format(key, val, cnt))
+    return
+
+  def show_timers(self, summary='mean'):
+    if self.DEBUG:
+      self.verbose_log("Timing results:")
+      for key,val in self.timers.items():
+        if not ("___" in key):
+          level_key = key + "___level"
+          s_key = '  ' * self.timers[level_key] + key
+          if summary in ['mean', 'avg']:
+            self.verbose_log(" {} = {:.3f}s".format(s_key,val))
+          else:
+            total = val * self.timers[key+"___COUNT"]
+            self.verbose_log(" {} = {:.3f}s".format(s_key,total))            
+    else:
+      self.verbose_log("DEBUG not activated!")
+    return      
       
         
 
@@ -311,12 +382,17 @@ def neighbors_by_idx(idx, embeds, k=None):
 
 
 
-def show_neighbors(idx, embeds, dct_i2n, log,                   
-                   k=10, df=None, field='IDE', 
+def show_neighbors(idx, embeds, log, dct_i2n=None, dct_rev=None,
+                   k=10, df=None, id_field='IDE', name_field='ItemName',
                    h1fld='Ierarhie1_name', h2fld='Ierarhie2_name',
-                   dct_rev=None):
-  if type(dct_i2n) == np.ndarray:
-    dct_i2n = {i:dct_i2n[i] for i in range(dct_i2n.shape[0])}
+                   ):
+  if dct_i2n is not None:
+    if type(dct_i2n) == np.ndarray:
+      dct_i2n = {i:dct_i2n[i] for i in range(dct_i2n.shape[0])}
+  elif df is not None:
+    dct_i2n = {k:v for k,v in zip(df[id_field], df[name_field])}
+  else:
+    raise ValueError("Either `df` or `dct_i2n` must be provided")
   if dct_rev is None:
     dct_rev = {name:idx for idx, name in dct_i2n.items()}
   if type(idx) != int:

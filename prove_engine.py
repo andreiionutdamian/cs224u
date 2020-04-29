@@ -37,10 +37,34 @@ class EmbedsEngine():
              id_field,
              categ_fields,
              log,
+             strict_relations=True,
              save_folder=None,
              dct_categ_names=None,
              name='emb_eng',
              ):
+    """
+    Inputs:
+       `np_embeddings`    : the embeddings matrix `(N, D)`
+       
+       `df_metadata`      : the metadata dataframe with `N` products
+       
+       `name_field`       : field name where item names are stored in metadata 
+       
+       `id_field`         : field name for the item ids
+       
+       `categ_fields`     : list of category fields in order of hierarchy levels
+       
+       `log` : Log object
+       
+       `strict_relations` : (boolean, default True) flag that decides whether positive
+                            relations are based on any category or only on category intersection
+                            between products
+       
+       `save_folder`      : where to save the outputs - if `None` and `log` has `get_data_folder` will use it
+       
+       `dct_categ_names`  : dictionary that maps each each of `categ_fields` to ids and names
+      
+    """
     assert type(np_embeddings) == np.ndarray
     assert len(np_embeddings.shape) == 2
     assert type(df_metadata) == pd.DataFrame
@@ -53,16 +77,20 @@ class EmbedsEngine():
       
     self.version = __EMBENG_VER__
     
+    self.dct_pos_edges = None
+    self.dct_neg_edges = None
+    self.strict_relations = strict_relations
+    
     self.embeds = np_embeddings    
     self.df_meta = df_metadata
     self.name_fld = name_field
     self.id_fld = id_field
-    self.categs = categ_fields
+    self.categ_fields = categ_fields
     self.log = log
     self.name = name
     self.is_categ_field_str = True
-    for categ in self.categs:
-      if type(self.df_meta[categ].iloc[0]) != str:
+    for categ_field in self.categ_fields:
+      if type(self.df_meta[categ_field].iloc[0]) != str:
         self.is_categ_field_str = False
     self.dct_categ_names = dct_categ_names
     
@@ -105,7 +133,7 @@ class EmbedsEngine():
 
   def _save_graph(self):
     fn = os.path.join(self._save_folder, self.name + '.pkl')
-    data = self.dct_edges, self.dct_categ_prods, self.dct_prods_categs
+    data = self.dct_pos_edges, self.dct_neg_edges
     try:
       with open(fn, 'wb') as fh:
         pickle.dump(data, fh, protocol=pickle.HIGHEST_PROTOCOL)
@@ -117,10 +145,8 @@ class EmbedsEngine():
         
   
   def _setup_meta_data(self):
-    self.dct_i2n = {k:v for k,v in zip(self.df_meta[self.id_fld], self.df_meta[self.name_fld])}
-    self.dct_n2i = {name:idx for idx, name in self.dct_i2n.items()}
     self.categs_names = []
-    for categ_fld in self.categs:
+    for categ_fld in self.categ_fields:
       name_field = categ_fld + '_name'      
       dct_rev = {v:k for k, v in self.dct_categ_names[categ_fld].items()} if self.dct_categ_names else None
       if name_field not in self.df_meta.columns:
@@ -143,61 +169,109 @@ class EmbedsEngine():
       self._construct_graph_from_meta()
       self._save_graph()
     return
+
+
+  def _get_item_negatives(self, item_id, k=100, max_dist=0.75):
+    idxs, dists = prove_utils.neighbors_by_idx(item_id, self.embeds, k=k)    
+    filtered = []
+    for i, idx in enumerate(idxs):
+      if dists[i] < max_dist:
+        filtered.append(idx)
+    if len(filtered) > 0:
+      df = self._items_to_df(filtered)
+      for categ_field in self.categ_fields:
+        df = df[df[categ_field] != self.dct_prods_categs[item_id][categ_field]]
+    if df.shape[0] > 0:
+      return df[self.id_fld].values
+    else:
+      return []
+    
+      
   
-  
-  def _construct_graph_from_meta(self):
-    dct_edges = {}    
+  def _construct_graph_from_meta(self, MAX_PROD_NEIGH=3000):
+    dct_pos_edges = {}    
+    dct_neg_edges = {}
     dct_categ_prods = {}
     dct_prods_categs = {x : {} for x in range(self.embeds.shape[0])}
     self.P("Constructing items knowledge graph")    
-    for categ in self.categs:
-      self.P("  Retrieving products for category '{}'".format(categ))
-      dct_categ_prods[categ] = {}
-      for categ_id in self.df_meta[categ].unique():
-        dct_categ_prods[categ][categ_id] = self.df_meta[
-            self.df_meta[categ] == categ_id][self.id_fld].unique()
-        for prod_id in dct_categ_prods[categ][categ_id]:
-          dct_prods_categs[prod_id][categ] = categ_id
+    for categ_field in self.categ_fields:
+      self.P("  Retrieving products for category '{}'".format(categ_field))
+      dct_categ_prods[categ_field] = {}
+      for categ_id in self.df_meta[categ_field].unique():
+        dct_categ_prods[categ_field][categ_id] = self.df_meta[
+            self.df_meta[categ_field] == categ_id][self.id_fld].unique().tolist()
+        for prod_id in dct_categ_prods[categ_field][categ_id]:
+          dct_prods_categs[prod_id][categ_field] = categ_id
+    
+    for emb_idx in range(self.embeds.shape[0]):
+      prod_neighbors = []
+      for categ_field in dct_categ_prods:
+        prod_categ = dct_prods_categs[emb_idx][categ_field]
+        prods = dct_categ_prods[categ_field][prod_categ]
+        if self.strict_relations:
+          if len(prod_neighbors) > 0:
+            prod_neighbors = set(prod_neighbors) & set(prods)
+          else:
+            prod_neighbors = prods
+        else:
+          prod_neighbors += prods
+        if len(prod_neighbors) > MAX_PROD_NEIGH:
+          raise ValueError('Looks like item {} has over {} products!'.format(
+              emb_idx, MAX_PROD_NEIGH))            
+      dct_pos_edges[emb_idx] = set(prod_neighbors)
+      if (emb_idx % 1000) == 0:
+        self.log.Pr("  Creating positive relations graph {:.1f}%".format(
+            (emb_idx + 1) / self.embeds.shape[0] * 100), end='', flush=True)    
+    self.log.P("  Created positive relations graph.\t\t\t")
+
 
     for emb_idx in range(self.embeds.shape[0]):
-      prod_neighbors = list()
-      for categ in dct_categ_prods:
-        prod_categ = dct_prods_categs[emb_idx][categ]
-        prods = dct_categ_prods[categ][prod_categ]
-        prod_neighbors += prods.tolist()
-      dct_edges[emb_idx] = set(prod_neighbors)
+      prod_neg_neigh = self._get_item_negatives(emb_idx)
+      dct_neg_edges[emb_idx] = prod_neg_neigh
       if (emb_idx % 1000) == 0:
-        print("\r  Creating products graph {:.1f}%".format(
-            (emb_idx + 1) / self.embeds.shape[0] * 100), end='', flush=True)
-      
-    print("\r  Created products graph {:.1f}%".format(
-        (emb_idx + 1) / self.embeds.shape[0] * 100), flush=True)
-    
+        self.log.Pr("  Creating negative relations graph {:.1f}%".format(
+            (emb_idx + 1) / self.embeds.shape[0] * 100), end='', flush=True)    
+    self.log.P("  Created negative relations graph.\t\t\t")
+
     self.dct_categ_prods = dct_categ_prods
     self.dct_prods_categs = dct_prods_categs
-    self.dct_edges = {k:list(v) for k,v in dct_edges.items()}
+    self.dct_pos_edges = {k:list(v) for k,v in dct_pos_edges.items()}
+    self.dct_neg_edges = {k:list(v) for k,v in dct_neg_edges.items()}
     return
+  
+  def _items_to_df(self, items):
+    fields = [self.id_fld, self.name_fld] + self.categs_names
+    df = self.df_meta[self.df_meta[self.id_fld].isin(items)][fields]
+    return df
         
       
-  def get_item_info(self, item_id, verbose=False):
-    predefined_names = ['ID','NAME', 'EDGES']
+  def get_item_info(self, item_id, verbose=False, show_relations=False):
+    predefined_names = ['ID','NAME', 'POS_EDGES', 'NEG_EDGES']
     dct_info = OrderedDict({})
     dct_info['ID'] = item_id
     dct_info['NAME'] = self.df_meta[self.df_meta[self.id_fld] == item_id][[self.name_fld]].iloc[0,0]
-    for i, categ in enumerate(self.categs):
-      dct_info[categ] = self.df_meta[self.df_meta[self.id_fld] == item_id][[categ]].iloc[0,0]
-      if self.categs_names[i] != categ:
+    for i, categ_field in enumerate(self.categ_fields):
+      dct_info[categ_field] = self.dct_prod_categs[item_id][categ_field]
+      if self.categs_names[i] != categ_field:
         dct_info[self.categs_names[i]] = self.df_meta[self.df_meta[self.id_fld] == item_id][[self.categs_names[i]]].iloc[0,0]
-    dct_info['EDGES'] = self.dct_edges[item_id]
+    dct_info['POS_EDGES'] = self.dct_pos_edges[item_id]
+    dct_info['NEG_EDGES'] = self.dct_neg_edges[item_id]
     if verbose:
       self.P("")
       self.P("Product '{}' info:".format(dct_info['ID']))
       for k in dct_info:
-        if k != 'ID':
-          _s = "Level '{}'".format(k) if k not in predefined_names else k
-          if type(dct_info[k]) == list:
-            _s += ' ({})'.format(len(dct_info[k]))
-          self.P("  {} {}".format(_s+':', str(dct_info[k])[:50]))
+        if k not in predefined_names:
+          _s = "  {}: {}".format(k, dct_info[k])
+          self.P(_s)
+        elif k != 'ID':
+          val = dct_info[k]
+          if type(val) != list:
+            self.P("  {}: {}".format(k, val))
+          else:
+            # assume products
+            self.P("  {}:".format(k))
+            self.P(textwrap.indent(str(self._items_to_df(dct_info[k])),' ' * 4))
+            
     return dct_info
   
   def analize_item(self, 
@@ -209,7 +283,8 @@ class EmbedsEngine():
                    embeds_name=None,
                    ):
     if embeds is None:
-      embeds = self.embeds
+      embeds = self.embeds      
+    self.log.Pr("Performing analysis of item {}...".format(item_id))
     d_i = self.get_item_info(item_id)
 #    d_p = self.get_item_info(positive_id)
 #    d_n = self.get_item_info(negative_id)
@@ -218,7 +293,6 @@ class EmbedsEngine():
     n_dist = dists[np.where(idxs==negative_id)[0][0]]
     df_f = self.get_similar_items(item_id, embeds, filtered=True)
     df_n = self.get_similar_items(item_id, embeds, filtered=False)
-    self.P("")
     self.P("Analysis of {}: '{}'  {}".format(
         item_id, d_i['NAME'],
         "using model {}".format(embeds_name) if embeds_name else '')
@@ -254,12 +328,11 @@ class EmbedsEngine():
     df_res = prove_utils.show_neighbors(
         idx=item_id, 
         embeds=embeds, 
-        dct_i2n=self.dct_i2n, 
-        dct_rev=self.dct_n2i,
         log=self.log,
         k=_k, 
         df=self.df_meta, 
-        field=self.id_fld, 
+        id_field=self.id_fld, 
+        name_field=self.name_fld,
         h1fld=self.categs_names[0], 
         h2fld=self.categs_names[1]
         )
@@ -288,6 +361,7 @@ class EmbedsEngine():
                              prod_ids=None, 
                              method='v1', 
                              dct_negative=None, 
+                             skip_negative=False,
                              full_edges=True, 
                              **kwargs):
     self.P("")
@@ -296,23 +370,32 @@ class EmbedsEngine():
     self.P("  Full edges:  {}".format(full_edges))
     if dct_negative is not None:
       self.P("  Negatives:   {}".format(len(dct_negative)))
-    _dct = self.dct_edges
-    _dct_neg = None
+    _dct = self.dct_pos_edges
+    _dct_neg = self.dct_neg_edges if not skip_negative else {}
     if prod_ids is not None:
+      _dct = {}
+      _dct_neg = {}
       if type(prod_ids) == int:
         prod_ids = [prod_ids]
-      _dct = {}
       for prod_id in prod_ids:
-        related_prods = list(self.dct_edges[prod_id])
+        related_prods = self.dct_pos_edges[prod_id]
         _dct[prod_id] = related_prods
         if full_edges:
           for related_id in related_prods:
             if related_id not in _dct:
-              _dct[related_id] = list(self.dct_edges[related_id])
+              _dct[related_id] = self.dct_edges[related_id]
             elif prod_id not in _dct[related_id]:
               _dct[related_id].append(prod_id)
+        if dct_negative is None and not skip_negative: 
+          # unless we give specific negative dict or no negative
+          negative_prods = self.dct_neg_edges[prod_id]
+          _dct_neg[prod_id] = negative_prods
+          if full_edges:
+            for neg_id in negative_prods:
+              if neg_id not in _dct_neg:
+                _dct_neg[neg_id] = prod_id
             
-    if dct_negative is not None:
+    if dct_negative is not None and not skip_negative:
       _dct_neg = dct_negative.copy()
       if full_edges:
         for neg_id in dct_negative:
@@ -326,7 +409,8 @@ class EmbedsEngine():
     method_name = '_get_retrofitted_embeds_' + method    
     func = getattr(self, method_name)
     self.P("  Method:      {}".format(func.__name__))
-    self.P("  Start-edges: {}".format(len(_dct)))
+    self.P("  Pos edges: {}".format(len(_dct)))
+    self.P("  Neg edges: {}".format(len(_dct_neg)))
     t1 = time()
     embeds = func(dct_edges=_dct, dct_negative=_dct_neg, **kwargs)
     t2 = time()
@@ -353,92 +437,6 @@ class EmbedsEngine():
                               np.squeeze(Y_prev) - np.squeeze(Y),
                               ord=2)))
 
-  
-  def _get_retrofitted_embeds_v1_orig(self, dct_edges, tol=5e-3, **kwargs):
-    embeds = self._retrofit_faruqui_original(
-        np_X=self.embeds,
-        dct_edges=dct_edges,
-        tol=tol,
-        **kwargs,
-        )
-    return embeds
-
-  def _retrofit_faruqui_original(
-      self, 
-      np_X, 
-      dct_edges, 
-      max_iters=100, 
-      tol=5e-3, 
-      alpha=None, 
-      beta=None,
-      **kwargs,
-      ):
-    """
-    Implements retrofitting method of Faruqui et al. https://arxiv.org/abs/1411.4166
-    however using the implementation from Potts et at / Dingwell et al
-    
-    Inputs:
-    ======
-    np_X : np.ndarray
-      This is the input embedding matrix
-    
-    dct_edges: dict
-      This is the dict that maps a certain vector to all its relatives 
-      
-    max_iters: int (default=100)
-    
-    alpha, beta: callbacks that return floats as per paper alpha/beta
-
-    tol : float (default=1e-2)
-      If the average distance change between two rounds is at or
-      below this value, we stop. Default to 10^-2 as suggested
-      in the paper.
-      
-    
-    Outputs: 
-    ======
-      np.ndarray: the retrofitted version of np_X
-      
-    """
-
-    if alpha is None:
-      alpha = lambda x: 1.0
-    if beta is None:
-      beta = lambda x: 1.0 / len(dct_edges[x])
-
-    np_Y = np_X.copy()
-    np_Y_prev = np_Y.copy()
-    self.P("  Stop tol:    {:.1e}".format(tol))
-    for iteration in range(1, max_iters+1):
-      t1 = time()
-      for i in dct_edges:
-        neighbors = dct_edges[i]
-        n_neighbors = len(neighbors)
-        if n_neighbors > 0:
-          a = alpha(i)
-          b = beta(i)
-          retro = np.array([b * np_Y[j] for j in neighbors])
-          retro = retro.sum(axis=0) + (a * np_X[i])
-          norm = np.array([b for j in neighbors])
-          norm = norm.sum(axis=0) + a
-          np_Y[i] = retro / norm
-        if (i % 1000) == 0:
-          self.log.Pr("Iteration {} - {:.1f}%".format(
-              iteration, (i+1)/np_X.shape[0]*100))
-        # end if
-      # end for matrix rows
-      changes = self._measure_changes(np_Y, np_Y_prev)
-      t2 = time()
-      if changes <= tol:
-        self.P("Retrofiting converged at iteration {} - change was {:.1e} ".format(
-                iteration, changes))
-        break
-      else:
-        np_Y_prev = np_Y.copy()
-        self.P("Iteration {:02d} - change was {:.1e}, iter time: {:.2f}s".format(
-            iteration, changes, t2 - t1))
-    # end for iterations
-    return np_Y
 
 
   def _retrofit_faruqui_fast(
@@ -474,6 +472,23 @@ class EmbedsEngine():
     Outputs: 
     ======
       np.ndarray: the retrofitted version of np_X
+      
+    Original code by Dingwell et all:
+      ```
+        for iteration in range(1, max_iters+1):
+            t1 = time()
+            for i in dct_edges:
+              neighbors = dct_edges[i]
+              n_neighbors = len(neighbors)
+              if n_neighbors > 0:
+                a = alpha(i)
+                b = beta(i)
+                retro = np.array([b * np_Y[j] for j in neighbors])
+                retro = retro.sum(axis=0) + (a * np_X[i])
+                norm = np.array([b for j in neighbors])
+                norm = norm.sum(axis=0) + a
+                np_Y[i] = retro / norm
+      ```
       
     """
 
@@ -557,15 +572,46 @@ class EmbedsEngine():
     pass
   
 
-  def _prepare_retrofit_data(self, dct_positive, dct_negative=None, split=False):
+  def _prepare_retrofit_data(self, dct_positive, 
+                             dct_negative=None, 
+                             split=False, 
+                             pad_id=-1,
+                             fix_weights=None):
     self.P("  Preparing retrofit data based on dict({})...".format(len(dct_positive)))
-    max_edges = max([len(v) for k,v in dct_positive.items()])
     if len(dct_positive) <= 1:
       raise ValueError("`dct_positive` must have more than 1 item")
+
     if split:
       # split in ids(N,) positives(N, var) negatives(N, var), pos_w(N), neg_w(N)
       dct_negative = {} if dct_negative is None else dct_negative
-      start_products = set(dct_positive.keys()) + set(dct_negative.keys())
+      start_ids = list(set(
+              list(dct_positive.keys()) + list(dct_negative.keys())
+              ))
+      self.P("    Positive edges: {}".format(len(dct_positive)))
+      self.P("    Negative edges: {}".format(len(dct_negative)))
+      pos_lists = [dct_positive.get(x,[]) for x in start_ids]
+      pos_lens = [len(x) for x in pos_lists]
+      
+      neg_lists = [dct_negative.get(x,[]) for x in start_ids]
+      neg_lens = [len(x) for x in neg_lists]
+      
+      max_pos_len = max([1] + pos_lens)
+      max_neg_len = max([1] + neg_lens)
+      
+      if fix_weights is not None:
+        pos_w = [fix_weights for _ in pos_lists]
+        neg_w = [fix_weights for _ in neg_lists]
+      else:
+        pos_w = [1/len(x) if x!=[] else 0 for x in pos_lists]
+        neg_w = [1/len(x) if x!=[] else 0 for x in neg_lists]   
+      
+      for i,seq in enumerate(pos_lists):
+        nn = max_pos_len - len(seq)
+        pos_lists[i] = seq + [pad_id] * nn
+      for i,seq in enumerate(neg_lists):
+        nn = max_neg_len - len(seq)
+        neg_lists[i] = seq + [pad_id] * nn
+      return start_ids, pos_lists, pos_w, neg_lists, neg_w    
     else:
       all_data = []  
       n_pos = len(dct_positive)
@@ -604,7 +650,7 @@ class EmbedsEngine():
                                     dct_negative=None,
                                     eager=False, 
                                     use_fit=False,
-                                    epochs=100, 
+                                    epochs=99, 
                                     batch_size=16384,
                                     gpu_optim=True,
                                     lr=0.1,
@@ -614,6 +660,7 @@ class EmbedsEngine():
     """
     this method implements a similar approach to Dingwell et al
     """
+    self.P("Starting `_get_retrofitted_embeds_v2_tf`...")
     import tensorflow as tf
 
     
@@ -623,6 +670,7 @@ class EmbedsEngine():
     data = self._prepare_retrofit_data(
         dct_positive=dct_edges,
         dct_negative=dct_negative,
+        split=False,
         )
     
     self.P("  Preparing model...")
@@ -686,13 +734,14 @@ class EmbedsEngine():
     tf_retro_loss_batch = final_add([tf_preserve, tf_relate])
     
     model = tf.keras.models.Model(tf_input, tf_retro_loss_batch)
-    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:1e}".format(
+    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}".format(
         epochs, batch_size, lr, tol))
     opt = tf.keras.optimizers.SGD(lr=lr)
     losses = []
     best_loss = np.inf
     fails = 0
     last_embeds = self.embeds
+    best_embeds = None
     if eager:
       def _convert(idx_slices):
         return tf.scatter_nd(tf.expand_dims(idx_slices.indices, 1),
@@ -756,6 +805,7 @@ class EmbedsEngine():
           )
       if use_fit:
         model.fit(x=data, y=data, epochs=epochs, batch_size=batch_size)
+        best_embeds = embeds_new.get_weights()[0]  
       else:
         ds = tf.data.Dataset.from_tensor_slices(data)
         n_batches = data.shape[0] // batch_size + 1
@@ -780,76 +830,310 @@ class EmbedsEngine():
           t2 = time()
           epoch_loss = np.mean(epoch_losses)
           losses.append(epoch_loss)
+          new_embeds = embeds_new.get_weights()[0]          
           if epoch_loss < best_loss:
+            best_embeds = new_embeds
             best_loss = epoch_loss
             fails = 0
           else:
             fails += 1
-          new_embeds = embeds_new.get_weights()[0]          
           diff = self._measure_changes(last_embeds, new_embeds)
-          last_embeds = new_embeds
           self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s, batch: {}, fails: {}".format(
               epoch, epochs, epoch_loss, diff, t2 - t1, b_shape, fails))
-          if fails >= patience or epoch_loss <= tol:
+          if fails >= patience or diff <= tol:
             self.P("    Stopping traing at epoch {}".format(epoch))
             break
+          last_embeds = new_embeds
+        # end batch
+      # end epoch
+    # end else eager
     
-    new_embeds = embeds_new.get_weights()[0]
-    return new_embeds
+    return best_embeds
   
   def _get_retrofitted_embeds_v2_th(self, 
                                     dct_edges, 
                                     dct_negative=None,
                                     eager=False, 
                                     use_fit=False,
-                                    epochs=10, 
+                                    epochs=99, 
                                     batch_size=16384,
                                     gpu_optim=True,
-                                    lr=0.1,
+                                    lr=0.05,
+                                    tol=1e-3,
                                     patience=2,
+                                    DEBUG=False,
+                                    dist='l2',
                                     **kwargs):
     """
     this method implements a similar approach to Dingwell et al
     """
+    self.P("Starting `_get_retrofitted_embeds_v2_th`...")
     import torch as th
+
+    vocab_size = self.embeds.shape[0]
+    embedding_dim = self.embeds.shape[1]
 
     data = self._prepare_retrofit_data(
         dct_positive=dct_edges,
         dct_negative=dct_negative,
         split=True,
+        pad_id = vocab_size
         )
-    
-    self.P("  Preparing model...")
+        
+    self.P("  Preparing torch model...")
     
     device = th.device("cuda" if th.cuda.is_available() else "cpu")
-    vocab_size = self.embeds.shape[0]
-    embedding_dim = self.embeds.shape[1]
+    if th.cuda.is_available():
+      th.cuda.empty_cache()
     
     tensors = [th.tensor(x, requires_grad=False, device=device) for x in data]
 
-    th_embeds = th.tensor(self.embeds, dtype='float32', required_grad=False, device=device)
+    th_embeds = th.tensor(self.embeds, dtype=th.float32, requires_grad=False, device=device)
+    th_embeds_pad = th.cat((th_embeds, th.zeros((1,embedding_dim), device=device)))
     
-    ds = th.utils.data.TensorDataset(tensors)
+    if DEBUG:
+      if dct_negative is not None and len(dct_negative) > 0:
+        for i, v in enumerate(data[3]):
+          if v[0] != vocab_size:
+            break
+        batch_size = i + 1
+    
+    ds = th.utils.data.TensorDataset(*tensors)
     dl = th.utils.data.DataLoader(
         dataset=ds,
         batch_size=batch_size, 
-        shuffle=True
+        shuffle=not DEBUG,
         )
     
-    th_emb_new = th.nn.Embedding(vocab_size, embedding_dim).to(device)
-    th_emb_new.weight = th.nn.Parameter(data=th_embeds)
-    opt = th.optim.SGD    
+    emb_new = th.nn.Embedding(
+        vocab_size + 1, 
+        embedding_dim, 
+        padding_idx=vocab_size).to(device)
+    
+    emb_new.weight.data.copy_(th_embeds_pad)
+    opt = th.optim.SGD(params=emb_new.parameters(), lr=lr) 
+    n_batches = len(data[0]) // batch_size + 1
+    losses = []
+    best_loss = np.inf
+    fails = 0
+    last_embeds = self.embeds
+    if dct_negative is not None and len(dct_negative) > 0:
+      negative_margin = 128 
+    else:
+      negative_margin = 0
+    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}{}, dist={}".format(
+        epochs, batch_size, lr, tol, 
+        ", negative margin: {}".format(negative_margin) if negative_margin>0 else "",
+        dist))
     for epoch in range(1, epochs + 1):
       epoch_losses = []
       t1 = time()
-      for i, tf_batch in enumerate(ds):
-          
+      for i, batch in enumerate(dl):
+        th_ids, th_pos, th_pos_w, th_neg, th_neg_w = batch
+        b_shape = th_pos.shape
+        th_pos_w = th_pos_w.unsqueeze(-1)
+        th_neg_w = th_neg_w.unsqueeze(-1)
+        
+        th_org_embs_raw = th_embeds[th_ids].unsqueeze(1)
+        th_new_embs_raw = emb_new(th_ids).unsqueeze(1)
+        th_pos_embs_raw = emb_new(th_pos)
+        th_neg_embs_raw = emb_new(th_neg)
+        
+        th_org_embs = th_org_embs_raw
+        th_new_embs = th_new_embs_raw
+        th_pos_embs = th_pos_embs_raw
+        th_neg_embs = th_neg_embs_raw
+        
+        
+#        th_org_embs = th.nn.functional.normalize(th_org_embs, p=2, dim=-1)
+#        th_new_embs = th.nn.functional.normalize(th_new_embs, p=2, dim=-1)
+#        th_pos_embs = th.nn.functional.normalize(th_pos_embs, p=2, dim=-1)
+#        th_neg_embs = th.nn.functional.normalize(th_neg_embs, p=2, dim=-1)
+        if dist == 'l2':
+          th_preserve_loss = (th_org_embs - th_new_embs).pow(2).sum(-1)
+        else:
+          th_preserve_loss = (th_org_embs - th_new_embs).abs().sum(-1)
+        
+        if dist == 'l2':
+          th_relate_nm = (th_pos_embs - th_new_embs).pow(2).sum(-1)
+        else:
+          th_relate_nm = (th_pos_embs - th_new_embs).abs().sum(-1)
+        th_relate_mask = ((th_pos_embs == 0).sum(-1) < 128).float()
+        th_relate_masked = th_relate_nm * th_relate_mask        
+        th_relate_w = th_relate_masked * th_pos_w
+        th_relate_loss = th_relate_w.sum(-1, keepdims=True)
+        
+        if dist == 'l2':
+          th_neg_nm = (th_new_embs - th_neg_embs).pow(2).sum(-1)
+        else:
+          th_neg_nm = (th_new_embs - th_neg_embs).abs().sum(-1)          
+        th_neg_nm_d = th.clamp(negative_margin - th_neg_nm, min=0)
+        th_neg_mask = (th_neg_embs.sum(-1) > 0).float()
+        th_neg_masked = th_neg_mask * th_neg_nm_d        
+        th_neg = th_neg_masked * th_neg_w
+        th_neg_loss = th_neg.sum(-1, keepdims=True)
+        
+        th_loss = th_preserve_loss.sum() + th_relate_loss.sum() + th_neg_loss.sum()
+        
         opt.zero_grad()
         th_loss.backward()
         opt.step()
+        epoch_losses.append(th_loss.detach().cpu().numpy())
+        self.log.Pr("    Epoch {:02d} - {:.1f}% - loss: {:.2f}".format(
+            epoch, i / n_batches * 100, np.mean(epoch_losses)))
+      # end batch
       t2 = time()
+      epoch_loss = np.mean(epoch_losses)
+      losses.append(epoch_loss)
+      new_embeds = emb_new.weight.data.detach().cpu().numpy()[:-1]         
+      if epoch_loss < best_loss:
+        best_loss = epoch_loss
+        best_embeds = new_embeds
+        fails = 0
+      else:
+        fails += 1
+      diff = self._measure_changes(last_embeds, new_embeds)
+      self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s,  batch: {}, fails: {}".format(
+          epoch, epochs, epoch_loss, diff, t2 - t1, b_shape, fails))
+      if fails >= patience or diff <= tol:
+        self.P("    Stopping traing at epoch {}".format(epoch))
+        break
+      last_embeds = new_embeds
+    # end epoch
+    return best_embeds
         
     
+
+  def _get_retrofitted_embeds_v3_th(self, 
+                                    dct_edges, 
+                                    dct_negative=None,
+                                    eager=False, 
+                                    use_fit=False,
+                                    epochs=99, 
+                                    batch_size=16384,
+                                    gpu_optim=True,
+                                    lr=0.05,
+                                    tol=1e-4,
+                                    patience=2,
+                                    DEBUG=False,
+                                    **kwargs):
+    """
+    this method implements a similar approach to Dingwell et al
+    """
+    self.P("Starting `_get_retrofitted_embeds_v3_th`...")
+    import torch as th
+
+    vocab_size = self.embeds.shape[0]
+    embedding_dim = self.embeds.shape[1]
+
+    data = self._prepare_retrofit_data(
+        dct_positive=dct_edges,
+        dct_negative=dct_negative,
+        split=True,
+        pad_id = vocab_size,
+#        fix_weights=1,
+        )
+    
+    if DEBUG:
+      batch_size = 8
+      if dct_negative is not None and len(dct_negative) > 0:
+        for i, v in enumerate(data[3]):
+          if v[0] != vocab_size:
+            break
+        batch_size = i + 1
+    
+        
+    self.P("  Preparing torch model...")
+    
+    device = th.device("cuda" if th.cuda.is_available() else "cpu")
+    if th.cuda.is_available():
+      th.cuda.empty_cache()
+    
+    tensors = [th.tensor(x, requires_grad=False, device=device) for x in data]
+
+    th_embeds = th.tensor(self.embeds, dtype=th.float32, requires_grad=False, device=device)
+    th_embeds_pad = th.cat((th_embeds, th.zeros((1,embedding_dim), device=device)))
+    
+    ds = th.utils.data.TensorDataset(*tensors)
+    dl = th.utils.data.DataLoader(
+        dataset=ds,
+        batch_size=batch_size, 
+        shuffle=not DEBUG,
+        )
+    
+    emb_new = th.nn.Embedding(
+        vocab_size + 1, 
+        embedding_dim, 
+        padding_idx=vocab_size).to(device)
+    
+    emb_new.weight.data.copy_(th_embeds_pad)
+    opt = th.optim.SGD(params=emb_new.parameters(), lr=lr) 
+    n_batches = len(data[0]) // batch_size + 1
+    losses = []
+    best_loss = np.inf
+    fails = 0
+    last_embeds = self.embeds
+    self.P("  Training model for {} epochs, batch={}, lr={:.1e}, tol={:.1e}".format(
+        epochs, batch_size, lr, tol))
+    for epoch in range(1, epochs + 1):
+      epoch_losses = []
+      t1 = time()
+      for i, batch in enumerate(dl):
+        th_ids, th_pos, th_pos_w, th_neg, th_neg_w = batch
+        b_shape = th_pos.shape
+        th_pos_w = th_pos_w.unsqueeze(-1)
+        th_neg_w = th_neg_w.unsqueeze(-1)
+        
+        th_org_embs = th_embeds[th_ids].unsqueeze(1)
+        th_new_embs = emb_new(th_ids).unsqueeze(1)
+        th_pos_embs = emb_new(th_pos)
+        th_neg_embs = emb_new(th_neg)
+        
+        
+        th_preserve_loss = (th_org_embs - th_new_embs).pow(2).sum(-1)
+        
+        
+        th_relate_nm = 1 - th.nn.functional.cosine_similarity(th_new_embs, th_pos_embs, dim=-1) 
+        th_relate_mask = ((th_pos_embs == 0).sum(-1) < 128).float()
+        th_relate_masked = th_relate_nm * th_relate_mask        
+        th_relate_w = th_relate_masked * th_pos_w
+        th_relate_loss = th_relate_w.sum(-1, keepdims=True)
+        
+        th_neg_nm = th.nn.functional.cosine_similarity(th_new_embs, th_neg_embs, dim=-1)#(th_new_embs - th_neg_embs).abs().sum(-1)
+        th_neg_v = th.clamp(th_neg_nm, min=0)
+        th_neg_mask = (th_neg_embs.sum(-1) > 0).float()
+        th_neg_masked = th_neg_mask * th_neg_v        
+        th_neg_weighted = th_neg_masked * th_neg_w
+        th_neg_loss = th_neg_weighted.sum(-1, keepdims=True)
+        
+        th_loss = th_preserve_loss.sum() + th_relate_loss.sum() + th_neg_loss.sum()
+        
+        opt.zero_grad()
+        th_loss.backward()
+        opt.step()
+        epoch_losses.append(th_loss.detach().cpu().numpy())
+        self.log.Pr("    Epoch {:02d} - {:.1f}% - loss: {:.2f}".format(
+            epoch, i / n_batches * 100, np.mean(epoch_losses)))
+      # end batch
+      t2 = time()
+      epoch_loss = np.mean(epoch_losses)
+      losses.append(epoch_loss)
+      new_embeds = emb_new.weight.data.detach().cpu().numpy()[:-1]         
+      if epoch_loss < best_loss:
+        best_loss = epoch_loss
+        best_embeds = new_embeds
+        fails = 0
+      else:
+        fails += 1
+      diff = self._measure_changes(last_embeds, new_embeds)
+      self.P("    Epoch {:02d}/{} - loss: {:.2f}, change:{:.3f}, time: {:.1f}s,  batch: {}, fails: {}".format(
+          epoch, epochs, epoch_loss, diff, t2 - t1, b_shape, fails))
+      if fails >= patience or diff <= tol:
+        self.P("    Stopping traing at epoch {}".format(epoch))
+        break
+      last_embeds = new_embeds
+    # end epoch
+    return best_embeds
     
     
   

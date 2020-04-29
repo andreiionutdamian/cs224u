@@ -173,7 +173,121 @@ Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_0
   7   7004 0.532  CD / PINK MARTINI / JE DIS OUI! (CRISTAL  MUZICA     CD International
   8   7798 0.534  CD / ALEXANDRA USURELU - LA CAPATUL LUMI  MUZICA  CD Rep. Local Terti
   9  12707 0.539          CD / INXS / THE VERY BEST (2011)  MUZICA     CD International
+
+
+================================================================================================  
+
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 5312:   1.128
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033.npy model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  5   7933 0.675               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT. MAREA CA        CARTE ROM  PRACTIC / TIMP LIBER
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  12071
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v2_th
+  Start-edges: 219
+Starting `_get_retrofitted_embeds_v2_th`...
+  Preparing retrofit data based on dict(219)...
+    Positive edges: 219
+    Negative edges: 0
+  Preparing torch model...
+  Training model for 99 epochs, batch=81, lr=5.0e-02, tol=1.0e-03
+    Epoch 01/99 - loss: 3601.09, change:1.695, time: 0.0s,  batch: torch.Size([57, 298]), fails: 0
+    Epoch 33/99 - loss: 2751.75, change:0.510, time: 0.0s,  batch: torch.Size([57, 298]), fails: 0
+    Epoch 34/99 - loss: 2752.01, change:0.517, time: 0.0s,  batch: torch.Size([57, 298]), fails: 1
+    Epoch 35/99 - loss: 2752.12, change:0.520, time: 0.0s,  batch: torch.Size([57, 298]), fails: 2
+    Stopping traing at epoch 35
+Retrofit with '_get_retrofitted_embeds_v2_th' took 2.8s
+Total 298 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.176
+  Distance from negative 5312:   1.103
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                                      NAME      H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)  MUZICA      CD International
+  1   7798 0.173  CD / ALEXANDRA USURELU - LA CAPATUL LUMI  MUZICA   CD Rep. Local Terti
+  2  11418 0.176  CD / DAVID BOWIE / BEST OF BOWIE (2002)   MUZICA      CD International
+  3   7785 0.180   CD / V/A / BUCURESTII DE ALTADATA VOL 1  MUZICA   CD Repertoriu Local
+  4   3091 0.181  CD / MARIA TANASE / BEST OF VOL. 1 (2011  MUZICA   CD Repertoriu Local
+  5   9333 0.182    CD / GREEN DAY / AMERICAN IDIOT (2004)  MUZICA      CD International
+  6   4627 0.182         CD / CARLA'S DREAMS / NGOC (2016)  MUZICA  Pop/Rock Repertoriu 
+  7   7343 0.183           CD / BTS / FACE YOURSELF (2018)  MUZICA      CD International
+  8  11932 0.186  LP / METALLICA / METALLICA -1991- (2015)  MUZICA                 Vinyl
+  9  12379 0.187  CD / CARRERAS / DOMINGO / PAVAROTTI / TH  MUZICA      CD International
+
+
+================================================================================================  
+
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 5312:   1.128
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033.npy model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  5   7933 0.675               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT. MAREA CA        CARTE ROM  PRACTIC / TIMP LIBER
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  12071
+  Full edges:  True
+  Negatives:   1
+  Method:      _get_retrofitted_embeds_v2_th
+  Start-edges: 219
+Starting `_get_retrofitted_embeds_v2_th`...
+  Preparing retrofit data based on dict(219)...
+    Positive edges: 219
+    Negative edges: 2
+  Preparing torch model...
+  Training model for 99 epochs, batch=81, lr=5.0e-02, tol=1.0e-03, negative margin: 128
+    Epoch 01/99 - loss: 3652.29, change:1.698, time: 0.0s,  batch: torch.Size([58, 298]), fails: 0
+    Epoch 35/99 - loss: 2782.60, change:0.516, time: 0.0s,  batch: torch.Size([58, 298]), fails: 0
+    Epoch 36/99 - loss: 2782.81, change:0.513, time: 0.0s,  batch: torch.Size([58, 298]), fails: 1
+    Epoch 37/99 - loss: 2782.61, change:0.505, time: 0.0s,  batch: torch.Size([58, 298]), fails: 2
+    Stopping traing at epoch 37
+Retrofit with '_get_retrofitted_embeds_v2_th' took 3.1s
+Total 299 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.608
+  Distance from negative 5312:   1.402
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                                      NAME      H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)  MUZICA      CD International
+  1  12225 0.573  CD / FRANK SINATRA / NOTHING BUT THE BES  MUZICA      CD International
+  2   4416 0.607  CD / COLDPLAY / 4 CD CATALOGUE SET (2012  MUZICA      CD International
+  3  11418 0.608  CD / DAVID BOWIE / BEST OF BOWIE (2002)   MUZICA      CD International
+  4   7453 0.618  CD / PINK FLOYD / WISH YOU WERE HERE -19  MUZICA      CD International
+  5   4627 0.618         CD / CARLA'S DREAMS / NGOC (2016)  MUZICA  Pop/Rock Repertoriu 
+  6   4865 0.619  CD / COLDPLAY / A HEAD FULL OF DREAMS (2  MUZICA      CD International
+  7   7798 0.625  CD / ALEXANDRA USURELU - LA CAPATUL LUMI  MUZICA   CD Rep. Local Terti
+  8  12379 0.628  CD / CARRERAS / DOMINGO / PAVAROTTI / TH  MUZICA      CD International
+  9   6901 0.631  CD / PINK FLOYD / A FOOT IN THE DOOR - T  MUZICA      CD International
   
+
 
 ================================================================================================  
 ================================================================================================  
@@ -284,6 +398,60 @@ Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_0
 
 ================================================================================================  
 
+
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy
+  Distance from positive 11418:  0.644
+  Distance from negative 5312:   1.128
+
+  Table: Non-filtered neighbors of 12071 using exp_v4es_033.npy model
+        ID  DIST                                      NAME               H1                    H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)           MUZICA      CD International
+  1  11418 0.644  CD / DAVID BOWIE / BEST OF BOWIE (2002)            MUZICA      CD International
+  2   4416 0.645  CD / COLDPLAY / 4 CD CATALOGUE SET (2012           MUZICA      CD International
+  3   4865 0.663  CD / COLDPLAY / A HEAD FULL OF DREAMS (2           MUZICA      CD International
+  4   9745 0.665  MASINI DIE-CAST 7.5cm III ASST / GOKI120          JUCARII               JUCARII
+  5   7933 0.675               CUVINTE INCRUCISATE/ IQ FUN        CARTE ROM    CARTI PENTRU COPII
+  6   8392 0.676                          13.2X2.5CM PLATE  ACCESORII GASTR  Accesorii servit mas
+  7  10135 0.678  BUCATARIE ITALIANA 100 DE RETETE USOR DE        CARTE ROM           GASTRONOMIE
+  8   4400 0.682          CARTEA SARUTURILOR / IV CEL NAIV        CARTE ROM  POEZIE / TEATRU / ST
+  9  12266 0.697  TIM DEDOPULOS / HERCULE POIROT. MAREA CA        CARTE ROM  PRACTIC / TIMP LIBER
+
+Performing retrofitting on (13000, 128) embedding matrix...
+  Product(s):  None
+  Full edges:  True
+  Method:      _get_retrofitted_embeds_v2_th
+  Start-edges: 13000
+Starting `_get_retrofitted_embeds_v2_th`...
+  Preparing retrofit data based on dict(13000)...
+  Preparing model...
+  Training model for 99 epochs, batch=256, lr=5.0e-02, tol=2.000000e-01
+    Epoch 01/99 - loss: 14149.58, change:3.828, time: 8.3s,  batch: torch.Size([200, 7454]), fails: 0
+    Epoch 33/99 - loss: 10486.78, change:3.154, time: 8.1s,  batch: torch.Size([200, 7454]), fails: 1
+    Epoch 34/99 - loss: 10480.83, change:3.111, time: 7.4s,  batch: torch.Size([200, 7454]), fails: 0
+    Epoch 35/99 - loss: 10485.16, change:3.134, time: 7.4s,  batch: torch.Size([200, 7454]), fails: 1
+    Epoch 36/99 - loss: 10481.02, change:3.080, time: 7.4s,  batch: torch.Size([200, 7454]), fails: 2
+    Stopping traing at epoch 36
+Retrofit with '_get_retrofitted_embeds_v2_th' took 280.1s
+Total 13000 embeddings modified
+Analysis of 12071: 'CD / DAVID BOWIE / BLACKSTAR (2016)'  using model exp_v4es_033.npy_RETRO
+  Distance from positive 11418:  0.323
+  Distance from negative 5312:   1.068
+
+  Table: Non-filtered neighbors of 12071 using retrofitted exp_v4es_033.npy model
+        ID  DIST                                      NAME      H1                   H2
+  0  12071 0.000       CD / DAVID BOWIE / BLACKSTAR (2016)  MUZICA     CD International
+  1   6901 0.204  CD / PINK FLOYD / A FOOT IN THE DOOR - T  MUZICA     CD International
+  2   4865 0.216  CD / COLDPLAY / A HEAD FULL OF DREAMS (2  MUZICA     CD International
+  3  10604 0.217  LP / LED ZEPPELIN / PHYSICAL GRAFFITI -1  MUZICA                Vinyl
+  4   1408 0.217  CD / QUEEN / THE PLATINUM COLLECTION (20  MUZICA     CD International
+  5   5316 0.217  CD / FREDDIE MERCURY / MESSENGER OF THE   MUZICA     CD International
+  6   5358 0.220  CD / PINK FLOYD / THE DARK SIDE OF THE M  MUZICA     CD International
+  7  11119 0.220  CD / JEAN MOSCOPOL / CUPLETE ANTICOMUNIS  MUZICA  CD Repertoriu Local
+  8   9040 0.220  CD / LEONARD COHEN / YOU WANT IT DARKER   MUZICA     CD International
+  9   7785 0.222   CD / V/A / BUCURESTII DE ALTADATA VOL 1  MUZICA  CD Repertoriu Local
+
+
+================================================================================================  
 
 
 
