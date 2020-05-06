@@ -79,3 +79,19 @@ rel_ext_data*
 models/
 
 logs/
+
+exp_data/df_items_top_13.5k.csv
+
+exp_data/df_tran_proc_top_13.5k.csv
+
+exp_data/df_tran_proc_top_15k.csv
+
+exp_data/glove_words_and_embeds_100d.npz
+
+exp_models/emb_eng.pkl
+
+exp_models/exp_v1_embeds.npy
+
+*.npy
+
+*.npz
