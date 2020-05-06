@@ -217,6 +217,7 @@ Starting `_get_retrofitted_embeds_v5_tf()` retrofit function
   Training model for 99 epochs, batch=256, lr=5.0e-02, tol=1.0e-03, dist=l1, neg_margin=128
     Epoch 01/99 - loss: 31592.94, change:15.551, time: 13.0s, batch: 256, fails: 0
     Epoch 02/99 - loss: 31274.88, change:9.383, time: 11.5s, batch: 256, fails: 0
+    Epoch 03/99 - loss: 30637.13, change:6.591, time: 11.3s, batch: 256, fails: 0
     Epoch 98/99 - loss: 23234.57, change:4.945, time: 11.5s, batch: 256, fails: 0
     Epoch 99/99 - loss: 23217.52, change:4.921, time: 11.4s, batch: 256, fails: 0
 Retrofit with '_get_retrofitted_embeds_v5_tf' took 1151.8s
@@ -262,46 +263,6 @@ Starting `_get_retrofitted_embeds_v5_tf()` retrofit function
     Epoch 01/99 - loss: 30678.82, change:16.886, time: 12.1s, batch: 256, fails: 0
     Epoch 02/99 - loss: 28146.93, change:12.147, time: 11.5s, batch: 256, fails: 0
     Epoch 03/99 - loss: 25875.77, change:14.107, time: 11.5s, batch: 256, fails: 0
-    Epoch 04/99 - loss: 23630.41, change:15.732, time: 11.5s, batch: 256, fails: 0
-    Epoch 05/99 - loss: 21569.78, change:16.940, time: 11.5s, batch: 256, fails: 0
-    Epoch 06/99 - loss: 19836.18, change:18.004, time: 11.5s, batch: 256, fails: 0
-    Epoch 07/99 - loss: 18436.80, change:18.701, time: 11.5s, batch: 256, fails: 0
-    Epoch 08/99 - loss: 17340.53, change:19.243, time: 11.4s, batch: 256, fails: 0
-    Epoch 09/99 - loss: 16409.34, change:19.323, time: 11.5s, batch: 256, fails: 0
-    Epoch 10/99 - loss: 15639.24, change:19.636, time: 11.7s, batch: 256, fails: 0
-    Epoch 11/99 - loss: 14995.63, change:19.965, time: 11.7s, batch: 256, fails: 0
-    Epoch 12/99 - loss: 14413.39, change:19.951, time: 11.5s, batch: 256, fails: 0
-    Epoch 13/99 - loss: 13934.17, change:20.279, time: 11.5s, batch: 256, fails: 0
-    Epoch 14/99 - loss: 13520.18, change:20.134, time: 12.6s, batch: 256, fails: 0
-    Epoch 15/99 - loss: 13144.38, change:20.350, time: 11.5s, batch: 256, fails: 0
-    Epoch 16/99 - loss: 12866.28, change:20.562, time: 11.5s, batch: 256, fails: 0
-    Epoch 17/99 - loss: 12602.65, change:20.720, time: 11.6s, batch: 256, fails: 0
-    Epoch 18/99 - loss: 12406.43, change:21.017, time: 11.4s, batch: 256, fails: 0
-    Epoch 19/99 - loss: 12231.90, change:21.096, time: 11.5s, batch: 256, fails: 0
-    Epoch 20/99 - loss: 12108.40, change:21.290, time: 11.5s, batch: 256, fails: 0
-    Epoch 21/99 - loss: 11987.12, change:21.417, time: 11.5s, batch: 256, fails: 0
-    Epoch 22/99 - loss: 11910.88, change:21.803, time: 11.5s, batch: 256, fails: 0
-    Epoch 23/99 - loss: 11848.34, change:22.077, time: 11.5s, batch: 256, fails: 0
-    Epoch 24/99 - loss: 11777.63, change:22.265, time: 11.5s, batch: 256, fails: 0
-    Epoch 25/99 - loss: 11743.90, change:22.481, time: 11.5s, batch: 256, fails: 0
-    Epoch 26/99 - loss: 11707.45, change:22.881, time: 11.5s, batch: 256, fails: 0
-    Epoch 27/99 - loss: 11675.95, change:22.888, time: 11.5s, batch: 256, fails: 0
-    Epoch 28/99 - loss: 11660.07, change:23.200, time: 11.4s, batch: 256, fails: 0
-    Epoch 29/99 - loss: 11633.82, change:23.621, time: 11.4s, batch: 256, fails: 0
-    Epoch 30/99 - loss: 11623.82, change:23.610, time: 11.5s, batch: 256, fails: 0
-    Epoch 31/99 - loss: 11605.63, change:24.061, time: 11.4s, batch: 256, fails: 0
-    Epoch 32/99 - loss: 11594.63, change:23.874, time: 11.4s, batch: 256, fails: 0
-    Epoch 33/99 - loss: 11565.81, change:24.114, time: 11.3s, batch: 256, fails: 0
-    Epoch 34/99 - loss: 11578.12, change:24.377, time: 11.4s, batch: 256, fails: 1
-    Epoch 35/99 - loss: 11557.81, change:24.612, time: 11.5s, batch: 256, fails: 0
-    Epoch 36/99 - loss: 11569.62, change:24.925, time: 11.5s, batch: 256, fails: 1
-    Epoch 37/99 - loss: 11550.99, change:24.859, time: 11.7s, batch: 256, fails: 0
-    Epoch 38/99 - loss: 11541.85, change:24.832, time: 11.6s, batch: 256, fails: 0
-    Epoch 39/99 - loss: 11539.14, change:24.833, time: 11.5s, batch: 256, fails: 0
-    Epoch 40/99 - loss: 11528.94, change:25.211, time: 11.6s, batch: 256, fails: 0
-    Epoch 41/99 - loss: 11521.32, change:25.328, time: 11.8s, batch: 256, fails: 0
-    Epoch 42/99 - loss: 11518.22, change:25.639, time: 11.5s, batch: 256, fails: 0
-    Epoch 43/99 - loss: 11536.46, change:25.929, time: 11.5s, batch: 256, fails: 1
     Epoch 44/99 - loss: 11507.38, change:25.515, time: 11.5s, batch: 256, fails: 0
     Epoch 45/99 - loss: 11509.75, change:25.414, time: 11.5s, batch: 256, fails: 1
     Epoch 46/99 - loss: 11512.40, change:25.744, time: 11.5s, batch: 256, fails: 2
