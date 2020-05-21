@@ -106,3 +106,8 @@ exp_data/glove_words_and_embeds_100d.npz
 
 
 *.npy
+*.h5
+
+*.bin
+
+ro_bert/

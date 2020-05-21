@@ -283,7 +283,7 @@ class TorchRNNClassifier(TorchModelBase):
                 # Backprop:
                 self.opt.zero_grad()
                 err.backward()
-                optimizer.step()
+                self.opt.step()
                 print("\r    Epoch {} done {:.1f}% - prev error hist: {}\t\t".format(
                     iteration, i_batch / n_batches * 100, self.errors[-10:]), end='', flush=True)
             # Incremental predictions where possible:
