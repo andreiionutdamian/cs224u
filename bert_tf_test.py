@@ -42,15 +42,16 @@ if __name__ == '__main__':
   np_data = np.array(data['input_ids'])
   np_mask = np.array(data['attention_mask'])
   
+  @tf.function
+  def get_embeds(X_data, X_attn):
+    embeds, clf_out = model([X_data, X_attn])
+    return embeds
+  
+  np_embeds = get_embeds(np_data, np_mask).numpy()
+  np_py_embeds = np.load('_pytest.npy') # salvat de mine din pytorch
+  print(np.allclose(np_embeds, np_py_embeds, atol=1e-5))
 
-  embeds, clf_out = model(np_data, attention_mask=np_mask)
-  np_embeds = embeds.numpy()
-#  np_py_embeds = np.load('_pytest.npy') # salvat de mine din pytorch
-#  print(np.allclose(np_embeds, np_py_embeds, atol=1e-5))
-  np_emb, np_clf = model.predict(np_data)
+  np_emb, np_clf = model.predict([np_data, np_mask])
   
   print(np.allclose(np_emb, np_embeds, atol=1e-3))
-  
-  np_s2 = tokenizer.encode(sents2[0])
-
   
