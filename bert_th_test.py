@@ -10,8 +10,8 @@ import torch as th
 from transformers import BertModel, BertTokenizer, EncoderDecoderModel
 
 if __name__ == '__main__':  
-  tokenizer = BertTokenizer.from_pretrained("ro_bert")
-  model = BertModel.from_pretrained("ro_bert")
+  tokenizer = BertTokenizer.from_pretrained("D:/Lummetry.AI Dropbox/DATA/_allan_data/_ro_bert/20200520")
+  model = BertModel.from_pretrained("D:/Lummetry.AI Dropbox/DATA/_allan_data/_ro_bert/20200520")
   model.eval()
   
   sents1 = [
@@ -28,7 +28,8 @@ if __name__ == '__main__':
     sents1, 
     add_special_tokens=True,
     return_attention_mask=True,
-    pad_to_max_length=True)
+    pad_to_max_length=True,
+    max_length=512)
   
   t2s = [tokenizer.convert_ids_to_tokens(x) for x in data['input_ids']]
   
