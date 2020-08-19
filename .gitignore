@@ -95,3 +95,5 @@ exp_models/exp_v1_embeds.npy
 *.npy
 
 *.npz
+
+exp_data/
