@@ -111,3 +111,4 @@ exp_data/glove_words_and_embeds_100d.npz
 *.bin
 
 ro_bert/
+exp_data/
